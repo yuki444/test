@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>株式ポートフォリオ</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  [x-cloak] { display: none !important; }
+  body { background: #0f172a; color: #e2e8f0; font-family: 'Helvetica Neue', sans-serif; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
+  .btn { padding: 0.4rem 1rem; border-radius: 0.5rem; font-size: 0.85rem; cursor: pointer; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-danger { background: #ef4444; color: #fff; }
+  .btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
+  .tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: flex; align-items: center; justify-content: center; }
+  .modal { background: #1e293b; border: 1px solid #334155; border-radius: 1rem; padding: 1.5rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+  .form-input { width: 100%; background: #0f172a; border: 1px solid #475569; border-radius: 0.5rem; padding: 0.5rem 0.75rem; color: #e2e8f0; font-size: 0.9rem; }
+  .form-input:focus { outline: none; border-color: #3b82f6; }
+  .form-label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.25rem; }
+  .table-row { border-bottom: 1px solid #1e293b; transition: background 0.1s; }
+  .table-row:hover { background: #1e293b; }
+  .up { color: #10b981; }
+  .down { color: #ef4444; }
+  .neutral { color: #94a3b8; }
+  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 100; padding: 0.75rem 1.25rem; border-radius: 0.5rem; font-size: 0.9rem; animation: slideIn 0.3s ease; }
+  .toast-ok { background: #10b981; color: #fff; }
+  .toast-err { background: #ef4444; color: #fff; }
+  @keyframes slideIn { from { transform: translateY(2rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0f172a; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+</style>
+</head>
+<body x-data="app()" x-init="init()" x-cloak>
+
+<!-- Toast -->
+<div x-show="toast.visible" x-transition class="toast" :class="toast.ok ? 'toast-ok' : 'toast-err'" x-text="toast.msg"></div>
+
+<!-- Chart Modal -->
+<div x-show="chartModal.open" class="modal-bg" @click.self="chartModal.open=false">
+  <div class="modal" style="max-width:600px">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="text-lg font-bold" x-text="chartModal.ticker"></h3>
+        <p class="text-sm text-slate-400" x-text="chartModal.name"></p>
+      </div>
+      <div class="flex gap-2">
+        <template x-for="p in ['1m','3m','6m','1y']">
+          <button class="btn btn-sm" :class="chartModal.period===p?'btn-primary':''" @click="loadChart(chartModal.ticker,p)" x-text="p"></button>
+        </template>
+        <button class="btn btn-sm btn-danger" @click="chartModal.open=false">✕</button>
+      </div>
+    </div>
+    <canvas id="priceChart" height="200"></canvas>
+    <p x-show="chartModal.loading" class="text-center text-slate-400 mt-4">読み込み中...</p>
+  </div>
+</div>
+
+<!-- Add Holding Modal -->
+<div x-show="holdingModal.open" class="modal-bg" @click.self="holdingModal.open=false">
+  <div class="modal">
+    <h3 class="text-lg font-bold mb-4">保有銘柄を追加</h3>
+    <form @submit.prevent="saveHolding">
+      <div class="mb-3">
+        <label class="form-label">銘柄コード（例: 7203 or 7203.T）</label>
+        <input class="form-input" x-model="holdingModal.ticker" @blur="fetchTickerName('holding')" placeholder="7203" required>
+        <p class="text-xs mt-1" :class="holdingModal.nameOk?'text-emerald-400':'text-slate-500'" x-text="holdingModal.nameLabel"></p>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">保有株数</label>
+        <input class="form-input" type="number" x-model="holdingModal.shares" placeholder="100" step="1" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">取得単価（円）</label>
+        <input class="form-input" type="number" x-model="holdingModal.avg_cost" placeholder="2500" step="0.01" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">メモ</label>
+        <input class="form-input" x-model="holdingModal.notes" placeholder="任意">
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button type="button" class="btn" style="background:#334155" @click="holdingModal.open=false">キャンセル</button>
+        <button type="submit" class="btn btn-primary" :disabled="holdingModal.saving">追加</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Trade Modal -->
+<div x-show="tradeModal.open" class="modal-bg" @click.self="tradeModal.open=false">
+  <div class="modal">
+    <h3 class="text-lg font-bold mb-4">取引を記録</h3>
+    <form @submit.prevent="saveTrade">
+      <div class="mb-3">
+        <label class="form-label">銘柄コード</label>
+        <input class="form-input" x-model="tradeModal.ticker" @blur="fetchTickerName('trade')" placeholder="7203" required>
+        <p class="text-xs mt-1" :class="tradeModal.nameOk?'text-emerald-400':'text-slate-500'" x-text="tradeModal.nameLabel"></p>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">売買</label>
+        <select class="form-input" x-model="tradeModal.trade_type">
+          <option value="BUY">買い</option>
+          <option value="SELL">売り</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">株数</label>
+        <input class="form-input" type="number" x-model="tradeModal.shares" placeholder="100" step="1" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">価格（円）</label>
+        <input class="form-input" type="number" x-model="tradeModal.price" placeholder="2500" step="0.01" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">手数料（円）</label>
+        <input class="form-input" type="number" x-model="tradeModal.fee" placeholder="0" step="0.01">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">取引日</label>
+        <input class="form-input" type="date" x-model="tradeModal.trade_date" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">メモ</label>
+        <input class="form-input" x-model="tradeModal.notes" placeholder="任意">
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button type="button" class="btn" style="background:#334155" @click="tradeModal.open=false">キャンセル</button>
+        <button type="submit" class="btn btn-primary" :disabled="tradeModal.saving">記録</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Watchlist Modal -->
+<div x-show="watchModal.open" class="modal-bg" @click.self="watchModal.open=false">
+  <div class="modal">
+    <h3 class="text-lg font-bold mb-4">ウォッチリストに追加</h3>
+    <form @submit.prevent="saveWatch">
+      <div class="mb-3">
+        <label class="form-label">銘柄コード</label>
+        <input class="form-input" x-model="watchModal.ticker" @blur="fetchTickerName('watch')" placeholder="7203" required>
+        <p class="text-xs mt-1" :class="watchModal.nameOk?'text-emerald-400':'text-slate-500'" x-text="watchModal.nameLabel"></p>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">目標株価（円）</label>
+        <input class="form-input" type="number" x-model="watchModal.target_price" placeholder="任意" step="0.01">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">カテゴリ</label>
+        <input class="form-input" x-model="watchModal.category" placeholder="例: 成長株, 高配当, etc.">
+      </div>
+      <div class="mb-4">
+        <label class="form-label">メモ</label>
+        <input class="form-input" x-model="watchModal.notes" placeholder="任意">
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button type="button" class="btn" style="background:#334155" @click="watchModal.open=false">キャンセル</button>
+        <button type="submit" class="btn btn-primary" :disabled="watchModal.saving">追加</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Event Modal -->
+<div x-show="eventModal.open" class="modal-bg" @click.self="eventModal.open=false">
+  <div class="modal">
+    <h3 class="text-lg font-bold mb-4">イベントを追加</h3>
+    <form @submit.prevent="saveEvent">
+      <div class="mb-3">
+        <label class="form-label">銘柄コード</label>
+        <input class="form-input" x-model="eventModal.ticker" placeholder="7203 または ALL（全体）">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">種別</label>
+        <select class="form-input" x-model="eventModal.event_type">
+          <option value="決算">決算</option>
+          <option value="配当">配当</option>
+          <option value="優待">優待</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">日付</label>
+        <input class="form-input" type="date" x-model="eventModal.event_date" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">説明</label>
+        <input class="form-input" x-model="eventModal.description" placeholder="任意">
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button type="button" class="btn" style="background:#334155" @click="eventModal.open=false">キャンセル</button>
+        <button type="submit" class="btn btn-primary" :disabled="eventModal.saving">追加</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Main Layout -->
+<div class="min-h-screen p-4">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <div style="background:#3b82f6;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">📈</div>
+      <div>
+        <h1 class="text-xl font-bold">株式ポートフォリオ</h1>
+        <p class="text-xs text-slate-400">yfinance powered</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-xs text-slate-400" x-text="lastUpdated"></span>
+      <button class="btn btn-primary" @click="refreshAll" :disabled="loading">
+        <span x-show="!loading">↻ 更新</span>
+        <span x-show="loading">更新中...</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-1 mb-6" style="border-bottom:1px solid #334155;padding-bottom:0">
+    <template x-for="tab in tabs">
+      <button class="px-4 py-2 text-sm font-medium transition-colors"
+        :style="activeTab===tab.id ? 'color:#3b82f6;border-bottom:2px solid #3b82f6;margin-bottom:-1px' : 'color:#94a3b8'"
+        @click="activeTab=tab.id; loadTab(tab.id)"
+        x-text="tab.label"></button>
+    </template>
+  </div>
+
+  <!-- ════ PORTFOLIO TAB ════ -->
+  <div x-show="activeTab==='portfolio'">
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-2 gap-3 mb-6" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr))">
+      <div class="card p-4">
+        <p class="text-xs text-slate-400 mb-1">総評価額</p>
+        <p class="text-2xl font-bold" x-text="fmt(summary.total_value) + '円'">--</p>
+      </div>
+      <div class="card p-4">
+        <p class="text-xs text-slate-400 mb-1">総損益</p>
+        <p class="text-2xl font-bold" :class="colorClass(summary.total_pnl)" x-text="fmtPnl(summary.total_pnl) + '円'">--</p>
+        <p class="text-sm" :class="colorClass(summary.total_pnl_pct)" x-text="fmtPct(summary.total_pnl_pct)"></p>
+      </div>
+      <div class="card p-4">
+        <p class="text-xs text-slate-400 mb-1">本日の変動</p>
+        <p class="text-2xl font-bold" :class="colorClass(summary.day_change_total)" x-text="fmtPnl(summary.day_change_total) + '円'">--</p>
+      </div>
+      <div class="card p-4">
+        <p class="text-xs text-slate-400 mb-1">取得コスト</p>
+        <p class="text-2xl font-bold" x-text="fmt(summary.total_cost) + '円'">--</p>
+      </div>
+    </div>
+
+    <!-- Holdings Table -->
+    <div class="card overflow-x-auto">
+      <div class="flex items-center justify-between p-4 border-b border-slate-700">
+        <h2 class="font-semibold">保有銘柄 <span class="text-slate-400 text-sm" x-text="'(' + holdings.length + '銘柄)'"></span></h2>
+        <button class="btn btn-primary btn-sm" @click="openHoldingModal">＋ 追加</button>
+      </div>
+      <div x-show="holdings.length===0 && !loading" class="p-8 text-center text-slate-400">保有銘柄がありません。「追加」から登録してください。</div>
+      <table x-show="holdings.length>0" class="w-full text-sm">
+        <thead>
+          <tr style="background:#0f172a;color:#64748b;font-size:0.75rem">
+            <th class="text-left p-3">銘柄</th>
+            <th class="text-right p-3">現在値</th>
+            <th class="text-right p-3">前日比</th>
+            <th class="text-right p-3">株数</th>
+            <th class="text-right p-3">取得単価</th>
+            <th class="text-right p-3">評価額</th>
+            <th class="text-right p-3">損益</th>
+            <th class="text-right p-3">損益率</th>
+            <th class="text-center p-3">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="h in holdings" :key="h.id">
+            <tr class="table-row cursor-pointer" @click="openChart(h)">
+              <td class="p-3">
+                <div class="font-bold" x-text="h.ticker"></div>
+                <div class="text-xs text-slate-400 truncate" style="max-width:120px" x-text="h.name"></div>
+              </td>
+              <td class="text-right p-3 font-mono" x-text="h.current_price != null ? fmt(h.current_price) : '--'"></td>
+              <td class="text-right p-3 font-mono" :class="colorClass(h.day_change)">
+                <span x-text="h.day_change != null ? fmtPnl(h.day_change) : '--'"></span>
+                <br><span class="text-xs" x-text="h.day_change_pct != null ? fmtPct(h.day_change_pct) : ''"></span>
+              </td>
+              <td class="text-right p-3 font-mono" x-text="h.shares.toLocaleString()"></td>
+              <td class="text-right p-3 font-mono" x-text="fmt(h.avg_cost)"></td>
+              <td class="text-right p-3 font-mono" x-text="h.current_value != null ? fmt(h.current_value) : '--'"></td>
+              <td class="text-right p-3 font-mono" :class="colorClass(h.pnl)" x-text="h.pnl != null ? fmtPnl(h.pnl) : '--'"></td>
+              <td class="text-right p-3 font-mono" :class="colorClass(h.pnl_pct)" x-text="h.pnl_pct != null ? fmtPct(h.pnl_pct) : '--'"></td>
+              <td class="text-center p-3" @click.stop>
+                <button class="btn btn-danger btn-sm" @click="deleteHolding(h.id)">削除</button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════ TRADES TAB ════ -->
+  <div x-show="activeTab==='trades'">
+    <div class="card mb-4 p-4 flex items-center justify-between">
+      <div>
+        <p class="text-xs text-slate-400">実現損益合計</p>
+        <p class="text-2xl font-bold" :class="colorClass(totalRealizedPnl)" x-text="fmtPnl(totalRealizedPnl) + '円'"></p>
+      </div>
+      <button class="btn btn-primary" @click="openTradeModal">＋ 取引を記録</button>
+    </div>
+    <div class="card overflow-x-auto">
+      <div x-show="trades.length===0" class="p-8 text-center text-slate-400">取引履歴がありません。</div>
+      <table x-show="trades.length>0" class="w-full text-sm">
+        <thead>
+          <tr style="background:#0f172a;color:#64748b;font-size:0.75rem">
+            <th class="text-left p-3">日付</th>
+            <th class="text-left p-3">銘柄</th>
+            <th class="text-center p-3">売買</th>
+            <th class="text-right p-3">株数</th>
+            <th class="text-right p-3">価格</th>
+            <th class="text-right p-3">手数料</th>
+            <th class="text-right p-3">実現損益</th>
+            <th class="text-left p-3">メモ</th>
+            <th class="text-center p-3">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="t in trades" :key="t.id">
+            <tr class="table-row">
+              <td class="p-3 text-slate-300" x-text="t.trade_date"></td>
+              <td class="p-3 font-bold" x-text="t.ticker"></td>
+              <td class="p-3 text-center">
+                <span class="tag" :style="t.trade_type==='BUY'?'background:#1d4ed8;color:#bfdbfe':'background:#7c2d12;color:#fed7aa'" x-text="t.trade_type==='BUY'?'買い':'売り'"></span>
+              </td>
+              <td class="p-3 text-right font-mono" x-text="t.shares.toLocaleString()"></td>
+              <td class="p-3 text-right font-mono" x-text="fmt(t.price)"></td>
+              <td class="p-3 text-right font-mono text-slate-400" x-text="t.fee > 0 ? fmt(t.fee) : '--'"></td>
+              <td class="p-3 text-right font-mono" :class="colorClass(t.realized_pnl)" x-text="t.realized_pnl != null ? fmtPnl(t.realized_pnl) : '--'"></td>
+              <td class="p-3 text-slate-400 text-xs" x-text="t.notes || ''"></td>
+              <td class="p-3 text-center">
+                <button class="btn btn-danger btn-sm" @click="deleteTrade(t.id)">削除</button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════ WATCHLIST TAB ════ -->
+  <div x-show="activeTab==='watchlist'">
+    <div class="flex justify-end mb-4">
+      <button class="btn btn-primary" @click="openWatchModal">＋ 追加</button>
+    </div>
+    <div x-show="watchlist.length===0" class="card p-8 text-center text-slate-400">ウォッチリストが空です。</div>
+    <div class="grid gap-3" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))">
+      <template x-for="w in watchlist" :key="w.id">
+        <div class="card p-4">
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <div class="font-bold text-lg" x-text="w.ticker"></div>
+              <div class="text-xs text-slate-400" x-text="w.name"></div>
+            </div>
+            <div class="flex gap-1 items-center">
+              <span x-show="w.category" class="tag" style="background:#1e3a5f;color:#93c5fd" x-text="w.category"></span>
+              <button class="btn btn-danger btn-sm" @click="deleteWatch(w.id)">✕</button>
+            </div>
+          </div>
+          <div class="flex justify-between items-end mt-3">
+            <div>
+              <p class="text-xs text-slate-400">現在値</p>
+              <p class="text-xl font-bold" x-text="w.current_price != null ? fmt(w.current_price) + '円' : '--'"></p>
+              <p class="text-sm" :class="colorClass(w.day_change_pct)" x-text="w.day_change != null ? fmtPnl(w.day_change) + ' (' + fmtPct(w.day_change_pct) + ')' : ''"></p>
+            </div>
+            <div x-show="w.target_price" class="text-right">
+              <p class="text-xs text-slate-400">目標株価</p>
+              <p class="font-bold" x-text="fmt(w.target_price) + '円'"></p>
+              <p class="text-sm" :class="colorClass(w.distance)" x-text="w.distance != null ? fmtPnl(w.distance) + ' (' + fmtPct(w.distance_pct) + ')' : ''"></p>
+            </div>
+          </div>
+          <div x-show="w.notes" class="mt-2 text-xs text-slate-400 border-t border-slate-700 pt-2" x-text="w.notes"></div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- ════ EVENTS TAB ════ -->
+  <div x-show="activeTab==='events'">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="font-semibold">直近のイベント（30日以内）</h2>
+      <button class="btn btn-primary" @click="openEventModal">＋ 追加</button>
+    </div>
+
+    <!-- Upcoming -->
+    <div x-show="upcomingEvents.length>0" class="mb-6">
+      <div class="grid gap-2">
+        <template x-for="e in upcomingEvents" :key="e.id+'u'">
+          <div class="card p-3 flex items-center gap-3" :style="'border-left:4px solid ' + eventColor(e.event_type)">
+            <div class="text-center" style="min-width:48px">
+              <div class="text-xs text-slate-400" x-text="e.event_date.slice(5,7) + '月'"></div>
+              <div class="text-2xl font-bold" x-text="e.event_date.slice(8,10)"></div>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <span class="font-bold" x-text="e.ticker"></span>
+                <span class="tag" :style="'background:' + eventColor(e.event_type) + '33;color:' + eventColor(e.event_type)" x-text="e.event_type"></span>
+              </div>
+              <div class="text-sm text-slate-400" x-text="e.description || ''"></div>
+            </div>
+            <button class="btn btn-danger btn-sm" @click="deleteEvent(e.id)">✕</button>
+          </div>
+        </template>
+      </div>
+    </div>
+    <div x-show="upcomingEvents.length===0" class="card p-4 text-center text-slate-400 mb-6">直近30日にイベントはありません</div>
+
+    <!-- All Events -->
+    <h2 class="font-semibold mb-3">全イベント</h2>
+    <div x-show="events.length===0" class="card p-8 text-center text-slate-400">イベントが登録されていません。</div>
+    <div class="card overflow-x-auto">
+      <table x-show="events.length>0" class="w-full text-sm">
+        <thead>
+          <tr style="background:#0f172a;color:#64748b;font-size:0.75rem">
+            <th class="text-left p-3">日付</th>
+            <th class="text-left p-3">銘柄</th>
+            <th class="text-left p-3">種別</th>
+            <th class="text-left p-3">説明</th>
+            <th class="text-center p-3">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="e in events" :key="e.id">
+            <tr class="table-row">
+              <td class="p-3 text-slate-300" x-text="e.event_date"></td>
+              <td class="p-3 font-bold" x-text="e.ticker"></td>
+              <td class="p-3">
+                <span class="tag" :style="'background:' + eventColor(e.event_type) + '33;color:' + eventColor(e.event_type)" x-text="e.event_type"></span>
+              </td>
+              <td class="p-3 text-slate-400 text-xs" x-text="e.description || ''"></td>
+              <td class="p-3 text-center">
+                <button class="btn btn-danger btn-sm" @click="deleteEvent(e.id)">削除</button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function app() {
+  return {
+    activeTab: 'portfolio',
+    tabs: [
+      {id:'portfolio', label:'📊 ポートフォリオ'},
+      {id:'trades',    label:'📋 売買履歴'},
+      {id:'watchlist', label:'👁 ウォッチリスト'},
+      {id:'events',    label:'📅 イベント'},
+    ],
+    loading: false,
+    lastUpdated: '',
+    toast: {visible: false, msg: '', ok: true},
+
+    // Data
+    holdings: [],
+    summary: {},
+    trades: [],
+    watchlist: [],
+    events: [],
+    upcomingEvents: [],
+
+    // Modals
+    holdingModal: {open:false, ticker:'', shares:'', avg_cost:'', notes:'', nameLabel:'', nameOk:false, saving:false},
+    tradeModal:   {open:false, ticker:'', trade_type:'BUY', shares:'', price:'', fee:'0', trade_date: new Date().toISOString().slice(0,10), notes:'', nameLabel:'', nameOk:false, saving:false},
+    watchModal:   {open:false, ticker:'', target_price:'', category:'', notes:'', nameLabel:'', nameOk:false, saving:false},
+    eventModal:   {open:false, ticker:'', event_type:'決算', event_date: new Date().toISOString().slice(0,10), description:'', saving:false},
+    chartModal:   {open:false, ticker:'', name:'', period:'3m', loading:false},
+    chartInstance: null,
+
+    async init() {
+      await this.loadTab('portfolio');
+    },
+
+    async loadTab(tab) {
+      this.activeTab = tab;
+      if (tab === 'portfolio') { await this.loadPortfolio(); }
+      else if (tab === 'trades') { await this.loadTrades(); }
+      else if (tab === 'watchlist') { await this.loadWatchlist(); }
+      else if (tab === 'events') { await this.loadEvents(); }
+    },
+
+    async refreshAll() {
+      this.loading = true;
+      await this.loadTab(this.activeTab);
+      this.loading = false;
+      this.lastUpdated = '更新: ' + new Date().toLocaleTimeString('ja-JP');
+    },
+
+    showToast(msg, ok=true) {
+      this.toast = {visible:true, msg, ok};
+      setTimeout(() => this.toast.visible = false, 3000);
+    },
+
+    fmt(n) {
+      if (n == null) return '--';
+      return Number(n).toLocaleString('ja-JP', {maximumFractionDigits: 2});
+    },
+    fmtPnl(n) {
+      if (n == null) return '--';
+      return (n >= 0 ? '+' : '') + Number(n).toLocaleString('ja-JP', {maximumFractionDigits: 2});
+    },
+    fmtPct(n) {
+      if (n == null) return '';
+      return (n >= 0 ? '+' : '') + Number(n).toFixed(2) + '%';
+    },
+    colorClass(n) {
+      if (n == null) return 'neutral';
+      return n > 0 ? 'up' : n < 0 ? 'down' : 'neutral';
+    },
+    eventColor(type) {
+      const m = {決算:'#a855f7', 配当:'#10b981', 優待:'#3b82f6', その他:'#64748b'};
+      return m[type] || '#64748b';
+    },
+
+    get totalRealizedPnl() {
+      return this.trades.filter(t => t.realized_pnl != null).reduce((s, t) => s + t.realized_pnl, 0);
+    },
+
+    // ── Portfolio ──
+    async loadPortfolio() {
+      this.loading = true;
+      try {
+        const [holdings, summary] = await Promise.all([
+          fetch('/api/portfolio').then(r => r.json()),
+          fetch('/api/portfolio/summary').then(r => r.json()),
+        ]);
+        this.holdings = holdings;
+        this.summary = summary;
+        this.lastUpdated = '更新: ' + new Date().toLocaleTimeString('ja-JP');
+      } catch(e) { this.showToast('データ取得エラー', false); }
+      this.loading = false;
+    },
+
+    openHoldingModal() {
+      this.holdingModal = {open:true, ticker:'', shares:'', avg_cost:'', notes:'', nameLabel:'', nameOk:false, saving:false};
+    },
+
+    async saveHolding() {
+      this.holdingModal.saving = true;
+      try {
+        const res = await fetch('/api/portfolio', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            ticker: this.holdingModal.ticker,
+            shares: parseFloat(this.holdingModal.shares),
+            avg_cost: parseFloat(this.holdingModal.avg_cost),
+            notes: this.holdingModal.notes || null,
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'エラー');
+        this.holdingModal.open = false;
+        this.showToast('保有銘柄を追加しました');
+        await this.loadPortfolio();
+      } catch(e) { this.showToast(e.message, false); }
+      this.holdingModal.saving = false;
+    },
+
+    async deleteHolding(id) {
+      if (!confirm('この銘柄を削除しますか？')) return;
+      await fetch('/api/portfolio/' + id, {method:'DELETE'});
+      this.showToast('削除しました');
+      await this.loadPortfolio();
+    },
+
+    // ── Trades ──
+    async loadTrades() {
+      this.loading = true;
+      try {
+        this.trades = await fetch('/api/trades').then(r => r.json());
+      } catch(e) { this.showToast('データ取得エラー', false); }
+      this.loading = false;
+    },
+
+    openTradeModal() {
+      this.tradeModal = {open:true, ticker:'', trade_type:'BUY', shares:'', price:'', fee:'0', trade_date: new Date().toISOString().slice(0,10), notes:'', nameLabel:'', nameOk:false, saving:false};
+    },
+
+    async saveTrade() {
+      this.tradeModal.saving = true;
+      try {
+        const res = await fetch('/api/trades', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            ticker: this.tradeModal.ticker,
+            trade_type: this.tradeModal.trade_type,
+            shares: parseFloat(this.tradeModal.shares),
+            price: parseFloat(this.tradeModal.price),
+            fee: parseFloat(this.tradeModal.fee || 0),
+            trade_date: this.tradeModal.trade_date,
+            notes: this.tradeModal.notes || null,
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'エラー');
+        this.tradeModal.open = false;
+        this.showToast('取引を記録しました');
+        await this.loadTrades();
+        if (this.activeTab === 'portfolio') await this.loadPortfolio();
+      } catch(e) { this.showToast(e.message, false); }
+      this.tradeModal.saving = false;
+    },
+
+    async deleteTrade(id) {
+      if (!confirm('この取引記録を削除しますか？')) return;
+      await fetch('/api/trades/' + id, {method:'DELETE'});
+      this.showToast('削除しました');
+      await this.loadTrades();
+    },
+
+    // ── Watchlist ──
+    async loadWatchlist() {
+      this.loading = true;
+      try {
+        this.watchlist = await fetch('/api/watchlist').then(r => r.json());
+      } catch(e) { this.showToast('データ取得エラー', false); }
+      this.loading = false;
+    },
+
+    openWatchModal() {
+      this.watchModal = {open:true, ticker:'', target_price:'', category:'', notes:'', nameLabel:'', nameOk:false, saving:false};
+    },
+
+    async saveWatch() {
+      this.watchModal.saving = true;
+      try {
+        const res = await fetch('/api/watchlist', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            ticker: this.watchModal.ticker,
+            target_price: this.watchModal.target_price ? parseFloat(this.watchModal.target_price) : null,
+            category: this.watchModal.category || null,
+            notes: this.watchModal.notes || null,
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'エラー');
+        this.watchModal.open = false;
+        this.showToast('ウォッチリストに追加しました');
+        await this.loadWatchlist();
+      } catch(e) { this.showToast(e.message, false); }
+      this.watchModal.saving = false;
+    },
+
+    async deleteWatch(id) {
+      await fetch('/api/watchlist/' + id, {method:'DELETE'});
+      this.showToast('削除しました');
+      await this.loadWatchlist();
+    },
+
+    // ── Events ──
+    async loadEvents() {
+      this.loading = true;
+      try {
+        const [all, upcoming] = await Promise.all([
+          fetch('/api/events').then(r => r.json()),
+          fetch('/api/events/upcoming').then(r => r.json()),
+        ]);
+        this.events = all;
+        this.upcomingEvents = upcoming;
+      } catch(e) { this.showToast('データ取得エラー', false); }
+      this.loading = false;
+    },
+
+    openEventModal() {
+      this.eventModal = {open:true, ticker:'', event_type:'決算', event_date: new Date().toISOString().slice(0,10), description:'', saving:false};
+    },
+
+    async saveEvent() {
+      this.eventModal.saving = true;
+      try {
+        const res = await fetch('/api/events', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            ticker: this.eventModal.ticker || 'ALL',
+            event_type: this.eventModal.event_type,
+            event_date: this.eventModal.event_date,
+            description: this.eventModal.description || null,
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'エラー');
+        this.eventModal.open = false;
+        this.showToast('イベントを追加しました');
+        await this.loadEvents();
+      } catch(e) { this.showToast(e.message, false); }
+      this.eventModal.saving = false;
+    },
+
+    async deleteEvent(id) {
+      await fetch('/api/events/' + id, {method:'DELETE'});
+      this.showToast('削除しました');
+      await this.loadEvents();
+    },
+
+    // ── Stock ticker auto-fetch ──
+    async fetchTickerName(form) {
+      const modal = form === 'holding' ? this.holdingModal : form === 'trade' ? this.tradeModal : this.watchModal;
+      if (!modal.ticker) return;
+      modal.nameLabel = '取得中...';
+      modal.nameOk = false;
+      try {
+        const data = await fetch('/api/stock/' + encodeURIComponent(modal.ticker)).then(r => r.json());
+        if (data.name && data.name !== modal.ticker) {
+          modal.nameLabel = '✓ ' + data.name;
+          modal.nameOk = true;
+        } else {
+          modal.nameLabel = '銘柄名を取得できませんでした';
+        }
+      } catch(e) { modal.nameLabel = '取得失敗'; }
+    },
+
+    // ── Chart ──
+    async openChart(h) {
+      this.chartModal = {open:true, ticker:h.ticker, name:h.name||'', period:'3m', loading:true};
+      await this.loadChart(h.ticker, '3m');
+    },
+
+    async loadChart(ticker, period) {
+      this.chartModal.period = period;
+      this.chartModal.loading = true;
+      if (this.chartInstance) { this.chartInstance.destroy(); this.chartInstance = null; }
+      try {
+        const data = await fetch(`/api/stock/${encodeURIComponent(ticker)}/history?period=${period}`).then(r => r.json());
+        await this.$nextTick();
+        const canvas = document.getElementById('priceChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        this.chartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.dates,
+            datasets: [{
+              label: ticker,
+              data: data.prices,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59,130,246,0.1)',
+              borderWidth: 2,
+              pointRadius: 0,
+              fill: true,
+              tension: 0.3,
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: {display:false} },
+            scales: {
+              x: { ticks: {color:'#64748b', maxTicksLimit:6}, grid:{color:'#1e293b'} },
+              y: { ticks: {color:'#64748b'}, grid:{color:'#1e293b'} }
+            }
+          }
+        });
+      } catch(e) { this.showToast('チャートの取得に失敗しました', false); }
+      this.chartModal.loading = false;
+    },
+  };
+}
+</script>
+</body>
+</html>
