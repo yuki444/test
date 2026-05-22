@@ -1,0 +1,26 @@
+{
+  "_comment": "このファイルを config.json にコピーして認証情報を設定してください",
+
+  "notion_token": "secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+
+  "lottery_db_id": "2c190fd4164042dab27319020cc7501e",
+  "card_db_id":    "8bdbbad309f642f5b2983ba28bd0b6c7",
+  "pack_db_id":    "668ab474daaf40b5a472c40f72a82638",
+
+  "calendar_id": "mossan72.tsubaki@gmail.com",
+
+  "google_credentials_path": "./google_credentials.json",
+
+  "_notion_setup": [
+    "1. https://www.notion.so/my-integrations でインテグレーションを作成",
+    "2. 発行された 'secret_...' トークンを notion_token に設定",
+    "3. NotionのポケモンカードDBページを開き「接続先」からインテグレーションを追加"
+  ],
+  "_google_setup": [
+    "1. https://console.cloud.google.com/ でプロジェクト作成",
+    "2. Google Calendar API を有効化",
+    "3. OAuth 2.0 クライアントIDを作成（デスクトップアプリ）",
+    "4. 認証情報JSONをダウンロードし google_credentials.json として保存",
+    "5. 初回実行時にブラウザで認証を完了（以降は google_token.json が自動利用）"
+  ]
+}
