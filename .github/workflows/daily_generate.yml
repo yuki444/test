@@ -1,0 +1,70 @@
+name: Daily Music Generation
+
+on:
+  schedule:
+    # 毎日 11:00 JST (UTC 02:00)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '処理する日付 (YYYY-MM-DD、空欄=今日)'
+        required: false
+        default: ''
+      styles:
+        description: 'スタイル名をスペース区切り (空欄=全5スタイル)'
+        required: false
+        default: ''
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check lyrics file exists
+        run: |
+          DATE="${{ github.event.inputs.date }}"
+          if [ -z "$DATE" ]; then
+            DATE=$(date +%Y-%m-%d)
+          fi
+          LYRICS_FILE="lyrics/$DATE/song.txt"
+          if [ ! -f "$LYRICS_FILE" ]; then
+            echo "No lyrics file found at $LYRICS_FILE — skipping."
+            echo "SKIP=true" >> $GITHUB_ENV
+          else
+            echo "DATE=$DATE" >> $GITHUB_ENV
+          fi
+
+      - name: Generate music
+        if: env.SKIP != 'true'
+        env:
+          SUNO_API_URL: ${{ secrets.SUNO_API_URL }}
+        run: |
+          STYLES="${{ github.event.inputs.styles }}"
+          if [ -z "$STYLES" ]; then
+            python scripts/generate_music.py --date "$DATE"
+          else
+            python scripts/generate_music.py --date "$DATE" --styles $STYLES
+          fi
+
+      - name: Commit results
+        if: env.SKIP != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/
+          if git diff --staged --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "chore: add generated songs for $DATE"
+            git push
+          fi

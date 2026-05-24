@@ -1,0 +1,27 @@
+[
+  {
+    "name": "electronic_ambient",
+    "label": "Electronic / Ambient",
+    "tags": "electronic, ambient, atmospheric, synthesizer, ethereal, dreamy, cinematic"
+  },
+  {
+    "name": "jpop_citypop",
+    "label": "J-Pop / City Pop",
+    "tags": "j-pop, city pop, japanese pop, groovy, urban, 80s vibes, funky bass"
+  },
+  {
+    "name": "rock_alternative",
+    "label": "Rock / Alternative",
+    "tags": "rock, alternative rock, electric guitar, energetic, indie, powerful drums"
+  },
+  {
+    "name": "jazz_bossanova",
+    "label": "Jazz / Bossa Nova",
+    "tags": "jazz, bossa nova, acoustic guitar, smooth, sophisticated, upright bass"
+  },
+  {
+    "name": "ballad",
+    "label": "Ballad",
+    "tags": "ballad, emotional, piano, orchestral, heartfelt, strings, cinematic"
+  }
+]
