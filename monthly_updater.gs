@@ -29,6 +29,7 @@ const LOTTERY_SITES = [
   { name: "ビックカメラ.com",           url: "https://www.biccamera.com/" },
   { name: "Amazon（先行予約）",         url: "https://www.amazon.co.jp/" },
   { name: "楽天市場",                   url: "https://www.rakuten.co.jp/" },
+  { name: "古本市場",                   url: "https://www.furuhon-ichiba.com/" },
 ];
 
 // ─────────────────────────────────────────────
