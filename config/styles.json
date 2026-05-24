@@ -15,9 +15,9 @@
     "tags": "rock, alternative rock, electric guitar, energetic, indie, powerful drums"
   },
   {
-    "name": "jazz_bossanova",
-    "label": "Jazz / Bossa Nova",
-    "tags": "jazz, bossa nova, acoustic guitar, smooth, sophisticated, upright bass"
+    "name": "acoustic_fingerpicking",
+    "label": "Acoustic Guitar / Singer-Songwriter",
+    "tags": "acoustic guitar, singer-songwriter, fingerpicking, intimate, folk, heartfelt, unplugged"
   },
   {
     "name": "ballad",
