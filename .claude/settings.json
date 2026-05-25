@@ -1,11 +1,22 @@
 {
   "permissions": {
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean -f *)",
+      "Bash(chmod -R *)",
+      "Bash(dd *)"
+    ],
     "allow": [
       "Bash(python3 scripts/list_results.py)",
       "Bash(python3 scripts/list_results.py --date *)",
       "Bash(pip install -r requirements.txt)",
       "Bash(pip show *)",
-      "Bash(pip list)"
+      "Bash(pip list)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }

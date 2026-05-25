@@ -1,5 +1,19 @@
 # Suno AI Lyrics Integration
 
+## Claude への操作ルール
+
+### 確認なしで実行してよい操作
+- ファイル・ディレクトリの読み取り（歌詞確認、output/ 確認、構成把握など）
+- `python3 scripts/list_results.py`（結果一覧表示）
+- `pip install -r requirements.txt`、`pip show`、`pip list`
+- `git commit`、`git push`（通常プッシュのみ）
+
+### 必ず実行前に確認すること
+- **`python3 scripts/generate_music.py` — Suno API を呼び出してクレジットを消費する。必ずユーザーに確認してから実行すること。**
+
+### 絶対に実行しないこと（deny 設定済み）
+- `rm -rf`、`git push --force`、`git reset --hard`、`git clean -f`
+
 毎日歌詞を整理し、Suno AIで5つのスタイルの曲を自動生成するシステム。
 
 ## セットアップ
