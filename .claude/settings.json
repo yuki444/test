@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 scripts/list_results.py)",
+      "Bash(python3 scripts/list_results.py --date *)",
+      "Bash(pip install -r requirements.txt)",
+      "Bash(pip show *)",
+      "Bash(pip list)"
+    ]
+  }
+}
