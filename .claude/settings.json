@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install *)",
+      "Bash(python scripts/generate_music.py*)",
+      "Bash(python scripts/list_results.py*)",
+      "Bash(mkdir -p lyrics/*)",
+      "Bash(cp lyrics/template/song.txt lyrics/*)",
+      "Bash(git status)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git add *)",
+      "Bash(git commit*)",
+      "Bash(git push*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/user/test && pip install -r requirements.txt -q 2>/dev/null || true",
+            "statusMessage": "Python依存関係をインストール中..."
+          }
+        ]
+      }
+    ]
+  }
+}
