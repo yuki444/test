@@ -18,7 +18,7 @@
 // 設定（変更不要 — スクリプトプロパティで管理）
 // ─────────────────────────────────────────────
 const HUB_PAGE_ID      = "36825aa13432819b9cbcc9a3c83cdc39"; // ポケモンカード投資ハブ
-const LOTTERY_DB_ID    = "2c190fd4164042dab27319020cc7501e"; // 抽選管理DB
+const LOTTERY_DB_ID    = "d17825aa54f947b790ff1342face83d4"; // 抽選管理（ハブ内インライン）
 const CARD_DB_ID       = "8bdbbad309f642f5b2983ba28bd0b6c7"; // 注目カードDB
 const PACK_DB_ID       = "668ab474daaf40b5a472c40f72a82638"; // 最新パック情報DB
 const CALENDAR_ID      = "mossan72.tsubaki@gmail.com";
