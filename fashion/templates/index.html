@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ワードローブコーディネーター</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <h1 class="app-title">ワードローブコーディネーター</h1>
+      <p class="app-subtitle">清潔感のある「普段着」を、あなたのためにプランニングします</p>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="profile">
+      <span class="tab-label">プロフィール</span>
+    </button>
+    <button class="tab-btn" data-tab="wardrobe">
+      <span class="tab-label">手持ちの服</span>
+    </button>
+    <button class="tab-btn" data-tab="recommend">
+      <span class="tab-label">季節別提案</span>
+    </button>
+  </nav>
+
+  <main class="main-content">
+
+    <!-- Profile Tab -->
+    <section id="tab-profile" class="tab-content active">
+      <div class="card">
+        <h2 class="card-title">基本情報</h2>
+        <p class="card-desc">より正確な提案のために入力してください。後からいつでも変更できます。</p>
+
+        <form id="profile-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="age">年齢</label>
+              <div class="input-with-unit">
+                <input type="number" id="age" placeholder="35" min="18" max="80">
+                <span class="unit">歳</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="height">身長</label>
+              <div class="input-with-unit">
+                <input type="number" id="height" placeholder="170" min="150" max="200">
+                <span class="unit">cm</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="weight">体重</label>
+              <div class="input-with-unit">
+                <input type="number" id="weight" placeholder="65" min="40" max="150">
+                <span class="unit">kg</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group mt">
+            <label>1シーズンあたりの予算感</label>
+            <div class="radio-group">
+              <label class="radio-card">
+                <input type="radio" name="budget" value="low">
+                <div class="radio-card-inner">
+                  <span class="radio-card-title">節約モード</span>
+                  <span class="radio-card-desc">できれば1万円以内で揃えたい</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="budget" value="medium" checked>
+                <div class="radio-card-inner">
+                  <span class="radio-card-title">普通</span>
+                  <span class="radio-card-desc">2〜3万円程度なら問題ない</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="budget" value="high">
+                <div class="radio-card-inner">
+                  <span class="radio-card-title">こだわりたい</span>
+                  <span class="radio-card-desc">良いものなら予算は気にしない</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group mt">
+            <label>家族構成</label>
+            <div class="radio-group">
+              <label class="radio-card">
+                <input type="radio" name="family" value="single">
+                <div class="radio-card-inner">
+                  <span class="radio-card-title">独身・一人暮らし</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="family" value="partner">
+                <div class="radio-card-inner">
+                  <span class="radio-card-title">パートナーと2人</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="family" value="children_small" checked>
+                <div class="radio-card-inner">
+                  <span class="radio-card-title">小さい子供がいる</span>
+                  <span class="radio-card-desc">未就学〜小学生</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="family" value="children_teen">
+                <div class="radio-card-inner">
+                  <span class="radio-card-title">中高生の子供がいる</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary mt">保存する</button>
+          <span id="profile-saved" class="saved-msg hidden">保存しました</span>
+        </form>
+      </div>
+    </section>
+
+    <!-- Wardrobe Tab -->
+    <section id="tab-wardrobe" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">手持ちの服を登録</h2>
+        <p class="card-desc">持っている服を登録すると「何を買い足すべきか」がより正確にわかります。登録は任意です。</p>
+
+        <div class="add-item-box">
+          <form id="add-item-form">
+            <div class="form-row">
+              <div class="form-group flex2">
+                <label for="item-name">アイテム名</label>
+                <input type="text" id="item-name" placeholder="例: 白クルーネックTシャツ">
+              </div>
+              <div class="form-group">
+                <label for="item-category">カテゴリ</label>
+                <select id="item-category">
+                  <option value="トップス">トップス</option>
+                  <option value="ボトムス">ボトムス</option>
+                  <option value="アウター">アウター</option>
+                  <option value="インナー">インナー</option>
+                  <option value="靴">靴</option>
+                  <option value="その他">その他</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="item-color">色</label>
+                <input type="text" id="item-color" placeholder="例: ネイビー">
+              </div>
+            </div>
+            <button type="submit" class="btn-secondary mt-sm">追加する</button>
+          </form>
+        </div>
+
+        <div id="wardrobe-list" class="wardrobe-list"></div>
+      </div>
+    </section>
+
+    <!-- Recommend Tab -->
+    <section id="tab-recommend" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">季節別ワードローブ提案</h2>
+        <p class="card-desc">シーズンを選ぶと、あなたのプロフィールと手持ちをもとに「持つべき服」を提案します。</p>
+
+        <div class="season-grid">
+          <button class="season-btn active" data-season="spring">
+            <span class="season-name">春</span>
+            <span class="season-sub">3〜5月</span>
+          </button>
+          <button class="season-btn" data-season="summer">
+            <span class="season-name">夏</span>
+            <span class="season-sub">6〜8月</span>
+          </button>
+          <button class="season-btn" data-season="autumn">
+            <span class="season-name">秋</span>
+            <span class="season-sub">9〜11月</span>
+          </button>
+          <button class="season-btn" data-season="winter">
+            <span class="season-name">冬</span>
+            <span class="season-sub">12〜2月</span>
+          </button>
+        </div>
+
+        <button id="recommend-btn" class="btn-primary btn-block mt">この季節の提案を見る</button>
+
+        <div id="recommend-loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p>コーディネーターが考え中...</p>
+        </div>
+
+        <div id="recommend-output" class="recommend-output hidden">
+          <div id="recommend-content" class="recommend-content"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
