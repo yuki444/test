@@ -23,26 +23,29 @@ body {
   color: var(--text);
   min-height: 100vh;
   font-size: 15px;
+  /* iOS safe area */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Header */
 .app-header {
   background: var(--primary);
   color: #fff;
-  padding: 24px 20px 20px;
+  padding: 20px 20px 16px;
+  padding-top: calc(20px + env(safe-area-inset-top));
   text-align: center;
 }
 
 .app-title {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 .app-subtitle {
-  margin-top: 5px;
-  font-size: 0.82rem;
-  opacity: 0.82;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  opacity: 0.8;
 }
 
 /* Tabs */
@@ -53,7 +56,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
 }
 
 .tab-btn {
@@ -62,12 +65,13 @@ body {
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--text-light);
   font-weight: 500;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
+  font-family: inherit;
 }
 
 .tab-btn.active {
@@ -100,50 +104,66 @@ body {
 .card {
   background: var(--card);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 1px 6px rgba(0,0,0,0.07);
 }
 
+.mt-card {
+  margin-top: 16px;
+}
+
 .card-title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--primary-dark);
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.optional-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-light);
+  background: #f0f2f5;
+  padding: 2px 7px;
+  border-radius: 10px;
 }
 
 .card-desc {
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   color: var(--text-light);
   line-height: 1.55;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 
 /* Forms */
 .form-row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   flex: 1;
-  min-width: 100px;
+  min-width: 90px;
 }
 
 .form-group.flex2 {
   flex: 2;
-  min-width: 180px;
+  min-width: 160px;
 }
 
 .form-group.mt {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .form-group label {
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text);
 }
@@ -151,7 +171,7 @@ body {
 .input-with-unit {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .input-with-unit input {
@@ -160,7 +180,7 @@ body {
 }
 
 .unit {
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   color: var(--text-light);
   white-space: nowrap;
 }
@@ -169,14 +189,15 @@ input[type="text"],
 input[type="number"],
 select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px 11px;
   border: 1.5px solid var(--border);
   border-radius: 7px;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   background: #fff;
   color: var(--text);
   transition: border-color 0.15s, box-shadow 0.15s;
   font-family: inherit;
+  -webkit-appearance: none;
 }
 
 input:focus,
@@ -190,14 +211,14 @@ select:focus {
 .radio-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
 .radio-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 11px;
+  padding: 11px 13px;
   border: 1.5px solid var(--border);
   border-radius: 8px;
   cursor: pointer;
@@ -224,20 +245,26 @@ select:focus {
 .radio-card-inner {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .radio-card-title {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
 }
 
 .radio-card-desc {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-light);
 }
 
 /* Buttons */
+.btn-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -246,8 +273,8 @@ select:focus {
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 12px 28px;
-  font-size: 0.95rem;
+  padding: 12px 26px;
+  font-size: 0.93rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
@@ -263,13 +290,15 @@ select:focus {
 }
 
 .btn-primary:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-primary.btn-block {
   width: 100%;
-  padding: 14px;
+  padding: 15px;
+  font-size: 1rem;
 }
 
 .btn-secondary {
@@ -281,7 +310,7 @@ select:focus {
   border: 1.5px solid var(--primary);
   border-radius: 8px;
   padding: 10px 20px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -293,20 +322,23 @@ select:focus {
 }
 
 .mt {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .mt-sm {
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
-/* Saved message */
+/* Messages */
 .saved-msg {
-  margin-left: 12px;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 600;
   color: var(--success);
-  vertical-align: middle;
+}
+
+.error-msg {
+  color: #c0392b;
+  font-size: 0.9rem;
 }
 
 .hidden {
@@ -318,29 +350,29 @@ select:focus {
   background: var(--bg);
   border: 1.5px solid var(--border);
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
+  padding: 14px;
+  margin-bottom: 16px;
 }
 
 /* Wardrobe list */
 .wardrobe-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
 .empty-state {
   text-align: center;
-  padding: 36px 20px;
+  padding: 28px 20px;
   color: var(--text-light);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
 }
 
 .wardrobe-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
+  padding: 11px 13px;
   border: 1.5px solid var(--border);
   border-radius: 8px;
   background: #fff;
@@ -353,20 +385,20 @@ select:focus {
 }
 
 .wardrobe-item-name {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
 .wardrobe-item-tags {
   display: flex;
-  gap: 6px;
+  gap: 5px;
   flex-wrap: wrap;
 }
 
 .tag {
-  font-size: 0.74rem;
-  padding: 2px 9px;
-  border-radius: 12px;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 10px;
   background: var(--primary-light);
   color: var(--primary);
   font-weight: 500;
@@ -375,7 +407,7 @@ select:focus {
 .btn-del {
   background: none;
   border: none;
-  color: #c8c8c8;
+  color: #bbb;
   cursor: pointer;
   font-size: 1.3rem;
   line-height: 1;
@@ -394,14 +426,14 @@ select:focus {
 .season-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
 .season-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   padding: 14px 8px;
   border: 2px solid var(--border);
   border-radius: 10px;
@@ -422,17 +454,17 @@ select:focus {
 }
 
 .season-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .season-name {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--primary-dark);
 }
 
 .season-sub {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-light);
 }
 
@@ -441,15 +473,15 @@ select:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 40px 20px;
+  gap: 12px;
+  padding: 36px 20px;
   color: var(--text-light);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
 }
 
 .spinner {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border: 3px solid var(--primary-light);
   border-top-color: var(--primary);
   border-radius: 50%;
@@ -462,23 +494,23 @@ select:focus {
 
 /* Recommend output */
 .recommend-output {
-  margin-top: 28px;
+  margin-top: 24px;
   border-top: 1.5px solid var(--border);
-  padding-top: 24px;
+  padding-top: 20px;
 }
 
 .recommend-content {
   line-height: 1.75;
-  font-size: 0.93rem;
+  font-size: 0.92rem;
   color: var(--text);
 }
 
 .recommend-content h2 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--primary-dark);
-  margin: 24px 0 12px;
-  padding-bottom: 8px;
+  margin: 20px 0 10px;
+  padding-bottom: 7px;
   border-bottom: 2px solid var(--primary-light);
 }
 
@@ -487,20 +519,20 @@ select:focus {
 }
 
 .recommend-content h3 {
-  font-size: 0.96rem;
+  font-size: 0.94rem;
   font-weight: 700;
   color: var(--primary);
-  margin: 20px 0 10px;
+  margin: 18px 0 8px;
 }
 
 .recommend-content p {
-  margin-bottom: 8px;
+  margin-bottom: 7px;
 }
 
 .recommend-content ul,
 .recommend-content ol {
-  padding-left: 22px;
-  margin-bottom: 12px;
+  padding-left: 20px;
+  margin-bottom: 10px;
 }
 
 .recommend-content li {
@@ -517,6 +549,7 @@ select:focus {
   text-decoration: none;
   border-bottom: 1px solid var(--primary-light);
   transition: border-color 0.15s;
+  word-break: break-all;
 }
 
 .recommend-content a:hover {
@@ -526,31 +559,16 @@ select:focus {
 .recommend-content hr {
   border: none;
   border-top: 1.5px solid var(--border);
-  margin: 20px 0;
-}
-
-.recommend-content blockquote {
-  border-left: 4px solid var(--primary-light);
-  padding-left: 14px;
-  color: var(--text-light);
-  margin: 12px 0;
+  margin: 18px 0;
 }
 
 /* Responsive */
-@media (max-width: 520px) {
+@media (max-width: 480px) {
   .form-row {
     flex-direction: column;
   }
 
-  .season-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .card {
-    padding: 18px;
-  }
-
-  .app-title {
-    font-size: 1.15rem;
+    padding: 16px;
   }
 }

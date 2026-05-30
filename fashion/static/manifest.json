@@ -1,0 +1,25 @@
+{
+  "name": "ワードローブコーディネーター",
+  "short_name": "コーデ提案",
+  "description": "シーズンごとに「持つべき服」を提案するパーソナルコーディネーター",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#2a5d8f",
+  "theme_color": "#2a5d8f",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,4 +1,11 @@
-// Tab switching
+// Service Worker registration (PWA)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+// ---------- Tab switching ----------
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -169,7 +176,7 @@ document.getElementById('recommend-btn').addEventListener('click', async () => {
   } catch (err) {
     loading.classList.add('hidden');
     output.classList.remove('hidden');
-    content.innerHTML = '<p style="color:#c0392b">エラーが発生しました。しばらく経ってから再度お試しください。</p>';
+    content.innerHTML = '<p class="error-msg">エラーが発生しました。しばらく経ってから再度お試しください。</p>';
     console.error(err);
   } finally {
     btn.disabled = false;
