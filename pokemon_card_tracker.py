@@ -75,7 +75,7 @@ def create_lottery_calendar_events(
     """抽選の応募開始・締切・結果確認をカレンダーに登録する。"""
 
     created_ids = []
-    base_desc = f"商品: {product_name}\nサイト: {site}\nURL: {url}\n\nNotion抽選管理DB:\nhttps://www.notion.so/2c190fd4164042dab27319020cc7501e"
+    base_desc = f"商品: {product_name}\nサイト: {site}\nURL: {url}\n\nNotion抽選管理（投資ハブ内）:\nhttps://www.notion.so/36825aa13432819b9cbcc9a3c83cdc39"
 
     events = []
     if apply_start:
@@ -150,6 +150,7 @@ def add_lottery_to_notion(
         "ビックカメラ": "ビックカメラ",
         "Amazon": "Amazon",
         "楽天": "楽天",
+        "古本市場": "古本市場",
     }
 
     props: dict = {
