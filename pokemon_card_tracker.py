@@ -316,7 +316,7 @@ def main() -> None:
     reg = sub.add_parser("register", help="抽選をNotionとカレンダーに登録")
     reg.add_argument("--name",          required=True, help="商品名")
     reg.add_argument("--site",          required=True,
-                     choices=["ポケモンセンター","ヨドバシ","ビックカメラ","Amazon","楽天","その他"],
+                     choices=["ポケモンセンター","ヨドバシ","ビックカメラ","Amazon","楽天","古本市場","その他"],
                      help="販売サイト")
     reg.add_argument("--url",           required=True, help="抽選ページURL")
     reg.add_argument("--apply-start",   metavar="YYYY-MM-DD", help="応募開始日")
