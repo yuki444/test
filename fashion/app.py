@@ -12,6 +12,16 @@ DATA_DIR.mkdir(exist_ok=True)
 PROFILE_FILE = DATA_DIR / "profile.json"
 WARDROBE_FILE = DATA_DIR / "wardrobe.json"
 
+# Pre-filled defaults from the user's actual profile
+DEFAULT_PROFILE = {
+    "age": "38",
+    "height": "178",
+    "weight": "80",
+    "budget": "high",
+    "family": "children_small",
+    "body_note": "スポーツ体型で太ももが太め。市販のパンツは太もも周りがきつくなりやすい。",
+}
+
 SYSTEM_PROMPT = """あなたは、ファッションに無頓着な普通の家族持ち男性専属の、プロのワードローブコンサルタントです。
 
 あなたの使命：
@@ -22,6 +32,12 @@ SYSTEM_PROMPT = """あなたは、ファッションに無頓着な普通の家�
 - 合わせやすいベーシックカラー（白・黒・グレー・ネイビー・ベージュ）中心
 - 「なぜこれが必要か」を短く明確に説明
 - 手持ち服が不明な場合でも、ゼロから揃える前提で完結した提案をする
+
+体型に関する注意（体型メモがある場合は必ず考慮）：
+- 太ももが太い場合: ストレッチ素材必須、テーパードより straight/wide シルエット推奨
+  UNIQLOなら「ウルトラストレッチ」「ジョガーパンツ」系、一般的なスキニー・細身は避ける
+- スポーツ体型（肩幅・胸板あり）: トップスはサイズ感に注意、窮屈に見えないものを選ぶ
+- 体型メモの内容に応じて、サイズ選びのコツも必ず一言添える
 
 購入先と検索URL形式（アイテムごとに複数の購入先を案内すること）：
 - UNIQLO: https://www.uniqlo.com/jp/ja/search/?q=キーワード
@@ -84,10 +100,7 @@ def profile():
     if request.method == "POST":
         save_json(PROFILE_FILE, request.json)
         return jsonify({"status": "ok"})
-    return jsonify(load_json(PROFILE_FILE, {
-        "age": "", "height": "", "weight": "",
-        "budget": "medium", "family": "children_small",
-    }))
+    return jsonify(load_json(PROFILE_FILE, DEFAULT_PROFILE))
 
 
 @app.route("/api/wardrobe", methods=["GET", "POST"])
@@ -102,7 +115,7 @@ def wardrobe():
 def recommend():
     data = request.json
     season = data.get("season", "spring")
-    profile = load_json(PROFILE_FILE, {})
+    profile = load_json(PROFILE_FILE, DEFAULT_PROFILE)
     wardrobe = load_json(WARDROBE_FILE, {"items": []})
 
     wardrobe_items = wardrobe.get("items", [])
@@ -114,18 +127,18 @@ def recommend():
     else:
         wardrobe_text = "なし（ゼロから揃える前提で提案してください）"
 
-    age = profile.get("age", "")
-    height = profile.get("height", "")
-    weight = profile.get("weight", "")
-    body_text = f"身長{height}cm / 体重{weight}kg" if height or weight else "未設定"
-    age_text = f"{age}歳" if age else "未設定"
+    age = profile.get("age", "38")
+    height = profile.get("height", "178")
+    weight = profile.get("weight", "80")
+    body_note = profile.get("body_note", DEFAULT_PROFILE["body_note"])
 
     prompt = f"""以下のユーザー情報をもとに、{SEASON_NAMES.get(season, season)}のワードローブ提案をお願いします。
 
 【ユーザー基本情報】
-- 年齢: {age_text}
-- 体型: {body_text}
-- 予算感: {BUDGET_LABELS.get(profile.get('budget', 'medium'), '普通（1シーズン2〜3万円程度）')}
+- 年齢: {age}歳
+- 体型: 身長{height}cm / 体重{weight}kg
+- 体型メモ: {body_note}
+- 予算感: {BUDGET_LABELS.get(profile.get('budget', 'high'), 'こだわりたい')}
 - 家族構成: {FAMILY_LABELS.get(profile.get('family', 'children_small'), '小さい子供がいる')}
 - 普段の服: ほぼUNIQLOのみ、ファッションには無頓着
 
@@ -142,7 +155,8 @@ def recommend():
 **[アイテム名]**
 - 用途: （どんなシーンで使うか1行）
 - おすすめ: 商品名 / 価格帯
-- 購入先: [UNIQLO](URL) / [GU](URL) / [無印](URL) / [ZOZOTOWN](URL) など複数
+- 体型メモ対応: （太もも・体型に関係するアイテムは必ずサイズ感・素材の注意点を記載）
+- 購入先: [UNIQLO](URL) / [GU](URL) / [ZOZOTOWN](URL) など複数
 
 ---
 

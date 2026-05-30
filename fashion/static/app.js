@@ -22,7 +22,8 @@ async function loadProfile() {
   if (p.age) document.getElementById('age').value = p.age;
   if (p.height) document.getElementById('height').value = p.height;
   if (p.weight) document.getElementById('weight').value = p.weight;
-  const bRadio = document.querySelector(`input[name="budget"][value="${p.budget || 'medium'}"]`);
+  if (p.body_note) document.getElementById('body-note').value = p.body_note;
+  const bRadio = document.querySelector(`input[name="budget"][value="${p.budget || 'high'}"]`);
   if (bRadio) bRadio.checked = true;
   const fRadio = document.querySelector(`input[name="family"][value="${p.family || 'children_small'}"]`);
   if (fRadio) fRadio.checked = true;
@@ -34,8 +35,9 @@ document.getElementById('profile-form').addEventListener('submit', async e => {
     age: document.getElementById('age').value,
     height: document.getElementById('height').value,
     weight: document.getElementById('weight').value,
-    budget: document.querySelector('input[name="budget"]:checked')?.value || 'medium',
+    budget: document.querySelector('input[name="budget"]:checked')?.value || 'high',
     family: document.querySelector('input[name="family"]:checked')?.value || 'children_small',
+    body_note: document.getElementById('body-note').value.trim(),
   };
   await fetch('/api/profile', {
     method: 'POST',

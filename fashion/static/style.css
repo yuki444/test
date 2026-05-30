@@ -185,6 +185,26 @@ body {
   white-space: nowrap;
 }
 
+textarea {
+  width: 100%;
+  padding: 10px 11px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-size: 0.93rem;
+  background: #fff;
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(42,93,143,0.12);
+}
+
 input[type="text"],
 input[type="number"],
 select {
