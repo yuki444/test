@@ -362,6 +362,49 @@ body{
 .b-grn{background:#d1fae5;color:#059669;}
 
 /* ══════════════════════════════
+   HOTEL BAR
+══════════════════════════════ */
+.hotel-bar{
+  background:linear-gradient(90deg,#0f172a 0%,#1e3a5f 60%,#0c4a6e 100%);
+  padding:16px 32px;
+  display:flex;
+  align-items:center;
+  gap:0;
+}
+.hotel-label{
+  font-size:9px;font-weight:900;letter-spacing:3px;
+  color:#38bdf8;text-transform:uppercase;
+  white-space:nowrap;
+  padding-right:20px;
+  border-right:1px solid rgba(255,255,255,0.1);
+  margin-right:20px;
+}
+.hotel-name{
+  font-family:'Oswald',sans-serif;
+  font-size:18px;font-weight:700;color:#fff;
+  margin-right:24px;
+  white-space:nowrap;
+}
+.hotel-chips{
+  display:flex;gap:8px;flex-wrap:wrap;
+  flex:1;
+}
+.hchip{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:6px;
+  padding:4px 10px;
+  font-size:10px;color:rgba(255,255,255,0.75);
+  white-space:nowrap;
+}
+.hchip.good{
+  background:rgba(56,189,248,0.1);
+  border-color:rgba(56,189,248,0.3);
+  color:#7dd3fc;
+}
+
+/* ══════════════════════════════
    FOOTER
 ══════════════════════════════ */
 .footer{
@@ -580,6 +623,20 @@ body{
 
 <div class="divider"></div>
 
+<!-- ▌HOTEL BAR -->
+<div class="hotel-bar">
+  <div class="hotel-label">🏨 STAY</div>
+  <div class="hotel-name">アパホテル〈札幌大通駅前南〉</div>
+  <div class="hotel-chips">
+    <div class="hchip good">♨️ 天然温泉 大浴場</div>
+    <div class="hchip good">🛏️ トリプルルーム（全8室）</div>
+    <div class="hchip">📍 大通駅1番出口 徒歩7分</div>
+    <div class="hchip">🍺 大通ビアガーデンへ徒歩7分</div>
+    <div class="hchip">🕐 大浴場 15:00〜翌1:00 / 6:00〜9:00</div>
+    <div class="hchip">🍽️ 素泊まりプランあり</div>
+  </div>
+</div>
+
 <!-- ▌BOTTOM -->
 <div class="bottom">
 
@@ -645,10 +702,10 @@ body{
         </div>
       </li>
       <li class="cli">
-        <div class="cl-box"></div>
+        <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
         <div class="cl-body">
-          <div class="cl-name">🏨 ホテル（大通〜すすきの周辺）</div>
-          <div class="cl-note">夏ピークで混雑　<span class="badge b-ora">早めに確保</span></div>
+          <div class="cl-name">🏨 アパホテル〈札幌大通駅前南〉</div>
+          <div class="cl-note">大通駅徒歩7分・天然温泉大浴場・トリプル　<span class="badge b-grn">決定済み</span></div>
         </div>
       </li>
     </ul>
