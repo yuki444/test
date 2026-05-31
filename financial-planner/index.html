@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>パーソナル ファイナンシャルプランナー</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --primary:#1a56db; --primary-light:#e8f0fe; --secondary:#059669; --secondary-light:#d1fae5;
+      --danger:#dc2626; --danger-light:#fee2e2; --warning:#d97706; --warning-light:#fef3c7;
+      --bg:#f8fafc; --surface:#ffffff; --border:#e2e8f0; --text:#1e293b; --text-muted:#64748b;
+      --radius:12px; --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+      --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Hiragino Sans','Yu Gothic UI','Meiryo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+    /* ===== PIN SCREEN ===== */
+    #pin-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1e3a8a 0%,#1a56db 50%,#0891b2 100%);
+      display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+    .pin-box{background:white;border-radius:24px;padding:40px 36px;width:100%;max-width:360px;
+      text-align:center;box-shadow:0 24px 48px rgba(0,0,0,.25)}
+    .pin-icon{font-size:40px;margin-bottom:8px}
+    .pin-app-name{font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px}
+    .pin-tagline{font-size:12px;color:var(--text-muted);margin-bottom:20px}
+    .pin-msg{font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:16px;min-height:20px;transition:color .2s}
+    .pin-msg.error{color:var(--danger)}
+    .pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:24px}
+    .pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);transition:all .2s}
+    .pin-dot.filled{background:var(--primary);border-color:var(--primary)}
+    .pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+    .pin-key{padding:16px;border:1px solid var(--border);border-radius:12px;font-size:20px;font-weight:700;
+      cursor:pointer;background:var(--bg);color:var(--text);transition:all .1s;user-select:none}
+    .pin-key:hover{background:var(--primary-light);border-color:var(--primary)}
+    .pin-key:active{transform:scale(.95)}
+    .pin-key.del{font-size:18px;color:var(--text-muted)}
+    .pin-key.wide{grid-column:span 2}
+    .pin-skip{font-size:12px;color:var(--primary);cursor:pointer;text-decoration:underline;margin-top:4px}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+    .shake{animation:shake .4s ease}
+
+    /* ===== LAYOUT ===== */
+    .layout{display:flex;min-height:100vh}
+    .sidebar{width:248px;background:var(--surface);border-right:1px solid var(--border);
+      position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+    .sidebar-header{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+    .sidebar-header h1{font-size:14px;font-weight:800;color:var(--primary);line-height:1.4}
+    .sidebar-header p{font-size:11px;color:var(--text-muted);margin-top:2px}
+    .privacy-badge{margin:8px 16px 0;padding:6px 10px;background:var(--secondary-light);border-radius:8px;
+      font-size:11px;color:var(--secondary);font-weight:600;display:flex;align-items:center;gap:6px}
+    .nav{padding:8px;flex:1}
+    .nav-section{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;
+      letter-spacing:.08em;padding:10px 12px 4px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;
+      cursor:pointer;font-size:13px;font-weight:500;color:var(--text-muted);transition:all .15s;margin-bottom:2px}
+    .nav-item:hover{background:var(--bg);color:var(--text)}
+    .nav-item.active{background:var(--primary-light);color:var(--primary);font-weight:700}
+    .nav-item .icon{font-size:15px;width:20px;text-align:center}
+    .nav-divider{height:1px;background:var(--border);margin:6px 12px}
+    .retire-progress{margin:0 16px 4px;padding:12px;background:var(--bg);border-radius:10px;
+      border:1px solid var(--border)}
+    .retire-progress-label{font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px}
+    .retire-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:4px}
+    .retire-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:3px;transition:width .5s}
+    .retire-progress-sub{font-size:11px;color:var(--text-muted)}
+    .sidebar-footer{padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+    .btn-save-all{width:100%;padding:10px;background:var(--primary);color:white;border:none;
+      border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+    .btn-save-all:hover{background:#1748c7}
+    .footer-tools{display:flex;gap:6px}
+    .btn-tool{flex:1;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+      font-size:11px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .15s;text-align:center}
+    .btn-tool:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+    .main{margin-left:248px;flex:1}
+    .page{display:none;padding:28px 32px;max-width:1000px}
+    .page.active{display:block}
+
+    /* ===== CARDS ===== */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      padding:22px;margin-bottom:18px;box-shadow:var(--shadow)}
+    .card-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+    /* ===== FORMS ===== */
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+    .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+    .field{display:flex;flex-direction:column;gap:4px}
+    .field label{font-size:11px;font-weight:700;color:var(--text-muted)}
+    .field input,.field select{padding:8px 11px;border:1px solid var(--border);border-radius:8px;
+      font-size:13px;color:var(--text);background:white;transition:border-color .15s;outline:none}
+    .field input:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+    .field .hint{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+    /* ===== PAGE HEADERS ===== */
+    .page-header{margin-bottom:22px}
+    .page-header h2{font-size:21px;font-weight:800}
+    .page-header p{font-size:13px;color:var(--text-muted);margin-top:4px}
+
+    /* ===== BUTTONS ===== */
+    .btn{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;
+      border:none;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+    .btn-primary{background:var(--primary);color:white}.btn-primary:hover{background:#1748c7}
+    .btn-secondary{background:var(--bg);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--border)}
+    .btn-danger{background:var(--danger-light);color:var(--danger)}.btn-danger:hover{background:#fecaca}
+    .btn-success{background:var(--secondary-light);color:var(--secondary)}.btn-success:hover{background:#a7f3d0}
+    .btn-sm{padding:5px 9px;font-size:11px}
+
+    /* ===== MEMBERS ===== */
+    .member-list{display:flex;flex-direction:column;gap:8px}
+    .member-card{display:grid;grid-template-columns:1fr 90px 160px auto;gap:10px;align-items:center;
+      padding:11px 13px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+    .member-role{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;width:fit-content}
+    .role-self{background:#dbeafe;color:#1d4ed8}.role-spouse{background:#fce7f3;color:#9d174d}
+    .role-child{background:#dcfce7;color:#166534}.role-parent,.role-other{background:#fef3c7;color:#92400e}
+
+    /* ===== PLAN TABS ===== */
+    .plan-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+    .plan-tab{padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;
+      border:2px solid var(--border);color:var(--text-muted);transition:all .15s;display:flex;align-items:center;gap:6px}
+    .plan-tab.active{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+    .plan-tab .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .plan-tab-add{border-style:dashed}.plan-tab-add:hover{border-color:var(--primary);color:var(--primary)}
+
+    /* ===== EVENTS ===== */
+    .event-list{display:flex;flex-direction:column;gap:6px}
+    .event-item{display:grid;grid-template-columns:1fr 110px 130px 100px auto;gap:8px;align-items:center;
+      padding:10px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+    .event-tag{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:700;width:fit-content;margin-top:3px}
+    .tag-income{background:var(--secondary-light);color:var(--secondary)}
+    .tag-expense{background:var(--danger-light);color:var(--danger)}
+    .tag-asset{background:#dbeafe;color:#1d4ed8}
+    .tag-life{background:var(--warning-light);color:var(--warning)}
+
+    /* ===== SUMMARY CARDS ===== */
+    .summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;margin-bottom:18px}
+    .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      padding:14px;box-shadow:var(--shadow)}
+    .summary-card .label{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+    .summary-card .value{font-size:20px;font-weight:800;margin-top:4px}
+    .summary-card .sub{font-size:10px;color:var(--text-muted);margin-top:2px}
+    .value-positive{color:var(--secondary)}.value-negative{color:var(--danger)}.value-neutral{color:var(--primary)}
+
+    /* ===== CHARTS ===== */
+    .chart-container{position:relative;height:300px;margin-top:8px}
+    .chart-sm{height:220px}
+    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+
+    /* ===== ADVICE ===== */
+    .advice-item{padding:14px;border-radius:10px;margin-bottom:10px;border-left:4px solid;display:flex;gap:12px}
+    .advice-item.good{background:var(--secondary-light);border-color:var(--secondary)}
+    .advice-item.warn{background:var(--warning-light);border-color:var(--warning)}
+    .advice-item.alert{background:var(--danger-light);border-color:var(--danger)}
+    .advice-item.info{background:var(--primary-light);border-color:var(--primary)}
+    .advice-icon{font-size:20px;flex-shrink:0}
+    .advice-content .title{font-size:14px;font-weight:700;margin-bottom:4px}
+    .advice-content .desc{font-size:13px;line-height:1.65;color:var(--text)}
+
+    /* ===== TABLE ===== */
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th{background:var(--bg);padding:9px 10px;text-align:right;font-weight:700;color:var(--text-muted);
+      border-bottom:2px solid var(--border);font-size:11px;white-space:nowrap}
+    th:first-child{text-align:left}
+    td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+    td:first-child{text-align:left;font-weight:600}
+    tr:hover td{background:var(--bg)}
+    .positive{color:var(--secondary);font-weight:700}.negative{color:var(--danger);font-weight:700}
+    .highlight-row td{background:#eff6ff!important;font-weight:700}
+    .retire-row td{background:#ecfdf5!important}
+
+    /* ===== MISC ===== */
+    .divider{border:none;border-top:1px solid var(--border);margin:18px 0}
+    .inline-summary{font-size:13px;padding:12px;background:var(--bg);border-radius:8px;
+      display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+    .inline-summary .item .lbl{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase}
+    .inline-summary .item .val{font-size:16px;font-weight:800;margin-top:2px}
+    .toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:white;padding:11px 18px;
+      border-radius:10px;font-size:13px;font-weight:700;z-index:1000;transform:translateY(80px);
+      opacity:0;transition:all .3s;box-shadow:var(--shadow-md)}
+    .toast.show{transform:translateY(0);opacity:1}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+      display:flex;align-items:center;justify-content:center;padding:20px}
+    .modal-box{background:white;border-radius:16px;padding:26px;width:100%;max-width:500px;
+      box-shadow:0 20px 40px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+    .modal-box h3{font-size:17px;font-weight:800;margin-bottom:18px}
+
+    /* ===== PRESET CHIPS ===== */
+    .preset-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+    .preset-chip{padding:5px 10px;border:1px solid var(--border);border-radius:20px;font-size:11px;
+      font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .15s;background:white}
+    .preset-chip:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+
+    @media(max-width:768px){
+      .sidebar{width:100%;position:relative;border-right:none;border-bottom:1px solid var(--border)}
+      .main{margin-left:0}
+      .layout{flex-direction:column}
+      .form-grid-2,.form-grid-3{grid-template-columns:1fr}
+      .chart-grid{grid-template-columns:1fr}
+      .event-item{grid-template-columns:1fr}
+      .member-card{grid-template-columns:1fr 80px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== PIN SCREEN ===== -->
+<div id="pin-screen" style="display:none">
+  <div class="pin-box">
+    <div class="pin-icon">💼</div>
+    <div class="pin-app-name">ファイナンシャルプランナー</div>
+    <div class="pin-tagline">あなた専属の家計管理ツール</div>
+    <div class="pin-msg" id="pin-msg">PINコードを入力してください</div>
+    <div class="pin-dots" id="pin-dots">
+      <span class="pin-dot"></span><span class="pin-dot"></span>
+      <span class="pin-dot"></span><span class="pin-dot"></span>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinInput('1')">1</button>
+      <button class="pin-key" onclick="pinInput('2')">2</button>
+      <button class="pin-key" onclick="pinInput('3')">3</button>
+      <button class="pin-key" onclick="pinInput('4')">4</button>
+      <button class="pin-key" onclick="pinInput('5')">5</button>
+      <button class="pin-key" onclick="pinInput('6')">6</button>
+      <button class="pin-key" onclick="pinInput('7')">7</button>
+      <button class="pin-key" onclick="pinInput('8')">8</button>
+      <button class="pin-key" onclick="pinInput('9')">9</button>
+      <button class="pin-key wide" onclick="pinInput('0')">0</button>
+      <button class="pin-key del" onclick="pinDelete()">⌫</button>
+    </div>
+    <div class="pin-skip" id="pin-skip" onclick="pinSkip()">PINなしで開く</div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app" style="display:none">
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <h1>💼 ファイナンシャルプランナー</h1>
+      <p>あなた専属の家計管理ツール</p>
+    </div>
+    <div class="privacy-badge">🔒 データはこの端末のみに保存</div>
+    <div class="nav">
+      <div class="nav-section">基本情報</div>
+      <div class="nav-item active" onclick="showPage('page-family')" id="nav-page-family"><span class="icon">👨‍👩‍👧</span> 家族構成</div>
+      <div class="nav-item" onclick="showPage('page-income')" id="nav-page-income"><span class="icon">💴</span> 収入・支出</div>
+      <div class="nav-item" onclick="showPage('page-assets')" id="nav-page-assets"><span class="icon">🏦</span> 資産・負債</div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">ライフプラン</div>
+      <div class="nav-item" onclick="showPage('page-plans')" id="nav-page-plans"><span class="icon">🗓️</span> イベント計画</div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">分析</div>
+      <div class="nav-item" onclick="showPage('page-simulation')" id="nav-page-simulation"><span class="icon">📊</span> シミュレーション</div>
+      <div class="nav-item" onclick="showPage('page-advice')" id="nav-page-advice"><span class="icon">💡</span> アドバイス</div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">設定・ツール</div>
+      <div class="nav-item" onclick="showPage('page-settings')" id="nav-page-settings"><span class="icon">⚙️</span> 設定・プライバシー</div>
+    </div>
+    <div id="retire-progress-widget" style="margin:0 12px 8px"></div>
+    <div class="sidebar-footer">
+      <button class="btn-save-all" onclick="saveAll()">💾 データを保存</button>
+      <div class="footer-tools">
+        <button class="btn-tool" onclick="exportData()" title="JSONファイルとしてダウンロード">⬇ エクスポート</button>
+        <button class="btn-tool" onclick="importData()" title="JSONファイルから読み込み">⬆ インポート</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ===== 家族構成 ===== -->
+    <div class="page active" id="page-family">
+      <div class="page-header"><h2>👨‍👩‍👧 家族構成</h2><p>家族全員の情報を登録してください。</p></div>
+      <div class="card">
+        <div class="card-title">👥 家族メンバー</div>
+        <div class="member-list" id="member-list"></div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="addMember('spouse')">＋ 配偶者</button>
+          <button class="btn btn-secondary" onclick="addMember('child')">＋ 子供</button>
+          <button class="btn btn-secondary" onclick="addMember('parent')">＋ 親</button>
+          <button class="btn btn-secondary" onclick="addMember('other')">＋ その他</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚙️ シミュレーション設定</div>
+        <div class="form-grid-3">
+          <div class="field"><label>退職年齢（本人）</label><input type="number" id="retire-age" value="65" min="50" max="80"><span class="hint">歳</span></div>
+          <div class="field"><label>退職年齢（配偶者）</label><input type="number" id="retire-age-spouse" value="63" min="50" max="80"><span class="hint">歳</span></div>
+          <div class="field"><label>シミュレーション終了年齢</label><input type="number" id="end-age" value="90" min="70" max="100"><span class="hint">歳（本人基準）</span></div>
+          <div class="field"><label>投資・運用利回り（想定）</label><input type="number" id="investment-return" value="3.0" min="0" max="15" step="0.1"><span class="hint">% / 年</span></div>
+          <div class="field"><label>物価上昇率（想定）</label><input type="number" id="inflation-rate" value="1.5" min="0" max="10" step="0.1"><span class="hint">% / 年</span></div>
+          <div class="field"><label>給与増加率（退職まで）</label><input type="number" id="salary-growth" value="1.0" min="0" max="10" step="0.1"><span class="hint">% / 年</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 収入・支出 ===== -->
+    <div class="page" id="page-income">
+      <div class="page-header"><h2>💴 収入・支出</h2><p>現在の月次収入と月次支出を入力してください。</p></div>
+      <div class="card">
+        <div class="card-title">📈 収入（月額・手取り）</div>
+        <div class="form-grid">
+          <div class="field"><label>本人 給与（手取り）</label><input type="number" id="income-self" value="350000" step="10000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>配偶者 給与（手取り）</label><input type="number" id="income-spouse" value="150000" step="10000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>副収入・フリーランス等</label><input type="number" id="income-side" value="0" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>配当・家賃収入等</label><input type="number" id="income-investment" value="0" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>ボーナス（本人・年額）</label><input type="number" id="bonus-self" value="1000000" step="50000"><span class="hint">円 / 年</span></div>
+          <div class="field"><label>ボーナス（配偶者・年額）</label><input type="number" id="bonus-spouse" value="400000" step="50000"><span class="hint">円 / 年</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📉 支出（月額）</div>
+        <div class="form-grid">
+          <div class="field"><label>住居費（家賃・住宅ローン含む）</label><input type="number" id="exp-housing" value="100000" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>食費</label><input type="number" id="exp-food" value="60000" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>光熱費・通信費</label><input type="number" id="exp-utilities" value="25000" step="1000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>保険料</label><input type="number" id="exp-insurance" value="30000" step="1000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>教育費</label><input type="number" id="exp-education" value="20000" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>交通費・自動車費</label><input type="number" id="exp-transport" value="20000" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>医療費</label><input type="number" id="exp-medical" value="10000" step="1000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>趣味・娯楽・外食</label><input type="number" id="exp-entertainment" value="30000" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>その他・雑費</label><input type="number" id="exp-other" value="20000" step="5000"><span class="hint">円 / 月</span></div>
+        </div>
+        <hr class="divider">
+        <div id="monthly-summary" class="inline-summary"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">💰 積立・貯蓄・年金</div>
+        <div class="form-grid">
+          <div class="field"><label>積立投資（NISA・iDeCo等）</label><input type="number" id="saving-invest" value="50000" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>普通貯蓄・定期預金</label><input type="number" id="saving-deposit" value="30000" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>年金見込み（本人）</label><input type="number" id="pension-self" value="150000" step="5000"><span class="hint">円 / 月（退職後）</span></div>
+          <div class="field"><label>年金見込み（配偶者）</label><input type="number" id="pension-spouse" value="80000" step="5000"><span class="hint">円 / 月（退職後）</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 資産・負債 ===== -->
+    <div class="page" id="page-assets">
+      <div class="page-header"><h2>🏦 資産・負債</h2><p>現在保有している資産と負債を入力してください。</p></div>
+      <div class="card">
+        <div class="card-title">💎 資産</div>
+        <div class="form-grid">
+          <div class="field"><label>現金・普通預金</label><input type="number" id="asset-cash" value="3000000" step="100000"><span class="hint">円</span></div>
+          <div class="field"><label>定期預金</label><input type="number" id="asset-fixed-deposit" value="2000000" step="100000"><span class="hint">円</span></div>
+          <div class="field"><label>株式・投資信託（NISA含む）</label><input type="number" id="asset-stocks" value="1500000" step="100000"><span class="hint">円</span></div>
+          <div class="field"><label>iDeCo・確定拠出年金</label><input type="number" id="asset-ideco" value="500000" step="100000"><span class="hint">円</span></div>
+          <div class="field"><label>不動産（自宅）時価</label><input type="number" id="asset-home" value="0" step="1000000"><span class="hint">円</span></div>
+          <div class="field"><label>不動産（投資用）時価</label><input type="number" id="asset-realestate" value="0" step="1000000"><span class="hint">円</span></div>
+          <div class="field"><label>生命保険（解約返戻金）</label><input type="number" id="asset-insurance" value="0" step="100000"><span class="hint">円</span></div>
+          <div class="field"><label>その他資産</label><input type="number" id="asset-other" value="0" step="100000"><span class="hint">円</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔴 負債</div>
+        <div class="form-grid">
+          <div class="field"><label>住宅ローン残高</label><input type="number" id="debt-mortgage" value="0" step="1000000"><span class="hint">円</span></div>
+          <div class="field"><label>住宅ローン 月返済額</label><input type="number" id="debt-mortgage-monthly" value="0" step="5000"><span class="hint">円 / 月（住居費に含む場合は0）</span></div>
+          <div class="field"><label>自動車ローン残高</label><input type="number" id="debt-car" value="0" step="100000"><span class="hint">円</span></div>
+          <div class="field"><label>教育ローン・奨学金残高</label><input type="number" id="debt-education" value="0" step="100000"><span class="hint">円</span></div>
+          <div class="field"><label>カードローン・消費者金融</label><input type="number" id="debt-consumer" value="0" step="100000"><span class="hint">円</span></div>
+          <div class="field"><label>その他負債</label><input type="number" id="debt-other" value="0" step="100000"><span class="hint">円</span></div>
+        </div>
+        <hr class="divider">
+        <div id="net-worth-summary" class="inline-summary"></div>
+      </div>
+    </div>
+
+    <!-- ===== ライフプラン ===== -->
+    <div class="page" id="page-plans">
+      <div class="page-header"><h2>🗓️ ライフイベント計画</h2><p>複数シナリオを作成して将来の選択肢を比較できます。</p></div>
+      <div class="card">
+        <div class="card-title">📋 シナリオ管理</div>
+        <div class="plan-tabs" id="plan-tabs"></div>
+        <div id="plan-content"></div>
+      </div>
+    </div>
+
+    <!-- ===== シミュレーション ===== -->
+    <div class="page" id="page-simulation">
+      <div class="page-header"><h2>📊 シミュレーション結果</h2><p>ライフプランに基づいた将来資産推移の予測です。</p></div>
+      <div class="summary-grid" id="sim-summary"></div>
+      <div class="card">
+        <div class="card-title">📈 純資産推移（全シナリオ比較）</div>
+        <div id="sim-legend" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px"></div>
+        <div class="chart-container"><canvas id="chart-networth"></canvas></div>
+      </div>
+      <div class="chart-grid">
+        <div class="card">
+          <div class="card-title">💰 年間キャッシュフロー</div>
+          <div class="chart-container chart-sm"><canvas id="chart-cashflow"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🥧 現在の資産構成</div>
+          <div class="chart-container chart-sm"><canvas id="chart-assets-pie"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 年次キャッシュフロー詳細</div>
+        <div style="margin-bottom:10px;display:flex;align-items:center;gap:10px">
+          <label style="font-size:12px;font-weight:700;color:var(--text-muted)">シナリオ：</label>
+          <select id="table-scenario-select" onchange="renderTable()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px"></select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>年</th><th>本人</th><th>収入</th><th>支出</th><th>年間収支</th>
+              <th>金融資産</th><th>負債</th><th>純資産</th>
+            </tr></thead>
+            <tbody id="cashflow-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== アドバイス ===== -->
+    <div class="page" id="page-advice">
+      <div class="page-header"><h2>💡 ファイナンシャルアドバイス</h2><p>入力データの分析に基づいた改善提案です。</p></div>
+      <div id="advice-content"></div>
+    </div>
+
+    <!-- ===== 設定 ===== -->
+    <div class="page" id="page-settings">
+      <div class="page-header"><h2>⚙️ 設定・プライバシー</h2></div>
+      <div class="card">
+        <div class="card-title">🔒 プライバシーについて</div>
+        <div style="background:var(--secondary-light);border-radius:10px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.8">
+          <strong>✅ データの保存先</strong><br>
+          入力したすべてのデータは、<strong>このデバイスのブラウザ（localStorage）にのみ保存</strong>されます。<br>
+          GitHubや外部サーバーには一切送信されません。<br><br>
+          <strong>✅ 他の人からは見えません</strong><br>
+          同じデバイスの同じブラウザでしかアクセスできません。<br>
+          別のデバイスや別のブラウザからは表示されません。<br><br>
+          <strong>✅ アクセス方法</strong><br>
+          このHTMLファイルをダウンロードしてブックマークすれば、いつでもアクセスできます。<br>
+          複数デバイスで使う場合は「エクスポート」でバックアップを取り、別デバイスで「インポート」してください。
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="exportData()">⬇ JSONでエクスポート（バックアップ）</button>
+          <button class="btn btn-secondary" onclick="importData()">⬆ JSONからインポート（復元）</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔐 PINロック設定</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">共有デバイスでの使用時にPINでアプリをロックできます。</p>
+        <div id="pin-status" style="margin-bottom:14px"></div>
+        <div class="form-grid-2" style="max-width:400px">
+          <div class="field"><label>新しいPIN（4桁）</label><input type="password" id="new-pin" maxlength="4" placeholder="0000" inputmode="numeric"></div>
+          <div class="field"><label>PINの確認</label><input type="password" id="confirm-pin" maxlength="4" placeholder="0000" inputmode="numeric"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-primary" onclick="setPin()">PINを設定</button>
+          <button class="btn btn-danger" onclick="clearPin()">PINを削除</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🗑️ データ管理</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">すべてのデータを削除してリセットします。</p>
+        <button class="btn btn-danger" onclick="clearAllData()">⚠️ 全データを削除してリセット</button>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /.layout -->
+</div><!-- /#app -->
+
+<div class="toast" id="toast"></div>
+<input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImportFile(event)">
+
+<script>
+// ============================================================
+// DATA MODEL
+// ============================================================
+const DEFAULTS = {
+  members:[{id:1,name:'本人',role:'self',age:35,gender:'male'}],
+  settings:{retireAge:65,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0},
+  income:{self:350000,spouse:150000,side:0,investment:0,bonusSelf:1000000,bonusSpouse:400000},
+  expenses:{housing:100000,food:60000,utilities:25000,insurance:30000,education:20000,
+    transport:20000,medical:10000,entertainment:30000,other:20000},
+  savings:{invest:50000,deposit:30000,pensionSelf:150000,pensionSpouse:80000},
+  assets:{cash:3000000,fixedDeposit:2000000,stocks:1500000,ideco:500000,home:0,realEstate:0,insurance:0,other:0},
+  debts:{mortgage:0,mortgageMonthly:0,car:0,education:0,consumer:0,other:0},
+  plans:[{id:1,name:'ベースライン',color:'#3b82f6',events:[]}]
+};
+
+let data = JSON.parse(localStorage.getItem('fp-data') || JSON.stringify(DEFAULTS));
+let activePlanId = data.plans[0]?.id || 1;
+const PLAN_COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444'];
+
+const EVENT_TYPES = [
+  {value:'lump-expense', label:'一時支出（冠婚葬祭・旅行等）', tag:'expense', amtLabel:'支出金額', amtHint:'例: -500000（支払う金額をマイナスで入力）', defaultAmt:-500000, defaultDur:1},
+  {value:'lump-income',  label:'一時収入（相続・売却等）',      tag:'income',  amtLabel:'収入金額', amtHint:'例: 5000000（受取金額をプラスで入力）', defaultAmt:5000000, defaultDur:1},
+  {value:'income-change',label:'収入変化（転職・昇給・副業等）',tag:'income',  amtLabel:'月額収入の変化',amtHint:'例: 100000（増加）/ -100000（減少）',defaultAmt:100000,defaultDur:20},
+  {value:'expense-change',label:'支出変化（家賃・保育等）',     tag:'expense', amtLabel:'月額支出の変化',amtHint:'例: 50000（増加）/ -50000（減少）', defaultAmt:50000, defaultDur:5},
+  {value:'buy-home',     label:'住宅購入（頭金のみ）',          tag:'asset',   amtLabel:'頭金・諸費用', amtHint:'例: -5000000（頭金をマイナスで入力）',defaultAmt:-5000000,defaultDur:1},
+  {value:'buy-car',      label:'自動車購入',                    tag:'expense', amtLabel:'購入費用',     amtHint:'例: -2000000（購入額をマイナスで入力）',defaultAmt:-2000000,defaultDur:1},
+  {value:'child-born',   label:'子供誕生・養育費',              tag:'life',    amtLabel:'月額養育費',  amtHint:'例: 50000（月額コストをプラスで入力）',defaultAmt:50000, defaultDur:22},
+  {value:'loan-start',   label:'新規ローン（住宅・自動車等）',  tag:'expense', amtLabel:'借入総額',    amtHint:'例: 30000000（借入額をプラスで入力）',defaultAmt:30000000,defaultDur:35},
+  {value:'retire-early', label:'早期退職・FIRE',                tag:'life',    amtLabel:'退職時一時金', amtHint:'例: 5000000（退職金をプラスで入力）',defaultAmt:5000000,defaultDur:1},
+  {value:'education-fee',label:'教育費一括（入学金・大学等）',  tag:'expense', amtLabel:'一括教育費',  amtHint:'例: -2000000（支払額をマイナスで入力）',defaultAmt:-2000000,defaultDur:1},
+];
+
+const PRESETS = [
+  {label:'🏠 住宅購入',    type:'buy-home',     name:'住宅購入（頭金）',amt:-5000000,dur:1},
+  {label:'🏦 住宅ローン',  type:'loan-start',   name:'住宅ローン',      amt:30000000,dur:35},
+  {label:'🚗 自動車購入',  type:'buy-car',      name:'自動車購入',      amt:-2500000,dur:1},
+  {label:'👶 子供誕生',    type:'child-born',   name:'第1子誕生',       amt:50000,   dur:22},
+  {label:'🎓 大学入学',    type:'education-fee',name:'大学入学費用',    amt:-2000000,dur:1},
+  {label:'💼 転職・昇給',  type:'income-change',name:'転職による収入変化',amt:100000,dur:30},
+  {label:'✈️ 旅行・趣味',  type:'lump-expense', name:'特別旅行',        amt:-500000,dur:1},
+  {label:'💰 相続・贈与',  type:'lump-income',  name:'相続・贈与',      amt:5000000, dur:1},
+];
+
+// ============================================================
+// PIN LOGIC
+// ============================================================
+let pinBuffer = '';
+let pinMode = 'verify'; // 'verify' | 'set-new' | 'set-confirm'
+let pinNewTemp = '';
+
+function simpleHash(str){
+  let h=5381;
+  for(let i=0;i<str.length;i++) h=((h<<5)+h+str.charCodeAt(i))>>>0;
+  return h.toString(16).padStart(8,'0');
+}
+
+function initPin(){
+  const storedPin = localStorage.getItem('fp-pin');
+  if(!storedPin){
+    document.getElementById('app').style.display='';
+    document.getElementById('pin-screen').style.display='none';
+    updatePinStatus();
+    return;
+  }
+  document.getElementById('pin-screen').style.display='';
+  document.getElementById('app').style.display='none';
+  document.getElementById('pin-msg').textContent='PINコードを入力してください';
+}
+
+function pinInput(digit){
+  if(pinBuffer.length>=4) return;
+  pinBuffer+=digit;
+  updatePinDots(pinBuffer.length);
+  if(pinBuffer.length===4) setTimeout(checkPin,100);
+}
+
+function pinDelete(){
+  if(pinBuffer.length>0){ pinBuffer=pinBuffer.slice(0,-1); updatePinDots(pinBuffer.length); }
+}
+
+function updatePinDots(count){
+  document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('filled',i<count));
+}
+
+function checkPin(){
+  const stored=localStorage.getItem('fp-pin');
+  if(!stored){
+    document.getElementById('app').style.display='';
+    document.getElementById('pin-screen').style.display='none';
+    return;
+  }
+  if(simpleHash(pinBuffer)===stored){
+    document.getElementById('app').style.display='';
+    document.getElementById('pin-screen').style.display='none';
+  } else {
+    const box=document.querySelector('.pin-box');
+    box.classList.add('shake');
+    setTimeout(()=>box.classList.remove('shake'),400);
+    document.getElementById('pin-msg').textContent='PINが違います。再度入力してください';
+    document.getElementById('pin-msg').classList.add('error');
+  }
+  pinBuffer=''; updatePinDots(0);
+}
+
+function pinSkip(){
+  document.getElementById('app').style.display='';
+  document.getElementById('pin-screen').style.display='none';
+}
+
+function setPin(){
+  const np=document.getElementById('new-pin').value;
+  const cp=document.getElementById('confirm-pin').value;
+  if(!/^\d{4}$/.test(np)){showToast('❌ PINは4桁の数字で入力してください');return;}
+  if(np!==cp){showToast('❌ PINが一致しません');return;}
+  localStorage.setItem('fp-pin',simpleHash(np));
+  document.getElementById('new-pin').value='';
+  document.getElementById('confirm-pin').value='';
+  updatePinStatus();
+  showToast('🔒 PINを設定しました');
+}
+
+function clearPin(){
+  if(!confirm('PINロックを解除しますか？')) return;
+  localStorage.removeItem('fp-pin');
+  updatePinStatus();
+  showToast('🔓 PINを削除しました');
+}
+
+function updatePinStatus(){
+  const el=document.getElementById('pin-status');
+  if(!el) return;
+  const has=!!localStorage.getItem('fp-pin');
+  el.innerHTML=has
+    ?'<span style="background:var(--secondary-light);color:var(--secondary);padding:6px 12px;border-radius:8px;font-size:13px;font-weight:700">🔒 PINロックが設定されています</span>'
+    :'<span style="background:var(--warning-light);color:var(--warning);padding:6px 12px;border-radius:8px;font-size:13px;font-weight:700">⚠️ PINは設定されていません</span>';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  if(id==='page-simulation'){syncFromDOM();renderSimulation();}
+  if(id==='page-advice'){syncFromDOM();renderAdvice();}
+  if(id==='page-income'){updateMonthlySummary();}
+  if(id==='page-assets'){updateNetWorthSummary();}
+  if(id==='page-settings'){updatePinStatus();}
+}
+
+// ============================================================
+// DOM SYNC
+// ============================================================
+function syncFromDOM(){
+  const g=id=>+(document.getElementById(id)?.value||0);
+  data.settings.retireAge=g('retire-age');
+  data.settings.retireAgeSpouse=g('retire-age-spouse');
+  data.settings.endAge=g('end-age');
+  data.settings.investReturn=+document.getElementById('investment-return').value;
+  data.settings.inflation=+document.getElementById('inflation-rate').value;
+  data.settings.salaryGrowth=+document.getElementById('salary-growth').value;
+  data.income={self:g('income-self'),spouse:g('income-spouse'),side:g('income-side'),
+    investment:g('income-investment'),bonusSelf:g('bonus-self'),bonusSpouse:g('bonus-spouse')};
+  ['housing','food','utilities','insurance','education','transport','medical','entertainment','other']
+    .forEach(k=>data.expenses[k]=g('exp-'+k));
+  data.savings={invest:g('saving-invest'),deposit:g('saving-deposit'),
+    pensionSelf:g('pension-self'),pensionSpouse:g('pension-spouse')};
+  ['cash','fixedDeposit','stocks','ideco','home','realEstate','insurance','other'].forEach((k,i)=>{
+    const ids=['asset-cash','asset-fixed-deposit','asset-stocks','asset-ideco','asset-home','asset-realestate','asset-insurance','asset-other'];
+    data.assets[k]=g(ids[i]);
+  });
+  ['mortgage','mortgageMonthly','car','education','consumer','other'].forEach((k,i)=>{
+    const ids=['debt-mortgage','debt-mortgage-monthly','debt-car','debt-education','debt-consumer','debt-other'];
+    data.debts[k]=g(ids[i]);
+  });
+}
+
+function syncToDOM(){
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  s('retire-age',data.settings.retireAge);
+  s('retire-age-spouse',data.settings.retireAgeSpouse);
+  s('end-age',data.settings.endAge);
+  s('investment-return',data.settings.investReturn);
+  s('inflation-rate',data.settings.inflation);
+  s('salary-growth',data.settings.salaryGrowth);
+  s('income-self',data.income.self); s('income-spouse',data.income.spouse);
+  s('income-side',data.income.side); s('income-investment',data.income.investment);
+  s('bonus-self',data.income.bonusSelf); s('bonus-spouse',data.income.bonusSpouse);
+  ['housing','food','utilities','insurance','education','transport','medical','entertainment','other']
+    .forEach(k=>s('exp-'+k,data.expenses[k]));
+  s('saving-invest',data.savings.invest); s('saving-deposit',data.savings.deposit);
+  s('pension-self',data.savings.pensionSelf); s('pension-spouse',data.savings.pensionSpouse);
+  ['cash','fixedDeposit','stocks','ideco','home','realEstate','insurance','other'].forEach((k,i)=>{
+    ['asset-cash','asset-fixed-deposit','asset-stocks','asset-ideco','asset-home','asset-realestate','asset-insurance','asset-other'].forEach((id,j)=>{if(i===j)s(id,data.assets[k]);});
+  });
+  ['mortgage','mortgageMonthly','car','education','consumer','other'].forEach((k,i)=>{
+    ['debt-mortgage','debt-mortgage-monthly','debt-car','debt-education','debt-consumer','debt-other'].forEach((id,j)=>{if(i===j)s(id,data.debts[k]);});
+  });
+}
+
+// ============================================================
+// FAMILY MEMBERS
+// ============================================================
+function renderMembers(){
+  const list=document.getElementById('member-list');
+  const roleLabel={self:'本人',spouse:'配偶者',child:'子供',parent:'親',other:'その他'};
+  const roleClass={self:'role-self',spouse:'role-spouse',child:'role-child',parent:'role-parent',other:'role-other'};
+  list.innerHTML=data.members.map((m,i)=>`
+    <div class="member-card">
+      <div class="field" style="margin:0">
+        <label>名前</label>
+        <input type="text" value="${m.name}" oninput="data.members[${i}].name=this.value">
+      </div>
+      <div class="field" style="margin:0">
+        <label>現在の年齢</label>
+        <input type="number" value="${m.age}" min="0" max="100" oninput="data.members[${i}].age=+this.value;updateRetireWidget()">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="member-role ${roleClass[m.role]||'role-other'}">${roleLabel[m.role]||m.role}</span>
+        <select onchange="data.members[${i}].gender=this.value" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px">
+          <option value="male" ${m.gender==='male'?'selected':''}>男性</option>
+          <option value="female" ${m.gender==='female'?'selected':''}>女性</option>
+        </select>
+      </div>
+      ${m.role!=='self'?`<button class="btn btn-danger btn-sm" onclick="removeMember(${i})">削除</button>`:'<div></div>'}
+    </div>`).join('');
+  updateRetireWidget();
+}
+
+function addMember(role){
+  const names={spouse:'配偶者',child:'子供',parent:'親',other:'その他'};
+  const ages={spouse:32,child:0,parent:65,other:30};
+  data.members.push({id:Date.now(),name:names[role],role,age:ages[role]||30,gender:'female'});
+  renderMembers();
+}
+function removeMember(i){data.members.splice(i,1);renderMembers();}
+
+function updateRetireWidget(){
+  const self=data.members.find(m=>m.role==='self');
+  if(!self) return;
+  const retireAge=+document.getElementById('retire-age')?.value||65;
+  const years=retireAge-self.age;
+  const pct=Math.max(0,Math.min(100,(self.age/(retireAge||65))*100));
+  const w=document.getElementById('retire-progress-widget');
+  if(!w) return;
+  w.innerHTML=`<div class="retire-progress">
+    <div class="retire-progress-label">🏁 退職まで</div>
+    <div class="retire-bar"><div class="retire-bar-fill" style="width:${pct}%"></div></div>
+    <div class="retire-progress-sub">${years>0?years+'年後（'+retireAge+'歳）':'退職年齢に達しています'}</div>
+  </div>`;
+}
+
+// ============================================================
+// INLINE SUMMARIES
+// ============================================================
+function updateMonthlySummary(){
+  syncFromDOM();
+  const totalIncome=data.income.self+data.income.spouse+data.income.side+data.income.investment
+    +(data.income.bonusSelf+data.income.bonusSpouse)/12;
+  const totalExp=Object.values(data.expenses).reduce((a,b)=>a+b,0);
+  const surplus=totalIncome-totalExp;
+  const savingRate=totalIncome>0?(data.savings.invest+data.savings.deposit)/totalIncome*100:0;
+  const el=document.getElementById('monthly-summary');
+  if(!el) return;
+  el.innerHTML=`
+    <div class="item"><div class="lbl">月収合計（ボーナス含む平均）</div><div class="val" style="color:var(--secondary)">+${fmt(Math.round(totalIncome))}円</div></div>
+    <div class="item"><div class="lbl">月支出合計</div><div class="val" style="color:var(--danger)">-${fmt(Math.round(totalExp))}円</div></div>
+    <div class="item"><div class="lbl">月次収支</div><div class="val" style="color:${surplus>=0?'var(--secondary)':'var(--danger)'}">${surplus>=0?'+':''}${fmt(Math.round(surplus))}円</div></div>
+    <div class="item"><div class="lbl">貯蓄率</div><div class="val" style="color:var(--primary)">${savingRate.toFixed(1)}%</div></div>`;
+}
+
+function updateNetWorthSummary(){
+  syncFromDOM();
+  const totalA=Object.values(data.assets).reduce((a,b)=>a+b,0);
+  const totalD=data.debts.mortgage+data.debts.car+data.debts.education+data.debts.consumer+data.debts.other;
+  const net=totalA-totalD;
+  const liq=data.assets.cash+data.assets.fixedDeposit;
+  const el=document.getElementById('net-worth-summary');
+  if(!el) return;
+  el.innerHTML=`
+    <div class="item"><div class="lbl">総資産</div><div class="val" style="color:var(--secondary)">+${fmtM(totalA)}</div></div>
+    <div class="item"><div class="lbl">総負債</div><div class="val" style="color:var(--danger)">-${fmtM(totalD)}</div></div>
+    <div class="item"><div class="lbl">純資産（ネットワース）</div><div class="val" style="color:${net>=0?'var(--primary)':'var(--danger)'}">${fmtM(net)}</div></div>
+    <div class="item"><div class="lbl">流動資産（現金・預金）</div><div class="val" style="color:var(--text)">${fmtM(liq)}</div></div>`;
+}
+
+// ============================================================
+// PLANS
+// ============================================================
+function renderPlans(){
+  const tabs=document.getElementById('plan-tabs');
+  tabs.innerHTML=data.plans.map(p=>`
+    <div class="plan-tab ${p.id===activePlanId?'active':''}" onclick="selectPlan(${p.id})">
+      <span class="dot" style="background:${p.color}"></span>
+      <span contenteditable="true" onblur="renamePlan(${p.id},this.textContent)" onclick="event.stopPropagation()">${p.name}</span>
+    </div>`).join('')+
+    (data.plans.length<4?`<div class="plan-tab plan-tab-add" onclick="addPlan()">＋ シナリオ追加</div>`:'');
+  renderPlanContent();
+}
+
+function selectPlan(id){activePlanId=id;renderPlans();}
+function renamePlan(id,name){const p=data.plans.find(p=>p.id===id);if(p)p.name=name.trim()||p.name;}
+
+function addPlan(){
+  if(data.plans.length>=4){showToast('シナリオは最大4つです');return;}
+  const id=Date.now();
+  const base=data.plans.find(p=>p.id===activePlanId);
+  data.plans.push({id,name:`シナリオ ${data.plans.length+1}`,color:PLAN_COLORS[data.plans.length%4],
+    events:[]});
+  activePlanId=id;renderPlans();
+}
+
+function copyPlan(){
+  if(data.plans.length>=4){showToast('シナリオは最大4つです');return;}
+  const src=data.plans.find(p=>p.id===activePlanId);
+  if(!src) return;
+  const id=Date.now();
+  data.plans.push({id,name:src.name+' (コピー)',color:PLAN_COLORS[data.plans.length%4],
+    events:JSON.parse(JSON.stringify(src.events))});
+  activePlanId=id;renderPlans();showToast('📋 シナリオをコピーしました');
+}
+
+function deletePlan(id){
+  if(data.plans.length<=1){showToast('最低1つのシナリオが必要です');return;}
+  if(!confirm('このシナリオを削除しますか？')) return;
+  data.plans=data.plans.filter(p=>p.id!==id);
+  activePlanId=data.plans[0].id;renderPlans();
+}
+
+function renderPlanContent(){
+  const plan=data.plans.find(p=>p.id===activePlanId);
+  if(!plan) return;
+  document.getElementById('plan-content').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:13px;color:var(--text-muted)">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${plan.color};margin-right:5px"></span>
+        <strong>${plan.name}</strong> のライフイベント（${plan.events.length}件）
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="openEventModal(${plan.id},null)">＋ イベント追加</button>
+        <button class="btn btn-secondary btn-sm" onclick="copyPlan()">📋 コピー</button>
+        ${data.plans.length>1?`<button class="btn btn-danger btn-sm" onclick="deletePlan(${plan.id})">🗑 削除</button>`:''}
+      </div>
+    </div>
+    <div class="preset-row">${PRESETS.map(p=>`<span class="preset-chip" onclick="addPreset(${plan.id},'${p.type}','${p.name}',${p.amt},${p.dur})">${p.label}</span>`).join('')}</div>
+    ${plan.events.length===0
+      ?`<div style="text-align:center;padding:28px;color:var(--text-muted);background:var(--bg);border-radius:8px;border:1px dashed var(--border)">
+          <div style="font-size:28px;margin-bottom:6px">📅</div>
+          <div style="font-size:13px;font-weight:700">イベントがありません</div>
+          <div style="font-size:11px;margin-top:3px">上のプリセットか「＋ イベント追加」から追加</div></div>`
+      :`<div class="event-list">${plan.events.map((e,i)=>renderEventItem(plan.id,e,i)).join('')}</div>`}`;
+}
+
+function renderEventItem(planId,e,i){
+  const type=EVENT_TYPES.find(t=>t.value===e.type)||EVENT_TYPES[0];
+  const tagClass={income:'tag-income',expense:'tag-expense',asset:'tag-asset',life:'tag-life'}[type.tag]||'tag-life';
+  const selfAge=data.members.find(m=>m.role==='self')?.age||35;
+  const yr=new Date().getFullYear()+(e.age-selfAge);
+  return `<div class="event-item">
+    <div><div style="font-size:13px;font-weight:700">${e.name||type.label}</div><span class="event-tag ${tagClass}">${type.label.split('（')[0]}</span></div>
+    <div><div style="font-size:10px;color:var(--text-muted)">発生年齢</div><div style="font-size:13px;font-weight:700">${e.age}歳<span style="color:var(--text-muted);font-size:10px;margin-left:4px">${yr}年</span></div></div>
+    <div><div style="font-size:10px;color:var(--text-muted)">金額</div><div style="font-size:13px;font-weight:700;color:${e.amount>=0?'var(--secondary)':'var(--danger)'}">${e.amount>=0?'+':''}${fmtM(e.amount)}</div></div>
+    <div><div style="font-size:10px;color:var(--text-muted)">期間</div><div style="font-size:13px">${e.duration>1?e.duration+'年':'単発'}</div></div>
+    <button class="btn btn-danger btn-sm" onclick="removeEvent(${planId},${i})">削除</button>
+  </div>`;
+}
+
+function addPreset(planId,type,name,amt,dur){
+  const plan=data.plans.find(p=>p.id===planId);
+  const self=data.members.find(m=>m.role==='self');
+  const age=(self?.age||35)+5;
+  if(!plan) return;
+  plan.events.push({type,name,age,amount:amt,duration:dur,memo:''});
+  plan.events.sort((a,b)=>a.age-b.age);
+  renderPlans();showToast('✅ イベントを追加しました（年齢を確認してください）');
+}
+
+function removeEvent(planId,idx){
+  const plan=data.plans.find(p=>p.id===planId);
+  if(plan){plan.events.splice(idx,1);renderPlans();}
+}
+
+function openEventModal(planId,existing){
+  const plan=data.plans.find(p=>p.id===planId);
+  const self=data.members.find(m=>m.role==='self');
+  const defaultAge=(self?.age||35)+5;
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.innerHTML=`<div class="modal-box">
+    <h3>📅 ライフイベントを追加</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="field"><label>イベント種別</label>
+        <select id="m-type" onchange="updateModalAmtLabel()">
+          ${EVENT_TYPES.map(t=>`<option value="${t.value}">${t.label}</option>`).join('')}
+        </select></div>
+      <div class="field"><label>イベント名（任意）</label><input type="text" id="m-name" placeholder="例：第1子誕生"></div>
+      <div class="field"><label>発生年齢（本人）</label><input type="number" id="m-age" value="${defaultAge}" min="0" max="90"><span class="hint">歳時点で発生</span></div>
+      <div class="field"><label id="m-amt-label">金額</label><input type="number" id="m-amt" value="-500000" step="100000"><span class="hint" id="m-amt-hint"></span></div>
+      <div class="field"><label>継続期間</label><input type="number" id="m-dur" value="1" min="1" max="60"><span class="hint">年（単発は1）</span></div>
+      <div class="field"><label>メモ</label><input type="text" id="m-memo" placeholder="備考"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveEvent(${planId})">追加する</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+  updateModalAmtLabel();
+}
+
+function updateModalAmtLabel(){
+  const sel=document.getElementById('m-type');
+  if(!sel) return;
+  const type=EVENT_TYPES.find(t=>t.value===sel.value)||EVENT_TYPES[0];
+  document.getElementById('m-amt-label').textContent=type.amtLabel;
+  document.getElementById('m-amt-hint').textContent=type.amtHint;
+  document.getElementById('m-amt').value=type.defaultAmt;
+  document.getElementById('m-dur').value=type.defaultDur;
+}
+
+function saveEvent(planId){
+  const plan=data.plans.find(p=>p.id===planId);
+  if(!plan) return;
+  plan.events.push({
+    type:document.getElementById('m-type').value,
+    name:document.getElementById('m-name').value,
+    age:+document.getElementById('m-age').value,
+    amount:+document.getElementById('m-amt').value,
+    duration:Math.max(1,+document.getElementById('m-dur').value),
+    memo:document.getElementById('m-memo').value
+  });
+  plan.events.sort((a,b)=>a.age-b.age);
+  document.querySelector('.modal-overlay')?.remove();
+  renderPlans();
+}
+
+// ============================================================
+// SIMULATION ENGINE (fixed)
+// ============================================================
+function simulate(plan){
+  syncFromDOM();
+  const self=data.members.find(m=>m.role==='self');
+  const spouse=data.members.find(m=>m.role==='spouse');
+  const startAge=self?.age||35;
+  const currentYear=new Date().getFullYear();
+  const {endAge,retireAge,retireAgeSpouse,investReturn:ir,inflation,salaryGrowth}=data.settings;
+  const r=ir/100, inf=inflation/100, sg=salaryGrowth/100;
+
+  let FA=data.assets.cash+data.assets.fixedDeposit+data.assets.stocks+data.assets.ideco+data.assets.insurance+data.assets.other;
+  let debt=data.debts.mortgage+data.debts.car+data.debts.education+data.debts.consumer+data.debts.other;
+  const rows=[];
+
+  for(let age=startAge;age<=endAge;age++){
+    const off=age-startAge;
+    const year=currentYear+off;
+    const retired=age>=retireAge;
+    const spouseAge=spouse?spouse.age+off:null;
+    const spouseRetired=!spouse||spouseAge>=retireAgeSpouse;
+    const gf=retired?1:Math.pow(1+sg,off);
+    const inflF=Math.pow(1+inf,off);
+
+    // Income
+    let income=0;
+    income+=retired?(data.savings.pensionSelf*12):(data.income.self*12+data.income.bonusSelf)*gf;
+    if(spouse) income+=spouseRetired?(data.savings.pensionSpouse*12):(data.income.spouse*12+data.income.bonusSpouse)*gf;
+    income+=(data.income.side+data.income.investment)*12;
+
+    // Expenses
+    let expenses=Object.values(data.expenses).reduce((a,b)=>a+b,0)*12*inflF;
+    if(data.debts.mortgageMonthly>0) expenses+=data.debts.mortgageMonthly*12; // separate payment
+    if(retired) expenses*=0.85;
+
+    // Events
+    let lump=0;
+    plan.events.forEach(ev=>{
+      if(age<ev.age||age>=ev.age+ev.duration) return;
+      switch(ev.type){
+        case 'lump-expense': case 'buy-car': case 'buy-home': case 'education-fee':
+          if(age===ev.age) lump+=ev.amount; break; // negative
+        case 'lump-income': case 'retire-early':
+          if(age===ev.age) lump+=ev.amount; break; // positive
+        case 'income-change':
+          income+=ev.amount*12; break; // positive=increase, negative=decrease
+        case 'expense-change':
+          expenses+=ev.amount*12; break; // positive=more spending
+        case 'child-born':
+          expenses+=ev.amount*12*inflF; break; // monthly child cost
+        case 'loan-start':
+          if(age===ev.age) debt+=ev.amount;
+          expenses+=(ev.amount/ev.duration)*inflF; break; // annual repayment
+      }
+    });
+
+    // Debt reduction from mortgage monthly payment
+    if(data.debts.mortgageMonthly>0 && debt>0){
+      debt=Math.max(0,debt-data.debts.mortgageMonthly*12);
+    }
+
+    // FA update: FA_new = FA*(1+r) + (income - expenses + lump)
+    // Investment return only on positive balance
+    const ret=FA>0?FA*r:0;
+    const netCash=income-expenses+lump;
+    FA=FA+ret+netCash;
+
+    const nonFA=data.assets.home+data.assets.realEstate;
+    rows.push({
+      year,age,spouseAge,
+      income:Math.round(income),
+      expenses:Math.round(expenses),
+      cashFlow:Math.round(netCash),
+      financialAssets:Math.round(FA),
+      debts:Math.round(debt),
+      netWorth:Math.round(FA+nonFA-debt),
+      isRetired:retired
+    });
+  }
+  return rows;
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+const charts={};
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+function renderSimulation(){
+  syncFromDOM();
+  const allSims=data.plans.map(p=>({plan:p,rows:simulate(p)}));
+  const base=allSims[0].rows;
+  const self=data.members.find(m=>m.role==='self');
+  const startAge=self?.age||35;
+  const totalA=Object.values(data.assets).reduce((a,b)=>a+b,0);
+  const totalD=data.debts.mortgage+data.debts.car+data.debts.education+data.debts.consumer+data.debts.other;
+  const retireRow=base.find(r=>r.isRetired)||base[base.length-1];
+  const lastRow=base[base.length-1];
+  const depletionRow=base.find(r=>r.netWorth<0);
+  const monthlyIncome=data.income.self+data.income.spouse+data.income.side;
+  const monthlyExp=Object.values(data.expenses).reduce((a,b)=>a+b,0);
+
+  // Summary
+  document.getElementById('sim-summary').innerHTML=`
+    <div class="summary-card"><div class="label">現在の純資産</div><div class="value value-neutral">${fmtM(totalA-totalD)}</div><div class="sub">資産${fmtM(totalA)} 負債${fmtM(totalD)}</div></div>
+    <div class="summary-card"><div class="label">退職時純資産見込み</div><div class="value ${retireRow.netWorth>=0?'value-positive':'value-negative'}">${fmtM(retireRow.netWorth)}</div><div class="sub">${retireRow.age}歳・${retireRow.year}年</div></div>
+    <div class="summary-card"><div class="label">${lastRow.age}歳時純資産</div><div class="value ${lastRow.netWorth>=0?'value-positive':'value-negative'}">${fmtM(lastRow.netWorth)}</div><div class="sub">${lastRow.year}年時点</div></div>
+    <div class="summary-card"><div class="label">資産枯渇リスク</div><div class="value ${depletionRow?'value-negative':'value-positive'}">${depletionRow?depletionRow.age+'歳頃':'問題なし'}</div><div class="sub">${depletionRow?'資産がマイナスに':'90歳まで持続'}</div></div>`;
+
+  // Legend
+  document.getElementById('sim-legend').innerHTML=allSims.map(s=>`
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text-muted)">
+      <span style="width:18px;height:3px;display:inline-block;background:${s.plan.color};border-radius:2px"></span>${s.plan.name}
+    </div>`).join('');
+
+  // Net worth chart
+  destroyChart('networth');
+  const labels=base.map(r=>`${r.age}歳`);
+  const retireIdx=base.findIndex(r=>r.isRetired);
+  charts.networth=new Chart(document.getElementById('chart-networth'),{
+    type:'line',
+    data:{labels,datasets:allSims.map(s=>({
+      label:s.plan.name,data:s.rows.map(r=>Math.round(r.netWorth/10000)),
+      borderColor:s.plan.color,backgroundColor:s.plan.color+'15',fill:true,
+      tension:.35,pointRadius:0,pointHoverRadius:4,borderWidth:2.5
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}万円`}},
+        annotation:retireIdx>=0?{annotations:{retire:{type:'line',xMin:retireIdx,xMax:retireIdx,
+          borderColor:'#94a3b8',borderWidth:1,borderDash:[4,4],label:{content:'退職',enabled:true,font:{size:10}}}}}:{}},
+      scales:{y:{ticks:{callback:v=>fmt(v)+'万'},grid:{color:'#f1f5f9'}},
+        x:{ticks:{maxTicksLimit:12}}}}
+  });
+
+  // Cash flow chart
+  destroyChart('cashflow');
+  const cfData=base;
+  charts.cashflow=new Chart(document.getElementById('chart-cashflow'),{
+    type:'bar',
+    data:{labels:cfData.map(r=>`${r.age}歳`),datasets:[{
+      label:'年間収支',data:cfData.map(r=>Math.round(r.cashFlow/10000)),
+      backgroundColor:cfData.map(r=>r.cashFlow>=0?'#10b98170':'#dc262670'),
+      borderColor:cfData.map(r=>r.cashFlow>=0?'#10b981':'#dc2626'),
+      borderWidth:1}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${fmt(ctx.raw)}万円`}}},
+      scales:{y:{ticks:{callback:v=>fmt(v)+'万'},grid:{color:'#f1f5f9'}},x:{ticks:{maxTicksLimit:12}}}}
+  });
+
+  // Assets pie
+  destroyChart('assetspie');
+  const aLabels=['現金・預金','定期預金','株式・投信','iDeCo','自宅','投資不動産','保険','その他'];
+  const aVals=[data.assets.cash,data.assets.fixedDeposit,data.assets.stocks,data.assets.ideco,
+    data.assets.home,data.assets.realEstate,data.assets.insurance,data.assets.other];
+  const filtered=aLabels.map((l,i)=>({l,v:aVals[i]})).filter(d=>d.v>0);
+  if(filtered.length>0){
+    charts.assetspie=new Chart(document.getElementById('chart-assets-pie'),{
+      type:'doughnut',
+      data:{labels:filtered.map(d=>d.l),datasets:[{data:filtered.map(d=>d.v),
+        backgroundColor:['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#ec4899','#94a3b8']}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}},
+          tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fmtM(ctx.raw)}`}}}}
+    });
+  }
+
+  // Table scenario select
+  const sel=document.getElementById('table-scenario-select');
+  sel.innerHTML=data.plans.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  renderTable();
+}
+
+function renderTable(){
+  const planId=+document.getElementById('table-scenario-select')?.value||data.plans[0].id;
+  const plan=data.plans.find(p=>p.id===planId);
+  if(!plan) return;
+  const rows=simulate(plan);
+  document.getElementById('cashflow-tbody').innerHTML=rows.map(r=>{
+    const badge=r.isRetired&&r.age===data.settings.retireAge?' 🎉退職':'';
+    return `<tr class="${r.isRetired?'retire-row':''}">
+      <td>${r.year}年${badge}</td>
+      <td>${r.age}歳${r.spouseAge?'/'+r.spouseAge+'歳':''}</td>
+      <td class="positive">+${fmtM(r.income)}</td>
+      <td class="negative">-${fmtM(r.expenses)}</td>
+      <td class="${r.cashFlow>=0?'positive':'negative'}">${r.cashFlow>=0?'+':''}${fmtM(r.cashFlow)}</td>
+      <td class="${r.financialAssets<0?'negative':''}">${fmtM(r.financialAssets)}</td>
+      <td class="${r.debts>0?'negative':''}">${r.debts>0?'-':''}${fmtM(r.debts)}</td>
+      <td class="${r.netWorth>=0?'positive':'negative'}"><strong>${fmtM(r.netWorth)}</strong></td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// ADVICE ENGINE
+// ============================================================
+function renderAdvice(){
+  syncFromDOM();
+  const self=data.members.find(m=>m.role==='self');
+  const selfAge=self?.age||35;
+  const retireAge=data.settings.retireAge;
+  const monthlyIncome=data.income.self+data.income.spouse+data.income.side+data.income.investment+(data.income.bonusSelf+data.income.bonusSpouse)/12;
+  const monthlyExp=Object.values(data.expenses).reduce((a,b)=>a+b,0);
+  const surplus=monthlyIncome-monthlyExp;
+  const savingRate=monthlyIncome>0?(data.savings.invest+data.savings.deposit)/monthlyIncome*100:0;
+  const totalA=Object.values(data.assets).reduce((a,b)=>a+b,0);
+  const totalD=data.debts.mortgage+data.debts.car+data.debts.education+data.debts.consumer+data.debts.other;
+  const netWorth=totalA-totalD;
+  const cash=data.assets.cash;
+  const emergencyMonths=monthlyExp>0?cash/monthlyExp:0;
+  const highRiskDebt=data.debts.consumer+data.debts.car;
+  const investRatio=(data.assets.stocks+data.assets.ideco)/(totalA||1)*100;
+  const simBase=simulate(data.plans[0]);
+  const retireRow=simBase.find(r=>r.isRetired)||simBase[simBase.length-1];
+  const lastRow=simBase[simBase.length-1];
+  const depletionRow=simBase.find(r=>r.netWorth<0);
+  const targetRetire=monthlyExp*12*25; // 4% rule
+  const nisaMonthlyMax=30000; // 年360万÷12
+  const idecoMax=23000;
+  const advice=[];
+
+  // 緊急資金
+  if(emergencyMonths<3){
+    advice.push({type:'alert',icon:'🚨',title:'緊急資金が不足しています',
+      desc:`現金・預金${fmtM(cash)}は生活費の${emergencyMonths.toFixed(1)}ヶ月分です。最低3ヶ月分（約${fmtM(monthlyExp*3)}）を優先的に確保してください。この資金は絶対に投資に回さないことが原則です。`});
+  } else if(emergencyMonths<6){
+    advice.push({type:'warn',icon:'⚠️',title:'緊急資金はほぼ適正です',
+      desc:`${emergencyMonths.toFixed(1)}ヶ月分（${fmtM(cash)}）確保できています。6ヶ月分（${fmtM(monthlyExp*6)}）まで積み増すと、より安心です。`});
+  } else {
+    advice.push({type:'good',icon:'✅',title:'緊急資金は十分です',
+      desc:`生活費${emergencyMonths.toFixed(1)}ヶ月分（${fmtM(cash)}）を確保しています。安心できる水準です。余剰現金は投資で働かせましょう。`});
+  }
+
+  // 月次収支
+  if(surplus<0){
+    advice.push({type:'alert',icon:'🔴',title:`毎月${fmt(Math.abs(Math.round(surplus)))}円の赤字です`,
+      desc:`このまま続くと年間${fmtM(Math.abs(surplus)*12)}の資産減少になります。固定費（保険・通信費・サブスク・住居費）の見直しが最優先です。変動費より固定費削減の方が効果が大きく、一度削れると継続的な節約になります。`});
+  } else if(surplus<50000){
+    advice.push({type:'warn',icon:'💸',title:'月次黒字はありますが余裕が少ないです',
+      desc:`月${fmt(Math.round(surplus))}円の黒字です。急な出費に備え、まず緊急資金を固めましょう。収入増・固定費削減でもう少し余裕を作ることをお勧めします。`});
+  } else {
+    advice.push({type:'good',icon:'💹',title:`月${fmt(Math.round(surplus))}円の黒字です`,
+      desc:`収支はしっかりプラスです。この余剰をNISAやiDeCoで効率よく運用できていれば理想的です。`});
+  }
+
+  // 貯蓄率
+  if(savingRate<10){
+    advice.push({type:'alert',icon:'📉',title:`貯蓄率${savingRate.toFixed(1)}%は低水準です`,
+      desc:`手取り収入の10〜20%以上の積立が推奨されます。まずNISAで月${fmt(nisaMonthlyMax)}円、iDeCoで月${fmt(idecoMax)}円から始めると税制優遇を最大活用できます。`});
+  } else if(savingRate<20){
+    advice.push({type:'info',icon:'📊',title:`貯蓄率${savingRate.toFixed(1)}%、20%を目指しましょう`,
+      desc:`現在は及第点です。NISA（年360万円枠）・iDeCoを活用し、あと月${fmt(Math.round((monthlyIncome*0.2)-(data.savings.invest+data.savings.deposit)))}円増やせると20%に達します。`});
+  } else {
+    advice.push({type:'good',icon:'🎯',title:`貯蓄率${savingRate.toFixed(1)}%は優秀です`,
+      desc:`非常に良好な水準です。NISA・iDeCoの非課税枠を使い切れているか確認しましょう。`});
+  }
+
+  // 高金利負債
+  if(highRiskDebt>0){
+    advice.push({type:'alert',icon:'💳',title:'高金利負債の早期返済を最優先に',
+      desc:`カード・消費者・自動車ローン残高が${fmtM(highRiskDebt)}あります。これらは年利3〜15%と高く、投資リターン（想定${data.settings.investReturn}%）を上回ることも多いです。まずこれらを完済してから投資を本格化させてください。`});
+  }
+
+  // 退職資産
+  if(retireRow.netWorth<targetRetire){
+    const gap=targetRetire-retireRow.netWorth;
+    const yearsLeft=retireAge-selfAge;
+    const extraPerMonth=yearsLeft>0?Math.round(gap/(yearsLeft*12)):0;
+    advice.push({type:'warn',icon:'🏖️',title:'退職時資産が目標の25年分生活費に届かない見込みです',
+      desc:`退職時（${retireRow.age}歳）純資産見込み${fmtM(retireRow.netWorth)}に対し、目標（生活費25年分）は${fmtM(targetRetire)}です。差額${fmtM(gap)}を埋めるため、月${fmt(extraPerMonth)}円の追加積立または生活費削減が必要です。`});
+  } else {
+    advice.push({type:'good',icon:'🎉',title:'退職資産の目標達成見込みです',
+      desc:`退職時（${retireRow.age}歳）純資産${fmtM(retireRow.netWorth)}は、生活費25年分の目標${fmtM(targetRetire)}を上回っています。現在の計画を維持しましょう。`});
+  }
+
+  // 資産枯渇
+  if(depletionRow){
+    advice.push({type:'alert',icon:'📉',title:`${depletionRow.age}歳頃に資産が枯渇する見込みです`,
+      desc:`現在のシナリオでは${depletionRow.year}年頃（${depletionRow.age}歳）に純資産がマイナスになります。年金の繰り下げ受給（75歳まで最大84%増）、退職後の生活費削減（10〜20%）、パートタイム収入の追加を検討してください。`});
+  } else if(lastRow.netWorth>0){
+    advice.push({type:'good',icon:'🏆',title:`${lastRow.age}歳まで資産が持続します`,
+      desc:`シミュレーション終端（${lastRow.age}歳）時点でも純資産${fmtM(lastRow.netWorth)}が残ります。資産の長期持続性は確保されています。`});
+  }
+
+  // NISA/iDeCo活用
+  if(investRatio<25&&selfAge<55){
+    advice.push({type:'info',icon:'📈',title:'投資性資産の比率を高める余地があります',
+      desc:`投資性資産（株式・投信・iDeCo）の比率は${investRatio.toFixed(0)}%です。退職まで${retireAge-selfAge}年ある場合、NISA（つみたて投資枠：月10万円、成長投資枠：年240万円）やiDeCo（月最大${fmt(idecoMax)}〜68,000円）の活用でインフレに強いポートフォリオを構築できます。`});
+  }
+
+  // 保険過多
+  if(data.expenses.insurance>monthlyIncome*0.1){
+    advice.push({type:'warn',icon:'🛡️',title:'保険料が月収の10%を超えています',
+      desc:`月${fmt(data.expenses.insurance)}円（収入の${(data.expenses.insurance/monthlyIncome*100).toFixed(0)}%）が保険料です。「必要な保障を最低コストで」が鉄則。掛け捨て生命保険の見直し、不要な特約の削除、貯蓄型保険の解約検討をお勧めします。`});
+  }
+
+  // 複数シナリオ比較
+  if(data.plans.length>1){
+    const sims=data.plans.map(p=>({name:p.name,rows:simulate(p)}));
+    const comparison=sims.map(s=>`${s.name}: 退職時${fmtM(s.rows.find(r=>r.isRetired)?.netWorth||0)}`).join(' / ');
+    advice.push({type:'info',icon:'🔀',title:'シナリオ間の退職資産比較',
+      desc:`${comparison}。シミュレーションページで各シナリオの長期推移を確認し、最善のライフプランを選びましょう。`});
+  }
+
+  document.getElementById('advice-content').innerHTML=advice.map(a=>`
+    <div class="advice-item ${a.type}">
+      <div class="advice-icon">${a.icon}</div>
+      <div class="advice-content"><div class="title">${a.title}</div><div class="desc">${a.desc}</div></div>
+    </div>`).join('');
+}
+
+// ============================================================
+// DATA MANAGEMENT
+// ============================================================
+function saveAll(){
+  syncFromDOM();
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  showToast('✅ 保存しました');
+}
+
+function exportData(){
+  syncFromDOM();
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`financial-plan-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('⬇ エクスポートしました');
+}
+
+function importData(){document.getElementById('import-file').click();}
+
+function handleImportFile(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const imported=JSON.parse(ev.target.result);
+      if(!imported.members||!imported.income) throw new Error('invalid');
+      if(!confirm('現在のデータを上書きしてインポートしますか？')) return;
+      data=imported; activePlanId=data.plans?.[0]?.id||1;
+      localStorage.setItem('fp-data',JSON.stringify(data));
+      syncToDOM(); renderMembers(); renderPlans();
+      showToast('✅ インポートしました');
+    } catch{showToast('❌ ファイルの読み込みに失敗しました');}
+    e.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+function clearAllData(){
+  if(!confirm('すべてのデータを削除してリセットします。この操作は取り消せません。続けますか？')) return;
+  localStorage.removeItem('fp-data');
+  data=JSON.parse(JSON.stringify(DEFAULTS));
+  activePlanId=data.plans[0].id;
+  syncToDOM(); renderMembers(); renderPlans(); updateMonthlySummary(); updateNetWorthSummary();
+  showToast('🗑 データをリセットしました');
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function fmt(n){return new Intl.NumberFormat('ja-JP').format(n);}
+function fmtM(n){
+  const abs=Math.abs(n), sign=n<0?'-':'';
+  if(abs>=100000000) return sign+(abs/100000000).toFixed(1)+'億円';
+  if(abs>=10000) return sign+Math.round(abs/10000)+'万円';
+  return sign+fmt(Math.round(abs))+'円';
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init(){
+  initPin();
+  renderMembers();
+  syncToDOM();
+  renderPlans();
+  updateMonthlySummary();
+  updateNetWorthSummary();
+
+  // Live recalculation listeners
+  const incomeIds=['income-self','income-spouse','income-side','income-investment','bonus-self','bonus-spouse',
+    'exp-housing','exp-food','exp-utilities','exp-insurance','exp-education','exp-transport',
+    'exp-medical','exp-entertainment','exp-other','saving-invest','saving-deposit'];
+  incomeIds.forEach(id=>{
+    document.getElementById(id)?.addEventListener('input',updateMonthlySummary);
+  });
+  const assetIds=['asset-cash','asset-fixed-deposit','asset-stocks','asset-ideco','asset-home',
+    'asset-realestate','asset-insurance','asset-other','debt-mortgage','debt-mortgage-monthly',
+    'debt-car','debt-education','debt-consumer','debt-other'];
+  assetIds.forEach(id=>{
+    document.getElementById(id)?.addEventListener('input',updateNetWorthSummary);
+  });
+  document.getElementById('retire-age')?.addEventListener('input',updateRetireWidget);
+}
+
+init();
+</script>
+</body>
+</html>
