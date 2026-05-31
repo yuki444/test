@@ -3,6 +3,13 @@ import anthropic
 import json
 from pathlib import Path
 
+# .env ファイルから ANTHROPIC_API_KEY を自動読み込み
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent / ".env")
+except ImportError:
+    pass
+
 app = Flask(__name__)
 client = anthropic.Anthropic()
 
