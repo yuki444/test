@@ -1,608 +1,578 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>北海道ゴルフ旅行 2026年7月</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>北海道ゴルフ旅行 2026年7月</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
 
-    body {
-      font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
-      background: #f0f4f8;
-      padding: 24px 16px;
-      min-height: 100vh;
-    }
+  * { margin:0; padding:0; box-sizing:border-box; }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
+  body {
+    font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+    background: #e8edf2;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
 
-    /* ヘッダー */
-    .header {
-      background: linear-gradient(135deg, #1a3a5c 0%, #2d6a9f 60%, #3a8fd1 100%);
-      border-radius: 20px;
-      padding: 36px 40px;
-      color: white;
-      margin-bottom: 24px;
-      position: relative;
-      overflow: hidden;
-    }
-    .header::before {
-      content: '⛳';
-      position: absolute;
-      right: 30px;
-      top: 20px;
-      font-size: 80px;
-      opacity: 0.15;
-    }
-    .header::after {
-      content: '🍺';
-      position: absolute;
-      right: 120px;
-      bottom: 15px;
-      font-size: 60px;
-      opacity: 0.12;
-    }
-    .header-tag {
-      display: inline-block;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.4);
-      border-radius: 20px;
-      padding: 4px 14px;
-      font-size: 12px;
-      letter-spacing: 2px;
-      margin-bottom: 12px;
-    }
-    .header h1 {
-      font-size: 30px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-    .header-sub {
-      font-size: 15px;
-      opacity: 0.85;
-      margin-bottom: 20px;
-    }
-    .header-meta {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .meta-chip {
-      background: rgba(255,255,255,0.15);
-      border-radius: 10px;
-      padding: 8px 16px;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .meta-chip span { font-size: 16px; }
+  .pamphlet {
+    width: 794px;
+    background: white;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    border-radius: 4px;
+    overflow: hidden;
+  }
 
-    /* ハイライト帯 */
-    .highlights {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .hl-card {
-      background: white;
-      border-radius: 14px;
-      padding: 16px 12px;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-    }
-    .hl-card .icon { font-size: 28px; margin-bottom: 6px; }
-    .hl-card .label { font-size: 11px; color: #666; line-height: 1.4; font-weight: 600; }
+  /* ══ HERO ══ */
+  .hero {
+    background: linear-gradient(135deg, #0a2540 0%, #1a4a7a 50%, #0e7490 100%);
+    padding: 32px 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+  }
+  .hero-label {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 900;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .hero h1 span { color: #7dd3fc; }
+  .hero-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 20px;
+  }
+  .hero-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .chip {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 11px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .hero-icons {
+    font-size: 52px;
+    line-height: 1;
+    opacity: 0.3;
+    position: absolute;
+    right: 0;
+    top: 0;
+    text-align: right;
+  }
 
-    /* 日程カード */
-    .day-card {
-      background: white;
-      border-radius: 18px;
-      margin-bottom: 18px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      overflow: hidden;
-    }
-    .day-header {
-      padding: 18px 28px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .day-header.day1 { background: linear-gradient(90deg, #1a5c3a, #2d9a5f); color: white; }
-    .day-header.day2 { background: linear-gradient(90deg, #5c1a1a, #c0392b); color: white; }
-    .day-header.day3 { background: linear-gradient(90deg, #1a3a5c, #2d6a9f); color: white; }
+  /* ══ HIGHLIGHTS BAR ══ */
+  .hl-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    background: #0f172a;
+  }
+  .hl-item {
+    padding: 12px 8px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.08);
+  }
+  .hl-item:last-child { border-right: none; }
+  .hl-icon { font-size: 20px; margin-bottom: 3px; }
+  .hl-text { font-size: 10px; color: rgba(255,255,255,0.7); line-height: 1.3; font-weight: 700; }
 
-    .day-badge {
-      background: rgba(255,255,255,0.25);
-      border-radius: 12px;
-      padding: 6px 14px;
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .day-title {
-      font-size: 17px;
-      font-weight: 700;
-    }
-    .day-subtitle {
-      font-size: 12px;
-      opacity: 0.85;
-      margin-top: 2px;
-    }
-    .day-emoji {
-      margin-left: auto;
-      font-size: 28px;
-      opacity: 0.7;
-    }
+  /* ══ DAYS GRID ══ */
+  .days {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .day-col {
+    padding: 18px 16px;
+    border-right: 1px solid #e8edf2;
+  }
+  .day-col:last-child { border-right: none; }
 
-    /* タイムライン */
-    .timeline {
-      padding: 10px 28px 20px;
-    }
-    .tl-item {
-      display: flex;
-      gap: 16px;
-      padding: 10px 0;
-      position: relative;
-    }
-    .tl-item:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      left: 45px;
-      top: 42px;
-      bottom: -10px;
-      width: 2px;
-      background: #e8eef3;
-    }
-    .tl-time {
-      min-width: 52px;
-      font-size: 12px;
-      color: #888;
-      font-weight: 600;
-      padding-top: 14px;
-      text-align: right;
-    }
-    .tl-dot {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 17px;
-      flex-shrink: 0;
-      margin-top: 7px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-    }
-    .dot-green  { background: #e8f8ef; }
-    .dot-blue   { background: #e8f0fb; }
-    .dot-orange { background: #fff3e0; }
-    .dot-red    { background: #fdecea; }
-    .dot-purple { background: #f3e8fb; }
-    .dot-yellow { background: #fffde7; }
-    .dot-teal   { background: #e0f5f5; }
-    .dot-pink   { background: #fce4ec; }
+  .day-head {
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+  }
+  .day-head.d1 { background: linear-gradient(135deg, #064e3b, #059669); }
+  .day-head.d2 { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
+  .day-head.d3 { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
 
-    .tl-content {
-      flex: 1;
-      padding: 8px 0;
-    }
-    .tl-name {
-      font-size: 15px;
-      font-weight: 700;
-      color: #1a2a3a;
-      margin-bottom: 3px;
-    }
-    .tl-desc {
-      font-size: 12px;
-      color: #666;
-      line-height: 1.5;
-    }
-    .tl-badge {
-      display: inline-block;
-      background: #f0f4f8;
-      border-radius: 6px;
-      padding: 2px 8px;
-      font-size: 11px;
-      color: #555;
-      margin-top: 4px;
-    }
-    .tl-badge.highlight {
-      background: #fff3cd;
-      color: #856404;
-    }
-    .tl-badge.special {
-      background: #d1f0e4;
-      color: #1a5c3a;
-    }
+  .day-num {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 2px;
+  }
+  .day-date {
+    font-size: 15px;
+    font-weight: 900;
+    color: white;
+    line-height: 1.2;
+  }
+  .day-theme {
+    font-size: 10px;
+    color: rgba(255,255,255,0.8);
+    margin-top: 2px;
+  }
 
-    /* フッター */
-    .footer-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 8px;
-    }
-    .info-card {
-      background: white;
-      border-radius: 16px;
-      padding: 22px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-    }
-    .info-card h3 {
-      font-size: 14px;
-      font-weight: 700;
-      color: #1a3a5c;
-      margin-bottom: 14px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #e8eef3;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 7px 0;
-      border-bottom: 1px solid #f0f4f8;
-      font-size: 13px;
-    }
-    .info-row:last-child { border-bottom: none; }
-    .info-label { color: #666; }
-    .info-value { font-weight: 600; color: #1a2a3a; }
-    .budget-total {
-      background: #e8f3fb;
-      border-radius: 10px;
-      padding: 10px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-    .budget-total .amount { font-weight: 700; color: #1a5c9a; font-size: 16px; }
+  /* タイムライン */
+  .tl { position: relative; }
+  .tl-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .tl-row:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 22px;
+    top: 30px;
+    bottom: -10px;
+    width: 1px;
+    background: #e2e8f0;
+  }
+  .tl-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 30px;
+  }
+  .tl-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    border: 2px solid #e2e8f0;
+    background: white;
+  }
+  .tl-time-s {
+    font-size: 9px;
+    color: #94a3b8;
+    font-weight: 700;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .tl-body { flex: 1; }
+  .tl-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
+  }
+  .tl-detail {
+    font-size: 10px;
+    color: #64748b;
+    line-height: 1.4;
+    margin-top: 1px;
+  }
+  .tl-tag {
+    display: inline-block;
+    background: #f1f5f9;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 9px;
+    color: #475569;
+    margin-top: 3px;
+  }
+  .tl-tag.accent { background: #fef3c7; color: #92400e; }
+  .tl-tag.green  { background: #d1fae5; color: #065f46; }
 
-    .note {
-      background: #fffde7;
-      border-left: 4px solid #ffc107;
-      border-radius: 0 10px 10px 0;
-      padding: 12px 16px;
-      font-size: 12px;
-      color: #555;
-      margin-top: 14px;
-      line-height: 1.7;
-    }
+  /* ══ BOTTOM SECTION ══ */
+  .bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid #e8edf2;
+    background: #f8fafc;
+  }
+  .bot-block {
+    padding: 16px 20px;
+    border-right: 1px solid #e8edf2;
+  }
+  .bot-block:last-child { border-right: none; }
+  .bot-title {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+  }
 
-    .footer-credit {
-      text-align: center;
-      margin-top: 24px;
-      font-size: 11px;
-      color: #aaa;
-    }
-  </style>
+  /* 予算 */
+  .budget-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 16px;
+  }
+  .b-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    padding: 3px 0;
+    border-bottom: 1px dotted #e2e8f0;
+  }
+  .b-label { color: #64748b; }
+  .b-val { font-weight: 700; color: #1e293b; }
+  .b-total {
+    background: #1e3a5f;
+    color: white;
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+  .b-total-val { font-size: 15px; font-weight: 900; color: #7dd3fc; }
+
+  /* チェックリスト */
+  .check-list { list-style: none; }
+  .check-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid #e8edf2;
+    font-size: 11px;
+    color: #334155;
+    line-height: 1.4;
+  }
+  .check-list li:last-child { border-bottom: none; }
+  .check-box {
+    width: 16px; height: 16px;
+    border: 2px solid #cbd5e1;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .priority-high { color: #dc2626; font-weight: 700; font-size: 9px; }
+  .priority-med  { color: #d97706; font-weight: 700; font-size: 9px; }
+
+  /* ══ FOOTER ══ */
+  .footer {
+    background: #0f172a;
+    padding: 10px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-left { font-size: 10px; color: rgba(255,255,255,0.5); }
+  .footer-right {
+    display: flex;
+    gap: 12px;
+  }
+  .course-badge {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 9px;
+    color: rgba(255,255,255,0.6);
+  }
+</style>
 </head>
 <body>
-<div class="container">
+<div class="pamphlet">
 
-  <!-- ヘッダー -->
-  <div class="header">
-    <div class="header-tag">TRAVEL PLAN 2026</div>
-    <h1>北海道ゴルフ旅行</h1>
-    <div class="header-sub">7月24日(金)〜26日(日)　2泊3日　男性3名</div>
-    <div class="header-meta">
-      <div class="meta-chip"><span>✈️</span> 関西空港 発着</div>
-      <div class="meta-chip"><span>🚗</span> レンタカー移動</div>
-      <div class="meta-chip"><span>⛳</span> ゴルフ 2ラウンド</div>
-      <div class="meta-chip"><span>💰</span> 約15万円 / 人</div>
-    </div>
-  </div>
-
-  <!-- ハイライト -->
-  <div class="highlights">
-    <div class="hl-card">
-      <div class="icon">⛳</div>
-      <div class="label">名門2コース<br>ゴルフ</div>
-    </div>
-    <div class="hl-card">
-      <div class="icon">🥌</div>
-      <div class="label">カーリング<br>体験</div>
-    </div>
-    <div class="hl-card">
-      <div class="icon">🍺</div>
-      <div class="label">大通公園<br>ビアガーデン</div>
-    </div>
-    <div class="hl-card">
-      <div class="icon">🛶</div>
-      <div class="label">支笏湖<br>カヤック</div>
-    </div>
-    <div class="hl-card">
-      <div class="icon">⚾</div>
-      <div class="label">エスコン<br>野球観戦</div>
-    </div>
-  </div>
-
-  <!-- Day 1 -->
-  <div class="day-card">
-    <div class="day-header day1">
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-top">
       <div>
-        <div class="day-badge">DAY 1　7/24（金）</div>
-        <div class="day-title" style="margin-top:8px">ゴルフ → カーリング → 大通ビアガーデン</div>
-        <div class="day-subtitle">新千歳空港 → 北広島 → 清田区 → 札幌</div>
-      </div>
-      <div class="day-emoji">⛳🥌🍺</div>
-    </div>
-    <div class="timeline">
-      <div class="tl-item">
-        <div class="tl-time">08:05</div>
-        <div class="tl-dot dot-blue">✈️</div>
-        <div class="tl-content">
-          <div class="tl-name">関西空港 出発</div>
-          <div class="tl-desc">ANA朝便 / 所要約2時間10分</div>
+        <div class="hero-label">TRAVEL PLAN 2026</div>
+        <h1>北海道<span>ゴルフ</span>旅行</h1>
+        <div class="hero-sub">7月24日(金) → 26日(日)　2泊3日　男性3名</div>
+        <div class="hero-chips">
+          <div class="chip">✈️ 関西空港 発着</div>
+          <div class="chip">🚗 レンタカー移動</div>
+          <div class="chip">⛳ ゴルフ 2ラウンド</div>
+          <div class="chip">💰 約15万円 / 人</div>
         </div>
       </div>
-      <div class="tl-item">
-        <div class="tl-time">10:15</div>
-        <div class="tl-dot dot-blue">🛬</div>
-        <div class="tl-content">
-          <div class="tl-name">新千歳空港 到着・レンタカーピックアップ</div>
-          <div class="tl-desc">7人乗りミニバン（3人で余裕の移動）</div>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">10:30</div>
-        <div class="tl-dot dot-green">⛳</div>
-        <div class="tl-content">
-          <div class="tl-name">ゴルフ ① ザ・ノースカントリーGC</div>
-          <div class="tl-desc">空港から車15分 ／ セガサミーカップ開催コース<br>キャディ付き乗用カート ／ 全レベル対応の開放的なレイアウト</div>
-          <span class="tl-badge">📍 北広島市</span>
-          <span class="tl-badge special">〜約15:30 終了</span>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">15:45</div>
-        <div class="tl-dot dot-teal">🥌</div>
-        <div class="tl-content">
-          <div class="tl-name">カーリング体験　どうぎんカーリングスタジアム</div>
-          <div class="tl-desc">日本初の通年型カーリング専用施設 ／ 用具一式レンタル込み<br>氷上なので夏でも涼しい ／ 3名で約5,000円/人</div>
-          <span class="tl-badge">📍 札幌市清田区（ゴルフ場から30分）</span>
-          <span class="tl-badge highlight">60〜90分</span>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">17:30</div>
-        <div class="tl-dot dot-yellow">🏨</div>
-        <div class="tl-content">
-          <div class="tl-name">ホテルチェックイン・着替え</div>
-          <div class="tl-desc">大通公園〜すすきのエリアのホテル推奨</div>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">18:00</div>
-        <div class="tl-dot dot-yellow">🍺</div>
-        <div class="tl-content">
-          <div class="tl-name">さっぽろ大通ビアガーデン</div>
-          <div class="tl-desc">日本最大級の屋外ビアガーデン ／ サッポロ・キリン・アサヒ・世界のビール 各ブース<br>大通公園5〜11丁目に広がる解放感抜群の空間</div>
-          <span class="tl-badge">📍 大通公園（ラストオーダー20:30）</span>
-          <span class="tl-badge highlight">7/23〜8/18 開催中！</span>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">21:00</div>
-        <div class="tl-dot dot-red">🍖</div>
-        <div class="tl-content">
-          <div class="tl-name">すすきので〆</div>
-          <div class="tl-desc">ジンギスカン（だるま・ヒゲのうし）→ バー二次会</div>
-          <span class="tl-badge">📍 すすきの（大通から徒歩10分）</span>
-        </div>
-      </div>
+      <div class="hero-icons">⛳<br>🍺</div>
     </div>
   </div>
 
-  <!-- Day 2 -->
-  <div class="day-card">
-    <div class="day-header day2">
-      <div>
-        <div class="day-badge">DAY 2　7/25（土）</div>
-        <div class="day-title" style="margin-top:8px">支笏湖カヤック → エスコン観戦 → すすきの</div>
-        <div class="day-subtitle">札幌 → 支笏湖 → 北広島 → 札幌</div>
-      </div>
-      <div class="day-emoji">🛶⚾🍻</div>
-    </div>
-    <div class="timeline">
-      <div class="tl-item">
-        <div class="tl-time">09:00</div>
-        <div class="tl-dot dot-teal">🛶</div>
-        <div class="tl-content">
-          <div class="tl-name">支笏湖 クリアカヤック / SUP</div>
-          <div class="tl-desc">透明度11年連続日本一の湖 ／ 底まで透けて見えるクリアカヤックが絶景<br>ガイド・ライフジャケット・装備一式込み ／ 約8,000円/人</div>
-          <span class="tl-badge">📍 支笏湖（札幌から車30〜40分）</span>
-          <span class="tl-badge special">2〜2.5時間</span>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">11:30</div>
-        <div class="tl-dot dot-orange">🍽️</div>
-        <div class="tl-content">
-          <div class="tl-name">昼食：支笏湖畔レストラン</div>
-          <div class="tl-desc">ヒメマスの塩焼き・チップ料理など北海道限定グルメ</div>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">12:30</div>
-        <div class="tl-dot dot-blue">🚗</div>
-        <div class="tl-content">
-          <div class="tl-name">エスコンフィールドへ移動</div>
-          <div class="tl-desc">支笏湖 → 北広島 ／ 約40〜50分</div>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">13:15</div>
-        <div class="tl-dot dot-red">⚾</div>
-        <div class="tl-content">
-          <div class="tl-name">エスコンフィールド北海道 入場・グルメ</div>
-          <div class="tl-desc">2023年開業・日本最新鋭球場 ／ 北海道食材スタジアムグルメ100種以上</div>
-          <span class="tl-badge">📍 北広島市（空港から30分）</span>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">14:00</div>
-        <div class="tl-dot dot-red">🔴</div>
-        <div class="tl-content">
-          <div class="tl-name">⚾ 日本ハム vs 楽天　試合開始</div>
-          <div class="tl-desc">天然芝・開閉式ドーム ／ クラフトビール片手に観戦</div>
-          <span class="tl-badge highlight">〜約17:00 終了見込み</span>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">17:30</div>
-        <div class="tl-dot dot-orange">🦞</div>
-        <div class="tl-content">
-          <div class="tl-name">すすきのでガッツリ飲み</div>
-          <div class="tl-desc">海鮮居酒屋（ウニ・ホタテ・カニ） → 二次会・バー</div>
-          <span class="tl-badge">📍 すすきの（球場から車30分）</span>
-        </div>
-      </div>
-    </div>
+  <!-- HIGHLIGHTS BAR -->
+  <div class="hl-bar">
+    <div class="hl-item"><div class="hl-icon">⛳</div><div class="hl-text">名門2コース<br>ゴルフ</div></div>
+    <div class="hl-item"><div class="hl-icon">🥌</div><div class="hl-text">カーリング<br>体験</div></div>
+    <div class="hl-item"><div class="hl-icon">🍺</div><div class="hl-text">大通公園<br>ビアガーデン</div></div>
+    <div class="hl-item"><div class="hl-icon">🛶</div><div class="hl-text">支笏湖<br>カヤック</div></div>
+    <div class="hl-item"><div class="hl-icon">⚾</div><div class="hl-text">エスコン<br>野球観戦</div></div>
   </div>
 
-  <!-- Day 3 -->
-  <div class="day-card">
-    <div class="day-header day3">
-      <div>
-        <div class="day-badge">DAY 3　7/26（日）</div>
-        <div class="day-title" style="margin-top:8px">ゴルフ → 昼食 → 帰宅</div>
-        <div class="day-subtitle">札幌 → 苫小牧 → 新千歳空港 → 関西空港</div>
-      </div>
-      <div class="day-emoji">⛳✈️</div>
-    </div>
-    <div class="timeline">
-      <div class="tl-item">
-        <div class="tl-time">07:00</div>
-        <div class="tl-dot dot-green">⛳</div>
-        <div class="tl-content">
-          <div class="tl-name">ゴルフ ② ニドムクラシックコース</div>
-          <div class="tl-desc">リゾートホテル併設の名門コース ／ 選手権開催実績・全レベルが楽しめる<br>空港直結クラブバスあり・帰りの移動も最もラク</div>
-          <span class="tl-badge">📍 苫小牧市（空港から車20分）</span>
-          <span class="tl-badge special">〜約12:30 終了</span>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">13:00</div>
-        <div class="tl-dot dot-orange">🍜</div>
-        <div class="tl-content">
-          <div class="tl-name">昼食：スープカレー or 海鮮丼</div>
-          <div class="tl-desc">新千歳空港内「北海道ラーメン道場」も◎</div>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">14:00</div>
-        <div class="tl-dot dot-purple">🛍️</div>
-        <div class="tl-content">
-          <div class="tl-name">新千歳空港 お土産・ショッピング</div>
-          <div class="tl-desc">白い恋人・じゃがポックル・六花亭 etc. ／ 空港内グルメも充実</div>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">16:30</div>
-        <div class="tl-dot dot-blue">✈️</div>
-        <div class="tl-content">
-          <div class="tl-name">新千歳空港 出発</div>
-          <div class="tl-desc">関西空港行き ／ 所要約2時間</div>
-        </div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">18:30</div>
-        <div class="tl-dot dot-blue">🛬</div>
-        <div class="tl-content">
-          <div class="tl-name">関西空港 到着・解散</div>
-          <div class="tl-desc">お疲れさまでした！</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- DAYS -->
+  <div class="days">
 
-  <!-- 予算・情報 -->
-  <div class="footer-section">
-    <div class="info-card">
-      <h3>💰 予算目安（1人あたり）</h3>
-      <div class="info-row">
-        <span class="info-label">✈️ 航空券（往復）</span>
-        <span class="info-value">35,000〜50,000円</span>
+    <!-- DAY 1 -->
+    <div class="day-col">
+      <div class="day-head d1">
+        <div class="day-num">DAY 1</div>
+        <div class="day-date">7/24（金）</div>
+        <div class="day-theme">ゴルフ・カーリング・ビアガーデン</div>
       </div>
-      <div class="info-row">
-        <span class="info-label">🏨 ホテル（2泊）</span>
-        <span class="info-value">15,000〜25,000円</span>
+      <div class="tl">
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">✈️</div><div class="tl-time-s">08:05</div></div>
+          <div class="tl-body">
+            <div class="tl-title">関西空港 出発</div>
+            <div class="tl-detail">ANA朝便 / 所要約2時間10分</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🛬</div><div class="tl-time-s">10:15</div></div>
+          <div class="tl-body">
+            <div class="tl-title">新千歳空港 着・レンタカー</div>
+            <div class="tl-detail">7人乗りミニバンで出発</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">⛳</div><div class="tl-time-s">10:30</div></div>
+          <div class="tl-body">
+            <div class="tl-title">ゴルフ ① ノースカントリーGC</div>
+            <div class="tl-detail">セガサミーカップ開催コース<br>キャディ付き・全レベル対応</div>
+            <span class="tl-tag green">空港から15分</span>
+            <span class="tl-tag accent">〜15:30終了</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🥌</div><div class="tl-time-s">15:45</div></div>
+          <div class="tl-body">
+            <div class="tl-title">カーリング体験</div>
+            <div class="tl-detail">どうぎんカーリングスタジアム<br>氷上で夏も涼しい・60分</div>
+            <span class="tl-tag">約5,000円/人</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🍺</div><div class="tl-time-s">18:00</div></div>
+          <div class="tl-body">
+            <div class="tl-title">さっぽろ大通ビアガーデン</div>
+            <div class="tl-detail">日本最大級・4社ブース<br>ラストオーダー20:30</div>
+            <span class="tl-tag accent">7/23〜8/18 開催</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🍖</div><div class="tl-time-s">21:00</div></div>
+          <div class="tl-body">
+            <div class="tl-title">すすきので〆</div>
+            <div class="tl-detail">ジンギスカン→バー二次会</div>
+          </div>
+        </div>
       </div>
-      <div class="info-row">
-        <span class="info-label">⛳ ゴルフ（2R）</span>
-        <span class="info-value">25,000〜40,000円</span>
+    </div>
+
+    <!-- DAY 2 -->
+    <div class="day-col">
+      <div class="day-head d2">
+        <div class="day-num">DAY 2</div>
+        <div class="day-date">7/25（土）</div>
+        <div class="day-theme">支笏湖・エスコン・すすきの</div>
       </div>
-      <div class="info-row">
-        <span class="info-label">🥌 カーリング体験</span>
-        <span class="info-value">約 5,000円</span>
+      <div class="tl">
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🛶</div><div class="tl-time-s">09:00</div></div>
+          <div class="tl-body">
+            <div class="tl-title">支笏湖 クリアカヤック / SUP</div>
+            <div class="tl-detail">透明度11年連続日本一の湖<br>底まで見えるクリアカヤック</div>
+            <span class="tl-tag green">札幌から30分</span>
+            <span class="tl-tag">約8,000円/人</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🍽️</div><div class="tl-time-s">11:30</div></div>
+          <div class="tl-body">
+            <div class="tl-title">昼食：支笏湖畔レストラン</div>
+            <div class="tl-detail">ヒメマス料理など北海道限定グルメ</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🚗</div><div class="tl-time-s">12:30</div></div>
+          <div class="tl-body">
+            <div class="tl-title">エスコンフィールドへ移動</div>
+            <div class="tl-detail">支笏湖 → 北広島 約40〜50分</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">⚾</div><div class="tl-time-s">13:15</div></div>
+          <div class="tl-body">
+            <div class="tl-title">エスコンフィールド入場</div>
+            <div class="tl-detail">2023年開業・日本最新鋭球場<br>スタジアムグルメ&クラフトビール</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🔴</div><div class="tl-time-s">14:00</div></div>
+          <div class="tl-body">
+            <div class="tl-title">⚾ 日本ハム vs 楽天 試合開始</div>
+            <div class="tl-detail">天然芝・開閉式ドーム</div>
+            <span class="tl-tag accent">〜17:00終了見込み</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🦞</div><div class="tl-time-s">17:30</div></div>
+          <div class="tl-body">
+            <div class="tl-title">すすきので海鮮＆飲み</div>
+            <div class="tl-detail">ウニ・ホタテ・カニ居酒屋 → バー</div>
+          </div>
+        </div>
       </div>
-      <div class="info-row">
-        <span class="info-label">🛶 支笏湖カヤック</span>
-        <span class="info-value">約 8,000円</span>
+    </div>
+
+    <!-- DAY 3 -->
+    <div class="day-col">
+      <div class="day-head d3">
+        <div class="day-num">DAY 3</div>
+        <div class="day-date">7/26（日）</div>
+        <div class="day-theme">ゴルフ・グルメ・帰宅</div>
       </div>
-      <div class="info-row">
-        <span class="info-label">⚾ エスコン観戦</span>
-        <span class="info-value">3,000〜8,000円</span>
+      <div class="tl">
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">⛳</div><div class="tl-time-s">07:00</div></div>
+          <div class="tl-body">
+            <div class="tl-title">ゴルフ ② ニドムクラシックコース</div>
+            <div class="tl-detail">リゾートホテル併設の名門コース<br>選手権開催実績・全レベル対応</div>
+            <span class="tl-tag green">空港から20分</span>
+            <span class="tl-tag accent">〜12:30終了</span>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🍜</div><div class="tl-time-s">13:00</div></div>
+          <div class="tl-body">
+            <div class="tl-title">昼食：スープカレー / 海鮮丼</div>
+            <div class="tl-detail">空港内「北海道ラーメン道場」も◎</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🛍️</div><div class="tl-time-s">14:00</div></div>
+          <div class="tl-body">
+            <div class="tl-title">新千歳空港 お土産</div>
+            <div class="tl-detail">白い恋人・じゃがポックル・六花亭</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">✈️</div><div class="tl-time-s">16:30</div></div>
+          <div class="tl-body">
+            <div class="tl-title">新千歳空港 出発</div>
+            <div class="tl-detail">関西空港行き / 所要約2時間</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-left"><div class="tl-dot">🏠</div><div class="tl-time-s">18:30</div></div>
+          <div class="tl-body">
+            <div class="tl-title">関西空港 到着・解散</div>
+            <div class="tl-detail">お疲れさまでした！</div>
+          </div>
+        </div>
       </div>
-      <div class="info-row">
-        <span class="info-label">🚗 レンタカー（3人割）</span>
-        <span class="info-value">10,000〜15,000円</span>
+    </div>
+
+  </div><!-- /days -->
+
+  <!-- BOTTOM -->
+  <div class="bottom">
+
+    <!-- 予算 -->
+    <div class="bot-block">
+      <div class="bot-title">💰 BUDGET（1人あたり目安）</div>
+      <div class="budget-grid">
+        <div class="b-row"><span class="b-label">✈️ 航空券（往復）</span><span class="b-val">35,000〜50,000</span></div>
+        <div class="b-row"><span class="b-label">🥌 カーリング</span><span class="b-val">約 5,000</span></div>
+        <div class="b-row"><span class="b-label">🏨 ホテル（2泊）</span><span class="b-val">15,000〜25,000</span></div>
+        <div class="b-row"><span class="b-label">🛶 支笏湖カヤック</span><span class="b-val">約 8,000</span></div>
+        <div class="b-row"><span class="b-label">⛳ ゴルフ（2R）</span><span class="b-val">25,000〜40,000</span></div>
+        <div class="b-row"><span class="b-label">⚾ エスコン観戦</span><span class="b-val">3,000〜8,000</span></div>
+        <div class="b-row"><span class="b-label">🚗 レンタカー（割）</span><span class="b-val">10,000〜15,000</span></div>
+        <div class="b-row"><span class="b-label">🍺 飲食・飲み代</span><span class="b-val">30,000〜50,000</span></div>
       </div>
-      <div class="info-row">
-        <span class="info-label">🍺 飲食・飲み代</span>
-        <span class="info-value">30,000〜50,000円</span>
-      </div>
-      <div class="budget-total">
+      <div class="b-total">
         <span>合計目安</span>
-        <span class="amount">131,000〜201,000円</span>
+        <span class="b-total-val">131,000〜201,000 円</span>
       </div>
     </div>
 
-    <div class="info-card">
-      <h3>📋 事前予約チェックリスト</h3>
-      <div class="info-row">
-        <span class="info-label">✈️ 航空券（早割で安く）</span>
-        <span class="info-value" style="color:#e74c3c">最優先</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">⛳ ゴルフ場 ①②</span>
-        <span class="info-value" style="color:#e74c3c">2〜3ヶ月前</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">⚾ エスコン チケット</span>
-        <span class="info-value" style="color:#e67e22">早めに</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">🛶 支笏湖 カヤック</span>
-        <span class="info-value" style="color:#e67e22">1〜2ヶ月前</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">🥌 カーリング体験</span>
-        <span class="info-value" style="color:#27ae60">1〜2ヶ月前</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">🏨 ホテル（札幌中心部）</span>
-        <span class="info-value" style="color:#e67e22">早めに</span>
-      </div>
-      <div class="note">
-        ⚠️ 大通ビアガーデンは予約不要・当日OK（混雑時は行列あり）<br>
-        ⚠️ エスコン試合日程・ゴルフ予約の確認を優先してください
-      </div>
+    <!-- チェックリスト -->
+    <div class="bot-block">
+      <div class="bot-title">📋 予約チェックリスト</div>
+      <ul class="check-list">
+        <li>
+          <div class="check-box"></div>
+          <div>✈️ <b>航空券</b>（ANA / JAL / Peach）<br><span class="priority-high">● 最優先・早割で3〜4万円台も可</span></div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div>⛳ <b>ゴルフ場予約</b>（ノースカントリー / ニドム）<br><span class="priority-high">● 2〜3ヶ月前・人気のため早めに</span></div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div>⚾ <b>エスコンチケット</b>（日本ハム vs 楽天 7/25）<br><span class="priority-med">● チケットぴあ・日本ハム公式</span></div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div>🛶 <b>支笏湖カヤック予約</b>（かのあ公式）<br><span class="priority-med">● 1〜2ヶ月前・定員あり</span></div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div>🥌 <b>カーリング体験予約</b>（どうぎんスタジアム）<br><span class="priority-med">● 1〜2ヶ月前・TEL予約</span></div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div>🏨 <b>ホテル</b>（大通〜すすきの周辺）<br><span class="priority-med">● 夏は混雑・早めに確保</span></div>
+        </li>
+      </ul>
     </div>
+
   </div>
 
-  <div class="footer-credit">北海道ゴルフ旅行プラン 2026年7月24〜26日　© 3名様専用プラン</div>
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">北海道ゴルフ旅行プラン 2026年7月24〜26日　男性3名</div>
+    <div class="footer-right">
+      <div class="course-badge">⛳ Day1: ザ・ノースカントリーGC</div>
+      <div class="course-badge">⛳ Day3: ニドムクラシックコース</div>
+    </div>
+  </div>
 
 </div>
 </body>
