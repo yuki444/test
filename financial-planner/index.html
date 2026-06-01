@@ -485,7 +485,7 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-title">📋 年次キャッシュフロー詳細</div>
+        <div class="card-title">📋 年次キャッシュフロー詳細 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">（金額はすべて万円単位）</span></div>
         <div style="margin-bottom:10px;display:flex;align-items:center;gap:10px">
           <label style="font-size:12px;font-weight:700;color:var(--text-muted)">シナリオ：</label>
           <select id="table-scenario-select" onchange="renderTable()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px"></select>
@@ -668,6 +668,17 @@
         <button class="btn btn-primary" onclick="addFPUpdates()">🏦 FPアップデートを現在のデータに反映</button>
       </div>
       <div class="card">
+        <div class="card-title">📉 投資取り崩し収入を反映</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">定年後（55歳）の投資取り崩し収入を全プランのイベントに追加します。</p>
+        <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
+          <strong>55歳〜 +50万円/月（35年間）</strong> — 定年後の生活費として投資資産を取り崩し<br>
+          <strong>取り崩し順</strong> — 投資信託 → 新NISA → 個別株<br>
+          <strong>新NISA戦略</strong> — 生涯上限1,800万まで積み立て後も課税口座で同額継続<br>
+          <span style="color:var(--text-muted)">※ シミュレーション上は収入として計上。年金（65歳〜）と合算表示されます。</span>
+        </div>
+        <button class="btn btn-primary" onclick="addDrawdownIncome()">📉 投資取り崩し収入を全プランに反映</button>
+      </div>
+      <div class="card">
         <div class="card-title">🗑️ データ管理</div>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">すべてのデータを削除してリセットします。</p>
         <button class="btn btn-danger" onclick="clearAllData()">⚠️ 全データを削除してリセット</button>
@@ -825,6 +836,7 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え④',   age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'income-change', name:'投資取り崩し（月50万）',  age:55,amount:500000, duration:35,memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'},
     ]},
     // ── プラン2: 20年後（58歳）に半値売却→賃貸転居 ────────────────
     {id:2,name:'20年後売却→賃貸',color:'#10b981',events:[
@@ -854,6 +866,7 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え④',   age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'income-change', name:'投資取り崩し（月50万）',  age:55,amount:500000, duration:35,memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'},
     ]},
     // ── プラン3: 8年ごとに新築へ住み替え（2割ずつ縮小） ───────────
     {id:3,name:'8年ごとに新築',color:'#f59e0b',events:[
@@ -892,6 +905,7 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え④',   age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'income-change', name:'投資取り崩し（月50万）',  age:55,amount:500000, duration:35,memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'},
     ]},
   ]
 };
@@ -1850,8 +1864,7 @@ function clearAllData(){
 function fmt(n){return new Intl.NumberFormat('ja-JP').format(n);}
 function fmtM(n){
   const abs=Math.abs(n), sign=n<0?'-':'';
-  if(abs>=100000000) return sign+(abs/100000000).toFixed(1)+'億円';
-  if(abs>=10000) return sign+Math.round(abs/10000)+'万円';
+  if(abs>=10000) return sign+fmt(Math.round(abs/10000))+'万円';
   return sign+fmt(Math.round(abs))+'円';
 }
 function showToast(msg){
@@ -3013,6 +3026,19 @@ function addFPUpdates(){
   showToast('✅ FPアップデートを反映しました（固定資産税・住宅ローン控除・医療費増加・家電買い替え・ESPP）');
 }
 
+function addDrawdownIncome(){
+  const EV={type:'income-change',name:'投資取り崩し（月50万）',age:55,amount:500000,duration:35,
+    memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'};
+  if(!data.plans) data.plans=[];
+  const plans=data.plans.filter(p=>!p.events.some(e=>e.name===EV.name));
+  if(!plans.length){showToast('ℹ️ 投資取り崩しはすでに全プランに反映済みです');return;}
+  if(!confirm(`以下の収入イベントを追加します:\n\n・${EV.name}（${EV.age}歳〜 +${addCommas(EV.amount)}円/月 × ${EV.duration}年間）\n\n対象: ${plans.map(p=>p.name).join('・')}\n\n続けますか？`)) return;
+  plans.forEach(p=>p.events.push({...EV}));
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderPlans();
+  showToast('✅ 投資取り崩し収入を全プランに反映しました');
+}
+
 // ============================================================
 // APPLY ALL UPDATES (one-shot batch migration)
 // ============================================================
@@ -3020,7 +3046,8 @@ function applyAllUpdates(){
   const ALL_MIGRATIONS=[
     addHousingScenarios, addDefaultHoldings, addInsuranceData, addFPSheetData,
     addCryptoHoldings, addInvestmentTrusts, addSBIHoldings,
-    addMonthlyFixedCosts, addLifestyleData, addEducationSteps, addFPUpdates
+    addMonthlyFixedCosts, addLifestyleData, addEducationSteps, addFPUpdates,
+    addDrawdownIncome
   ];
 
   const origConfirm=window.confirm;

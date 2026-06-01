@@ -149,7 +149,8 @@
         {"type":"lump-expense",  "name":"家電・設備買い替え①",   "age":48,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
         {"type":"lump-expense",  "name":"家電・設備買い替え②",   "age":58,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
         {"type":"lump-expense",  "name":"家電・設備買い替え③",   "age":68,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
-        {"type":"lump-expense",  "name":"家電・設備買い替え④",   "age":78,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"}
+        {"type":"lump-expense",  "name":"家電・設備買い替え④",   "age":78,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"income-change", "name":"投資取り崩し（月50万）",  "age":55,"amount":500000, "duration":35,"memo":"定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立"}
       ]
     },
     {
@@ -181,7 +182,8 @@
         {"type":"lump-expense",  "name":"家電・設備買い替え①",   "age":48,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
         {"type":"lump-expense",  "name":"家電・設備買い替え②",   "age":58,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
         {"type":"lump-expense",  "name":"家電・設備買い替え③",   "age":68,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
-        {"type":"lump-expense",  "name":"家電・設備買い替え④",   "age":78,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"}
+        {"type":"lump-expense",  "name":"家電・設備買い替え④",   "age":78,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"income-change", "name":"投資取り崩し（月50万）",  "age":55,"amount":500000, "duration":35,"memo":"定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立"}
       ]
     },
     {
@@ -220,7 +222,8 @@
         {"type":"lump-expense",  "name":"家電・設備買い替え①",   "age":48,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
         {"type":"lump-expense",  "name":"家電・設備買い替え②",   "age":58,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
         {"type":"lump-expense",  "name":"家電・設備買い替え③",   "age":68,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
-        {"type":"lump-expense",  "name":"家電・設備買い替え④",   "age":78,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"}
+        {"type":"lump-expense",  "name":"家電・設備買い替え④",   "age":78,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"income-change", "name":"投資取り崩し（月50万）",  "age":55,"amount":500000, "duration":35,"memo":"定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立"}
       ]
     }
   ]
