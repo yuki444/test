@@ -484,32 +484,85 @@ const DEFAULTS = {
   ],
   settings:{retireAge:65,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0},
   income:{self:350000,spouse:150000,side:0,investment:0,bonusSelf:1000000,bonusSpouse:400000},
-  expenses:{housing:100000,food:60000,utilities:25000,insurance:30000,education:20000,
+  // housing=固定資産税・管理費・修繕（住宅ローンは別途 debts.mortgageMonthly で管理）
+  expenses:{housing:80000,food:60000,utilities:25000,insurance:30000,education:20000,
     transport:20000,medical:10000,entertainment:30000,other:20000},
   savings:{invest:50000,deposit:30000,pensionSelf:150000,pensionSpouse:80000},
-  assets:{cash:3000000,fixedDeposit:2000000,stocks:1500000,ideco:500000,home:0,realEstate:0,insurance:0,other:0},
-  debts:{mortgage:0,mortgageMonthly:0,car:0,education:0,consumer:0,other:0},
-  plans:[{id:1,name:'ベースライン',color:'#3b82f6',events:[
-    // 海外旅行（3年おき、第2子が20歳になるまで）
-    {type:'lump-expense',  name:'家族海外旅行①',        age:39,amount:-2000000,duration:1,memo:'第1子6歳・第2子2歳'},
-    {type:'lump-expense',  name:'家族海外旅行②',        age:42,amount:-2000000,duration:1,memo:'第1子9歳・第2子5歳'},
-    {type:'lump-expense',  name:'家族海外旅行③',        age:45,amount:-2000000,duration:1,memo:'第1子12歳・第2子8歳'},
-    {type:'lump-expense',  name:'家族海外旅行④',        age:48,amount:-2000000,duration:1,memo:'第1子15歳・第2子11歳'},
-    // 第1子：私立高校〜私立大学
-    {type:'expense-change',name:'第1子 私立高校 授業料', age:48,amount:80000,  duration:3,memo:'月+8万円 公立差額 第1子15〜17歳'},
-    {type:'lump-expense',  name:'家族海外旅行⑤',        age:51,amount:-2000000,duration:1,memo:'第1子18歳・第2子14歳'},
-    {type:'education-fee', name:'第1子 大学入学費用',    age:51,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第1子18歳'},
-    {type:'expense-change',name:'第1子 大学 授業料',     age:51,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第1子18〜21歳'},
-    // 第2子：私立高校〜私立大学
-    {type:'expense-change',name:'第2子 私立高校 授業料', age:52,amount:80000,  duration:3,memo:'月+8万円 公立差額 第2子15〜17歳'},
-    {type:'lump-expense',  name:'家族海外旅行⑥',        age:54,amount:-2000000,duration:1,memo:'第1子21歳・第2子17歳'},
-    {type:'education-fee', name:'第2子 大学入学費用',    age:55,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第2子18歳'},
-    {type:'expense-change',name:'第2子 大学 授業料',     age:55,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第2子18〜21歳'},
-    {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行 第2子20歳'},
-    // 結婚お祝い
-    {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
-    {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
-  ]}]
+  // 3年前に7,000万円の家を購入（自宅評価額）
+  assets:{cash:3000000,fixedDeposit:2000000,stocks:1500000,ideco:500000,home:70000000,realEstate:0,insurance:0,other:0},
+  // 35年ローン・1.5%固定・月20万返済。3年経過後残高約6,000万
+  debts:{mortgage:60000000,mortgageMonthly:200000,car:0,education:0,consumer:0,other:0},
+  plans:[
+    // ── プラン1: ローン完済・住み続ける ─────────────────────────────
+    {id:1,name:'住み続ける（ローン完済）',color:'#3b82f6',events:[
+      {type:'lump-expense',  name:'家族海外旅行①',        age:39,amount:-2000000,duration:1,memo:'第1子6歳・第2子2歳'},
+      {type:'lump-expense',  name:'家族海外旅行②',        age:42,amount:-2000000,duration:1,memo:'第1子9歳・第2子5歳'},
+      {type:'lump-expense',  name:'家族海外旅行③',        age:45,amount:-2000000,duration:1,memo:'第1子12歳・第2子8歳'},
+      {type:'lump-expense',  name:'家族海外旅行④',        age:48,amount:-2000000,duration:1,memo:'第1子15歳・第2子11歳'},
+      {type:'expense-change',name:'第1子 私立高校 授業料', age:48,amount:80000,  duration:3,memo:'月+8万円 公立差額 第1子15〜17歳'},
+      {type:'lump-expense',  name:'家族海外旅行⑤',        age:51,amount:-2000000,duration:1,memo:'第1子18歳・第2子14歳'},
+      {type:'education-fee', name:'第1子 大学入学費用',    age:51,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第1子18歳'},
+      {type:'expense-change',name:'第1子 大学 授業料',     age:51,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第1子18〜21歳'},
+      {type:'expense-change',name:'第2子 私立高校 授業料', age:52,amount:80000,  duration:3,memo:'月+8万円 公立差額 第2子15〜17歳'},
+      {type:'lump-expense',  name:'家族海外旅行⑥',        age:54,amount:-2000000,duration:1,memo:'第1子21歳・第2子17歳'},
+      {type:'education-fee', name:'第2子 大学入学費用',    age:55,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第2子18歳'},
+      {type:'expense-change',name:'第2子 大学 授業料',     age:55,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第2子18〜21歳'},
+      {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行 第2子20歳'},
+      {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
+      {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
+    ]},
+    // ── プラン2: 20年後（58歳）に半値売却→賃貸転居 ────────────────
+    {id:2,name:'20年後売却→賃貸',color:'#10b981',events:[
+      {type:'lump-expense',  name:'家族海外旅行①',        age:39,amount:-2000000,duration:1,memo:'第1子6歳・第2子2歳'},
+      {type:'lump-expense',  name:'家族海外旅行②',        age:42,amount:-2000000,duration:1,memo:'第1子9歳・第2子5歳'},
+      {type:'lump-expense',  name:'家族海外旅行③',        age:45,amount:-2000000,duration:1,memo:'第1子12歳・第2子8歳'},
+      {type:'lump-expense',  name:'家族海外旅行④',        age:48,amount:-2000000,duration:1,memo:'第1子15歳・第2子11歳'},
+      {type:'expense-change',name:'第1子 私立高校 授業料', age:48,amount:80000,  duration:3,memo:'月+8万円 公立差額 第1子15〜17歳'},
+      {type:'lump-expense',  name:'家族海外旅行⑤',        age:51,amount:-2000000,duration:1,memo:'第1子18歳・第2子14歳'},
+      {type:'education-fee', name:'第1子 大学入学費用',    age:51,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第1子18歳'},
+      {type:'expense-change',name:'第1子 大学 授業料',     age:51,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第1子18〜21歳'},
+      {type:'expense-change',name:'第2子 私立高校 授業料', age:52,amount:80000,  duration:3,memo:'月+8万円 公立差額 第2子15〜17歳'},
+      {type:'lump-expense',  name:'家族海外旅行⑥',        age:54,amount:-2000000,duration:1,memo:'第1子21歳・第2子17歳'},
+      {type:'education-fee', name:'第2子 大学入学費用',    age:55,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第2子18歳'},
+      {type:'expense-change',name:'第2子 大学 授業料',     age:55,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第2子18〜21歳'},
+      {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行 第2子20歳'},
+      // 58歳で半値売却。残債~2,500万精算後 約1,000万がFAに加算、以降ローン消滅
+      {type:'sell-home',     name:'住宅売却（半値）',      age:58,amount:35000000,duration:1,memo:'7,000万→3,500万(半値)で売却。残債~2,500万精算・純益~1,000万FA算入。ローン消滅'},
+      {type:'expense-change',name:'管理費→家賃 差額',      age:58,amount:20000,  duration:40,memo:'固定資産税・管理費8万→家賃10万へ 月+2万'},
+      {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
+      {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
+    ]},
+    // ── プラン3: 8年ごとに新築へ住み替え（2割ずつ縮小） ───────────
+    {id:3,name:'8年ごとに新築',color:'#f59e0b',events:[
+      {type:'lump-expense',  name:'家族海外旅行①',        age:39,amount:-2000000,duration:1,memo:'第1子6歳・第2子2歳'},
+      {type:'lump-expense',  name:'家族海外旅行②',        age:42,amount:-2000000,duration:1,memo:'第1子9歳・第2子5歳'},
+      // 43歳：7,000万→5,600万(2割減)の新築へ。売却益~1,800万を頭金、新ローン3,800万・月11.6万
+      {type:'move-home',     name:'新築①へ住替（43歳）',  age:43,amount:0,duration:1,
+       salePrice:70000000,newPrice:56000000,newLoan:38000000,newMonthly:116000,
+       memo:'売却7,000万-残債→益1,800万を頭金/新ローン3,800万@1.5%35年=月11.6万'},
+      {type:'lump-expense',  name:'家族海外旅行③',        age:45,amount:-2000000,duration:1,memo:'第1子12歳・第2子8歳'},
+      {type:'lump-expense',  name:'家族海外旅行④',        age:48,amount:-2000000,duration:1,memo:'第1子15歳・第2子11歳'},
+      {type:'expense-change',name:'第1子 私立高校 授業料', age:48,amount:80000,  duration:3,memo:'月+8万円 公立差額 第1子15〜17歳'},
+      {type:'lump-expense',  name:'家族海外旅行⑤',        age:51,amount:-2000000,duration:1,memo:'第1子18歳・第2子14歳'},
+      {type:'education-fee', name:'第1子 大学入学費用',    age:51,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第1子18歳'},
+      {type:'expense-change',name:'第1子 大学 授業料',     age:51,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第1子18〜21歳'},
+      // 51歳：5,600万→4,480万(2割減)の新築へ。売却益~2,500万を頭金、新ローン1,980万・月6.1万
+      {type:'move-home',     name:'新築②へ住替（51歳）',  age:51,amount:0,duration:1,
+       salePrice:56000000,newPrice:44800000,newLoan:19800000,newMonthly:61000,
+       memo:'売却5,600万-残債→益2,500万を頭金/新ローン1,980万@1.5%35年=月6.1万'},
+      {type:'expense-change',name:'第2子 私立高校 授業料', age:52,amount:80000,  duration:3,memo:'月+8万円 公立差額 第2子15〜17歳'},
+      {type:'lump-expense',  name:'家族海外旅行⑥',        age:54,amount:-2000000,duration:1,memo:'第1子21歳・第2子17歳'},
+      {type:'education-fee', name:'第2子 大学入学費用',    age:55,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第2子18歳'},
+      {type:'expense-change',name:'第2子 大学 授業料',     age:55,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第2子18〜21歳'},
+      {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行 第2子20歳'},
+      // 59歳：4,480万→3,584万(2割減)の新築へ。売却益~2,880万を頭金、新ローン704万・月2.2万
+      {type:'move-home',     name:'新築③へ住替（59歳）',  age:59,amount:0,duration:1,
+       salePrice:44800000,newPrice:35840000,newLoan:7040000,newMonthly:22000,
+       memo:'売却4,480万-残債→益2,880万を頭金/新ローン704万@1.5%35年=月2.2万'},
+      {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
+      {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
+    ]},
+  ]
 };
 
 let data = JSON.parse(localStorage.getItem('fp-data') || JSON.stringify(DEFAULTS));
@@ -527,11 +580,15 @@ const EVENT_TYPES = [
   {value:'loan-start',   label:'新規ローン（住宅・自動車等）',  tag:'expense', amtLabel:'借入総額',    amtHint:'例: 30000000（借入額をプラスで入力）',defaultAmt:30000000,defaultDur:35},
   {value:'retire-early', label:'早期退職・FIRE',                tag:'life',    amtLabel:'退職時一時金', amtHint:'例: 5000000（退職金をプラスで入力）',defaultAmt:5000000,defaultDur:1},
   {value:'education-fee',label:'教育費一括（入学金・大学等）',  tag:'expense', amtLabel:'一括教育費',  amtHint:'例: -2000000（支払額をマイナスで入力）',defaultAmt:-2000000,defaultDur:1},
+  {value:'sell-home',    label:'住宅売却（賃貸転居）',          tag:'asset',   amtLabel:'売却価格',    amtHint:'例: 35000000（売却額をプラスで入力）。ローン残高を差引いた純益がFAに加算',defaultAmt:35000000,defaultDur:1},
+  {value:'move-home',    label:'住み替え（新築へ買替）',        tag:'asset',   amtLabel:'旧宅売却価格',amtHint:'例: 70000000（売却額）。newPrice/newLoan/newMonthlyをイベントに設定',defaultAmt:70000000,defaultDur:1},
 ];
 
 const PRESETS = [
   {label:'🏠 住宅購入',    type:'buy-home',     name:'住宅購入（頭金）',amt:-5000000,dur:1},
   {label:'🏦 住宅ローン',  type:'loan-start',   name:'住宅ローン',      amt:30000000,dur:35},
+  {label:'🏚️ 住宅売却',   type:'sell-home',    name:'住宅売却→賃貸',   amt:35000000,dur:1},
+  {label:'🔄 住み替え',    type:'move-home',    name:'新築へ住替',      amt:70000000,dur:1},
   {label:'🚗 自動車購入',  type:'buy-car',      name:'自動車購入',      amt:-2500000,dur:1},
   {label:'👶 子供誕生',    type:'child-born',   name:'第1子誕生',       amt:50000,   dur:22},
   {label:'🎓 大学入学',    type:'education-fee',name:'大学入学費用',    amt:-2000000,dur:1},
@@ -949,7 +1006,11 @@ function simulate(plan){
   const r=ir/100, inf=inflation/100, sg=salaryGrowth/100;
 
   let FA=data.assets.cash+data.assets.fixedDeposit+data.assets.stocks+data.assets.ideco+data.assets.insurance+data.assets.other;
-  let debt=data.debts.mortgage+data.debts.car+data.debts.education+data.debts.consumer+data.debts.other;
+  // Per-plan mortgage and home tracking (each plan gets its own state)
+  let mortgageBalance=data.debts.mortgage;
+  let mortgageMonthly=data.debts.mortgageMonthly;
+  let otherDebt=data.debts.car+data.debts.education+data.debts.consumer+data.debts.other;
+  let homeValue=data.assets.home;
   const rows=[];
 
   for(let age=startAge;age<=endAge;age++){
@@ -967,9 +1028,9 @@ function simulate(plan){
     if(spouse) income+=spouseRetired?(data.savings.pensionSpouse*12):(data.income.spouse*12+data.income.bonusSpouse)*gf;
     income+=(data.income.side+data.income.investment)*12;
 
-    // Expenses
+    // Expenses (mortgage payment only when balance remains)
     let expenses=Object.values(data.expenses).reduce((a,b)=>a+b,0)*12*inflF;
-    if(data.debts.mortgageMonthly>0) expenses+=data.debts.mortgageMonthly*12; // separate payment
+    if(mortgageMonthly>0 && mortgageBalance>0) expenses+=mortgageMonthly*12;
     if(retired) expenses*=0.85;
 
     // Events
@@ -978,41 +1039,58 @@ function simulate(plan){
       if(age<ev.age||age>=ev.age+ev.duration) return;
       switch(ev.type){
         case 'lump-expense': case 'buy-car': case 'buy-home': case 'education-fee':
-          if(age===ev.age) lump+=ev.amount; break; // negative
+          if(age===ev.age) lump+=ev.amount; break;
         case 'lump-income': case 'retire-early':
-          if(age===ev.age) lump+=ev.amount; break; // positive
+          if(age===ev.age) lump+=ev.amount; break;
         case 'income-change':
-          income+=ev.amount*12; break; // positive=increase, negative=decrease
+          income+=ev.amount*12; break;
         case 'expense-change':
-          expenses+=ev.amount*12; break; // positive=more spending
+          expenses+=ev.amount*12; break;
         case 'child-born':
-          expenses+=ev.amount*12*inflF; break; // monthly child cost
+          expenses+=ev.amount*12*inflF; break;
         case 'loan-start':
-          if(age===ev.age) debt+=ev.amount;
-          expenses+=(ev.amount/ev.duration)*inflF; break; // annual repayment
+          if(age===ev.age) otherDebt+=ev.amount;
+          expenses+=(ev.amount/ev.duration)*inflF; break;
+        case 'sell-home':
+          // Sell house: net proceeds (salePrice - remaining mortgage) go to FA
+          if(age===ev.age){
+            lump+=ev.amount-mortgageBalance;
+            mortgageBalance=0; mortgageMonthly=0; homeValue=0;
+          }
+          break;
+        case 'move-home':
+          // Sell old house, buy new (smaller) house with new mortgage
+          if(age===ev.age){
+            const sp=ev.salePrice!=null?ev.salePrice:(ev.amount||0);
+            const np=ev.newPrice||0;
+            const nl=ev.newLoan||0;
+            lump+=(sp-mortgageBalance)-(np-nl); // net FA: proceeds minus new down payment
+            mortgageBalance=nl;
+            mortgageMonthly=ev.newMonthly||0;
+            homeValue=np;
+          }
+          break;
       }
     });
 
-    // Debt reduction from mortgage monthly payment
-    if(data.debts.mortgageMonthly>0 && debt>0){
-      debt=Math.max(0,debt-data.debts.mortgageMonthly*12);
+    // Reduce mortgage balance by annual payment (stops when paid off)
+    if(mortgageMonthly>0 && mortgageBalance>0){
+      mortgageBalance=Math.max(0,mortgageBalance-mortgageMonthly*12);
     }
 
-    // FA update: FA_new = FA*(1+r) + (income - expenses + lump)
-    // Investment return only on positive balance
     const ret=FA>0?FA*r:0;
     const netCash=income-expenses+lump;
     FA=FA+ret+netCash;
 
-    const nonFA=data.assets.home+data.assets.realEstate;
+    const totalDebt=mortgageBalance+otherDebt;
     rows.push({
       year,age,spouseAge,
       income:Math.round(income),
       expenses:Math.round(expenses),
       cashFlow:Math.round(netCash),
       financialAssets:Math.round(FA),
-      debts:Math.round(debt),
-      netWorth:Math.round(FA+nonFA-debt),
+      debts:Math.round(totalDebt),
+      netWorth:Math.round(FA+homeValue+data.assets.realEstate-totalDebt),
       isRetired:retired
     });
   }
