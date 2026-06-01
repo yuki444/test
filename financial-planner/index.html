@@ -342,8 +342,16 @@
     <!-- ===== 資産・負債 ===== -->
     <div class="page" id="page-assets">
       <div class="page-header"><h2>🏦 資産・負債</h2><p>現在保有している資産と負債を入力してください。</p></div>
+      <!-- 資産配分チャート -->
+      <div class="card" id="alloc-card">
+        <div class="card-title">🥧 資産配分（アセットアロケーション）</div>
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <div style="width:160px;height:160px;flex-shrink:0"><canvas id="alloc-chart"></canvas></div>
+          <div id="alloc-legend" style="flex:1;min-width:160px;font-size:12px;display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+      </div>
       <div class="card">
-        <div class="card-title">💎 資産</div>
+        <div class="card-title">💎 資産合計（シミュレーション用）</div>
         <div class="form-grid">
           <div class="field"><label>現金・普通預金</label><input type="number" id="asset-cash" value="3000000" step="100000"><span class="hint">円</span></div>
           <div class="field"><label>定期預金</label><input type="number" id="asset-fixed-deposit" value="2000000" step="100000"><span class="hint">円</span></div>
@@ -367,6 +375,18 @@
         </div>
         <hr class="divider">
         <div id="net-worth-summary" class="inline-summary"></div>
+      </div>
+      <!-- 口座・保有資産明細 -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="card-title" style="margin:0">📋 口座・保有資産明細</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary btn-sm" onclick="syncHoldingsToAssets()" title="明細合計を上の資産欄に反映">⬆ 合計を反映</button>
+            <button class="btn btn-primary btn-sm" onclick="openHoldingModal()">＋ 追加</button>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px">口座・銘柄ごとに資産を記録。「合計を反映」で上の資産欄を自動更新します。</p>
+        <div id="holdings-container"></div>
       </div>
     </div>
 
@@ -458,6 +478,16 @@
         </div>
       </div>
       <div class="card">
+        <div class="card-title">🏠 住宅ローン シナリオ追加</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">住宅購入済み向けの3シナリオを現在のデータに追加します。既存のシナリオは削除されません。</p>
+        <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
+          <strong>① 住み続ける（ローン完済）</strong> — 70歳までローン返済継続<br>
+          <strong>② 20年後売却→賃貸</strong> — 58歳で半値売却・賃貸転居<br>
+          <strong>③ 8年ごとに新築</strong> — 43/51/59歳に2割縮小の新築へ住替
+        </div>
+        <button class="btn btn-primary" onclick="addHousingScenarios()">🏠 3シナリオを現在のデータに追加</button>
+      </div>
+      <div class="card">
         <div class="card-title">🗑️ データ管理</div>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">すべてのデータを削除してリセットします。</p>
         <button class="btn btn-danger" onclick="clearAllData()">⚠️ 全データを削除してリセット</button>
@@ -492,6 +522,7 @@ const DEFAULTS = {
   assets:{cash:3000000,fixedDeposit:2000000,stocks:1500000,ideco:500000,home:70000000,realEstate:0,insurance:0,other:0},
   // 35年ローン・1.5%固定・月20万返済。3年経過後残高約6,000万
   debts:{mortgage:60000000,mortgageMonthly:200000,car:0,education:0,consumer:0,other:0},
+  holdings:[],
   plans:[
     // ── プラン1: ローン完済・住み続ける ─────────────────────────────
     {id:1,name:'住み続ける（ローン完済）',color:'#3b82f6',events:[
@@ -567,7 +598,7 @@ const DEFAULTS = {
 
 let data = JSON.parse(localStorage.getItem('fp-data') || JSON.stringify(DEFAULTS));
 let activePlanId = data.plans[0]?.id || 1;
-const PLAN_COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444'];
+const PLAN_COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
 
 const EVENT_TYPES = [
   {value:'lump-expense', label:'一時支出（冠婚葬祭・旅行等）', tag:'expense', amtLabel:'支出金額', amtHint:'例: -500000（支払う金額をマイナスで入力）', defaultAmt:-500000, defaultDur:1},
@@ -757,7 +788,7 @@ function showPage(id){
   if(id==='page-simulation'){syncFromDOM();renderSimulation();}
   if(id==='page-advice'){syncFromDOM();renderAdvice();}
   if(id==='page-income'){updateMonthlySummary();}
-  if(id==='page-assets'){updateNetWorthSummary();}
+  if(id==='page-assets'){updateNetWorthSummary();renderAllocChart();renderHoldings();}
   if(id==='page-settings'){updatePinStatus();}
 }
 
@@ -907,7 +938,7 @@ function renderPlans(){
       <span class="dot" style="background:${p.color}"></span>
       <span contenteditable="true" onblur="renamePlan(${p.id},this.textContent)" onclick="event.stopPropagation()">${p.name}</span>
     </div>`).join('')+
-    (data.plans.length<4?`<div class="plan-tab plan-tab-add" onclick="addPlan()">＋ シナリオ追加</div>`:'');
+    (data.plans.length<6?`<div class="plan-tab plan-tab-add" onclick="addPlan()">＋ シナリオ追加</div>`:'');
   renderPlanContent();
 }
 
@@ -915,7 +946,7 @@ function selectPlan(id){activePlanId=id;renderPlans();}
 function renamePlan(id,name){const p=data.plans.find(p=>p.id===id);if(p)p.name=name.trim()||p.name;}
 
 function addPlan(){
-  if(data.plans.length>=4){showToast('シナリオは最大4つです');return;}
+  if(data.plans.length>=6){showToast('❌ シナリオは最大6つまでです');return;}
   const id=Date.now();
   const base=data.plans.find(p=>p.id===activePlanId);
   data.plans.push({id,name:`シナリオ ${data.plans.length+1}`,color:PLAN_COLORS[data.plans.length%4],
@@ -924,7 +955,7 @@ function addPlan(){
 }
 
 function copyPlan(){
-  if(data.plans.length>=4){showToast('シナリオは最大4つです');return;}
+  if(data.plans.length>=6){showToast('❌ シナリオは最大6つまでです');return;}
   const src=data.plans.find(p=>p.id===activePlanId);
   if(!src) return;
   const id=Date.now();
@@ -1445,10 +1476,245 @@ function showToast(msg){
 }
 
 // ============================================================
+// ASSET ALLOCATION CHART
+// ============================================================
+function renderAllocChart(){
+  syncFromDOM();
+  const a=data.assets;
+  const totalD=data.debts.mortgage+data.debts.car+data.debts.education+data.debts.consumer+data.debts.other;
+  const cats=[
+    {label:'現金・預金',   value:a.cash+a.fixedDeposit,  color:'#60a5fa'},
+    {label:'株式・投信',   value:a.stocks+a.ideco,        color:'#34d399'},
+    {label:'不動産',       value:a.home+a.realEstate,      color:'#f59e0b'},
+    {label:'保険・その他', value:a.insurance+a.other,      color:'#a78bfa'},
+    {label:'負債',         value:-totalD,                  color:'#f87171'},
+  ].filter(c=>c.value!==0);
+  const total=cats.reduce((s,c)=>s+(c.value>0?c.value:0),0);
+  const legend=document.getElementById('alloc-legend');
+  if(legend){
+    legend.innerHTML=cats.map(c=>{
+      const pct=total>0?Math.round(Math.abs(c.value)/total*100):0;
+      const sign=c.value<0?'-':'';
+      return `<div style="display:flex;align-items:center;gap:8px">
+        <span style="width:10px;height:10px;border-radius:2px;background:${c.color};flex-shrink:0"></span>
+        <span style="flex:1;color:var(--text-muted)">${c.label}</span>
+        <span style="font-weight:700">${sign}${fmtM(Math.abs(c.value))}</span>
+        <span style="color:var(--text-muted);min-width:30px;text-align:right">${pct}%</span>
+      </div>`;
+    }).join('');
+  }
+  const canvas=document.getElementById('alloc-chart');
+  if(!canvas) return;
+  if(charts['alloc']){charts['alloc'].destroy();delete charts['alloc'];}
+  if(cats.length===0) return;
+  charts['alloc']=new Chart(canvas,{
+    type:'doughnut',
+    data:{
+      labels:cats.map(c=>c.label),
+      datasets:[{data:cats.map(c=>Math.abs(c.value)),backgroundColor:cats.map(c=>c.color),borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{
+        const v=cats[ctx.dataIndex].value;
+        const pct=total>0?Math.round(Math.abs(v)/total*100):0;
+        return ` ${fmtM(Math.abs(v))} (${pct}%)`;
+      }}}},
+      cutout:'65%'
+    }
+  });
+}
+
+// ============================================================
+// HOLDINGS (口座・保有資産明細)
+// ============================================================
+const HOLDING_CATS=[
+  {value:'cash',     label:'現金・普通預金',       field:'cash'},
+  {value:'deposit',  label:'定期預金',              field:'fixedDeposit'},
+  {value:'stocks',   label:'株式・投信（NISA含む）',field:'stocks'},
+  {value:'ideco',    label:'iDeCo・確定拠出年金',   field:'ideco'},
+  {value:'insurance',label:'生命保険（解約返戻金）', field:'insurance'},
+  {value:'other',    label:'その他資産',             field:'other'},
+];
+
+function renderHoldings(){
+  const container=document.getElementById('holdings-container');
+  if(!container) return;
+  const h=data.holdings||[];
+  if(h.length===0){
+    container.innerHTML=`<div style="text-align:center;padding:24px;color:var(--text-muted);background:var(--bg);border-radius:8px;border:1px dashed var(--border)">
+      <div style="font-size:24px;margin-bottom:6px">📂</div>
+      <div style="font-size:13px;font-weight:700">明細がありません</div>
+      <div style="font-size:11px;margin-top:3px">「＋ 追加」から口座・銘柄を登録</div></div>`;
+    return;
+  }
+  const totalGain=h.reduce((s,x)=>s+(x.cost>0?x.value-x.cost:0),0);
+  let html=`<div style="overflow-x:auto"><table style="width:100%;font-size:12px;border-collapse:collapse">
+    <thead><tr style="border-bottom:2px solid var(--border);color:var(--text-muted)">
+      <th style="text-align:left;padding:6px 8px">口座名</th>
+      <th style="text-align:left;padding:6px 8px">銘柄・資産名</th>
+      <th style="text-align:left;padding:6px 8px">カテゴリ</th>
+      <th style="text-align:right;padding:6px 8px">現在価額</th>
+      <th style="text-align:right;padding:6px 8px">取得価額</th>
+      <th style="text-align:right;padding:6px 8px">含み損益</th>
+      <th style="padding:4px"></th>
+    </tr></thead><tbody>`;
+  h.forEach((x,i)=>{
+    const gain=x.cost>0?x.value-x.cost:null;
+    const gainPct=x.cost>0?Math.round((x.value-x.cost)/x.cost*100):null;
+    const gainColor=gain===null?'var(--text-muted)':gain>=0?'var(--secondary)':'var(--danger)';
+    const gainStr=gain===null?'—':`${gain>=0?'+':''}${fmtM(gain)}<br><span style="font-size:10px">(${gain>=0?'+':''}${gainPct}%)</span>`;
+    const catLabel=HOLDING_CATS.find(c=>c.value===x.category)?.label||x.category;
+    html+=`<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px">${x.account||'—'}</td>
+      <td style="padding:8px;font-weight:700">${x.name}</td>
+      <td style="padding:8px;color:var(--text-muted)">${catLabel}</td>
+      <td style="text-align:right;padding:8px;font-weight:700">${fmtM(x.value)}</td>
+      <td style="text-align:right;padding:8px;color:var(--text-muted)">${x.cost>0?fmtM(x.cost):'—'}</td>
+      <td style="text-align:right;padding:8px;color:${gainColor}">${gainStr}</td>
+      <td style="padding:8px"><button class="btn btn-danger btn-sm" onclick="deleteHolding(${i})">削除</button></td>
+    </tr>`;
+  });
+  const totalVal=h.reduce((s,x)=>s+x.value,0);
+  html+=`</tbody><tfoot><tr style="font-weight:700;border-top:2px solid var(--border);background:var(--bg)">
+    <td colspan="3" style="padding:8px;color:var(--text-muted)">合計 ${h.length}件</td>
+    <td style="text-align:right;padding:8px">${fmtM(totalVal)}</td>
+    <td style="padding:8px"></td>
+    <td style="text-align:right;padding:8px;color:${totalGain>=0?'var(--secondary)':'var(--danger)'}">
+      ${totalGain>=0?'+':''}${fmtM(totalGain)}
+    </td>
+    <td></td>
+  </tr></tfoot></table></div>`;
+  container.innerHTML=html;
+}
+
+function openHoldingModal(editIdx){
+  const existing=editIdx!=null?data.holdings[editIdx]:null;
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.innerHTML=`<div class="modal-box">
+    <h3>📋 ${existing?'保有資産を編集':'保有資産を追加'}</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="field"><label>口座名・証券会社</label><input type="text" id="h-account" placeholder="例: SBI証券 NISA口座" value="${existing?.account||''}"></div>
+      <div class="field"><label>銘柄・資産名 <span style="color:var(--danger)">*</span></label><input type="text" id="h-name" placeholder="例: eMAXIS Slim 全世界株式" value="${existing?.name||''}"></div>
+      <div class="field"><label>カテゴリ</label>
+        <select id="h-cat">
+          ${HOLDING_CATS.map(c=>`<option value="${c.value}"${existing?.category===c.value?' selected':''}>${c.label}</option>`).join('')}
+        </select></div>
+      <div class="field"><label>現在価額（円）</label><input type="text" inputmode="numeric" data-money="1" id="h-value" value="${addCommas(existing?.value||0)}" style="text-align:right"></div>
+      <div class="field"><label>取得価額（円）<span style="font-size:11px;color:var(--text-muted);font-weight:400">（不明な場合は0）</span></label><input type="text" inputmode="numeric" data-money="1" id="h-cost" value="${addCommas(existing?.cost||0)}" style="text-align:right"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveHolding(${editIdx!=null?editIdx:'null'})">保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+}
+
+function saveHolding(editIdx){
+  const name=document.getElementById('h-name').value.trim();
+  if(!name){showToast('❌ 銘柄・資産名を入力してください');return;}
+  const h={
+    account:document.getElementById('h-account').value.trim(),
+    name,
+    category:document.getElementById('h-cat').value,
+    value:stripCommas(document.getElementById('h-value').value),
+    cost:stripCommas(document.getElementById('h-cost').value),
+  };
+  if(editIdx!=null) data.holdings[editIdx]=h;
+  else data.holdings.push(h);
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  document.querySelector('.modal-overlay')?.remove();
+  renderHoldings();
+  showToast('✅ 保存しました');
+}
+
+function deleteHolding(idx){
+  if(!confirm('この明細を削除しますか？')) return;
+  data.holdings.splice(idx,1);
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderHoldings();
+}
+
+function syncHoldingsToAssets(){
+  if(!data.holdings?.length){showToast('❌ 明細がありません');return;}
+  const totals={cash:0,fixedDeposit:0,stocks:0,ideco:0,insurance:0,other:0};
+  data.holdings.forEach(h=>{
+    const cat=HOLDING_CATS.find(c=>c.value===h.category);
+    if(cat) totals[cat.field]=(totals[cat.field]||0)+h.value;
+  });
+  Object.entries(totals).forEach(([field,val])=>{
+    if(val>0) data.assets[field]=val;
+  });
+  syncToDOM();
+  updateNetWorthSummary();
+  renderAllocChart();
+  showToast('✅ 明細合計を資産欄に反映しました');
+}
+
+// ============================================================
+// ADD HOUSING SCENARIOS (migration helper)
+// ============================================================
+function addHousingScenarios(){
+  const existingNames=data.plans.map(p=>p.name);
+  const toAdd=[];
+  const commonEvents=[
+    {type:'lump-expense',  name:'家族海外旅行①',        age:39,amount:-2000000,duration:1,memo:'第1子6歳・第2子2歳'},
+    {type:'lump-expense',  name:'家族海外旅行②',        age:42,amount:-2000000,duration:1,memo:'第1子9歳・第2子5歳'},
+    {type:'lump-expense',  name:'家族海外旅行③',        age:45,amount:-2000000,duration:1,memo:'第1子12歳・第2子8歳'},
+    {type:'lump-expense',  name:'家族海外旅行④',        age:48,amount:-2000000,duration:1,memo:'第1子15歳・第2子11歳'},
+    {type:'expense-change',name:'第1子 私立高校 授業料', age:48,amount:80000,  duration:3,memo:'月+8万円 公立差額'},
+    {type:'lump-expense',  name:'家族海外旅行⑤',        age:51,amount:-2000000,duration:1,memo:'第1子18歳・第2子14歳'},
+    {type:'education-fee', name:'第1子 大学入学費用',    age:51,amount:-1500000,duration:1,memo:'私立大 第1子18歳'},
+    {type:'expense-change',name:'第1子 大学 授業料',     age:51,amount:100000, duration:4,memo:'月+10万円 私立文系'},
+    {type:'expense-change',name:'第2子 私立高校 授業料', age:52,amount:80000,  duration:3,memo:'月+8万円 公立差額'},
+    {type:'lump-expense',  name:'家族海外旅行⑥',        age:54,amount:-2000000,duration:1,memo:'第1子21歳・第2子17歳'},
+    {type:'education-fee', name:'第2子 大学入学費用',    age:55,amount:-1500000,duration:1,memo:'私立大 第2子18歳'},
+    {type:'expense-change',name:'第2子 大学 授業料',     age:55,amount:100000, duration:4,memo:'月+10万円 私立文系'},
+    {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行'},
+    {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳'},
+    {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳'},
+  ];
+  if(!existingNames.includes('住み続ける（ローン完済）'))
+    toAdd.push({name:'住み続ける（ローン完済）',color:'#3b82f6',events:[...commonEvents]});
+  if(!existingNames.includes('20年後売却→賃貸'))
+    toAdd.push({name:'20年後売却→賃貸',color:'#10b981',events:[...commonEvents,
+      {type:'sell-home',     name:'住宅売却（半値）',   age:58,amount:35000000,duration:1,memo:'残債精算・ローン消滅'},
+      {type:'expense-change',name:'賃貸家賃差額',        age:58,amount:20000,  duration:40,memo:'管理費8万→家賃10万'},
+    ].sort((a,b)=>a.age-b.age)});
+  if(!existingNames.includes('8年ごとに新築'))
+    toAdd.push({name:'8年ごとに新築',color:'#f59e0b',events:[...commonEvents,
+      {type:'move-home',name:'新築①へ住替（43歳）',age:43,amount:0,duration:1,salePrice:70000000,newPrice:56000000,newLoan:38000000,newMonthly:116000,memo:'7,000→5,600万'},
+      {type:'move-home',name:'新築②へ住替（51歳）',age:51,amount:0,duration:1,salePrice:56000000,newPrice:44800000,newLoan:19800000,newMonthly:61000,memo:'5,600→4,480万'},
+      {type:'move-home',name:'新築③へ住替（59歳）',age:59,amount:0,duration:1,salePrice:44800000,newPrice:35840000,newLoan:7040000,newMonthly:22000,memo:'4,480→3,584万'},
+    ].sort((a,b)=>a.age-b.age)});
+  if(toAdd.length===0){showToast('ℹ️ 3シナリオはすでに追加済みです');return;}
+  if(data.plans.length+toAdd.length>6){
+    showToast(`❌ シナリオ数が上限(6)を超えます。先に不要なシナリオを削除してください`);return;
+  }
+  if(!confirm(`以下のシナリオを追加します:\n${toAdd.map(p=>'・'+p.name).join('\n')}\n\n続けますか？`)) return;
+  toAdd.forEach(p=>{
+    const id=Date.now()+Math.random();
+    data.plans.push({id,name:p.name,color:p.color,events:p.events});
+  });
+  // 住宅データが未設定なら補完
+  if(data.assets.home===0) data.assets.home=70000000;
+  if(data.debts.mortgage===0) data.debts.mortgage=60000000;
+  if(data.debts.mortgageMonthly===0) data.debts.mortgageMonthly=200000;
+  if(data.expenses.housing>=100000) data.expenses.housing=80000;
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  syncToDOM(); renderPlans();
+  showToast(`✅ ${toAdd.length}シナリオを追加しました`);
+}
+
+// ============================================================
 // INIT
 // ============================================================
 function init(){
   initPin();
+  if(!data.holdings) data.holdings=[];
   initMoneyInputs();
   renderMembers();
   syncToDOM();
@@ -1467,7 +1733,7 @@ function init(){
     'asset-realestate','asset-insurance','asset-other','debt-mortgage','debt-mortgage-monthly',
     'debt-car','debt-education','debt-consumer','debt-other'];
   assetIds.forEach(id=>{
-    document.getElementById(id)?.addEventListener('input',updateNetWorthSummary);
+    document.getElementById(id)?.addEventListener('input',()=>{updateNetWorthSummary();renderAllocChart();});
   });
   document.getElementById('retire-age')?.addEventListener('input',updateRetireWidget);
 }
