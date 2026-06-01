@@ -582,6 +582,15 @@
         <button class="btn btn-primary" onclick="addCryptoHoldings()">₿ 暗号資産を現在のデータに追加</button>
       </div>
       <div class="card">
+        <div class="card-title">📱 月次固定費を反映</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">スポーツクラブ・美容・通信費・サブスクを支出明細に追加します。同名の項目は重複追加されません。</p>
+        <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
+          <strong>娯楽・趣味に追加</strong> — スポーツクラブ +37,000円/月<br>
+          <strong>その他に追加</strong> — 美容 +24,000 / 携帯電話 +7,000 / WEBサービス +5,000 / インターネット +4,000
+        </div>
+        <button class="btn btn-primary" onclick="addMonthlyFixedCosts()">📱 月次固定費を現在のデータに反映</button>
+      </div>
+      <div class="card">
         <div class="card-title">🏌️ ライフスタイル費用を反映</div>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">ゴルフ・家族旅行・火災保険・子供小遣いを現在のデータに追加します。同内容は重複追加されません。</p>
         <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
@@ -631,16 +640,21 @@ const DEFAULTS = {
   income:{self:850000,spouse:325000,side:0,investment:0,bonusSelf:1000000,bonusSpouse:0},
   // housing=固定資産税・管理費・修繕（住宅ローンは別途 debts.mortgageMonthly で管理）
   expenses:{housing:80000,food:55000,utilities:22000,insurance:65000,education:75000,
-    transport:25000,medical:30000,entertainment:110000,other:75000},
+    transport:25000,medical:30000,entertainment:147000,other:115000},
   expenseDetails:{
     entertainment:[
-      {name:'ゴルフ',           amount:30000},
-      {name:'外食・飲み会',     amount:50000},
-      {name:'趣味・レジャー',   amount:30000},
+      {name:'スポーツクラブ',       amount:37000},
+      {name:'ゴルフ',               amount:30000},
+      {name:'外食・飲み会',         amount:50000},
+      {name:'趣味・レジャー',       amount:30000},
     ],
     other:[
-      {name:'家族旅行（年30万）',amount:25000},
-      {name:'日用品・雑費',     amount:50000},
+      {name:'家族旅行（年30万）',   amount:25000},
+      {name:'日用品・雑費',         amount:50000},
+      {name:'美容（美容院等）',     amount:24000},
+      {name:'携帯電話',             amount:7000},
+      {name:'WEBサービス・サブスク',amount:5000},
+      {name:'インターネット',       amount:4000},
     ]
   },
   // 年金見込み: 本人厚生年金+国民年金(65歳~)≈20万/月, 配偶者≈14万/月
@@ -2411,6 +2425,33 @@ function addEducationSteps(){
   renderExpenseSteps();
   markDirty();
   showToast('✅ 教育費ステップを反映しました');
+}
+
+function addMonthlyFixedCosts(){
+  const ENT_ITEMS=[
+    {name:'スポーツクラブ',       amount:37000},
+  ];
+  const OTH_ITEMS=[
+    {name:'美容（美容院等）',     amount:24000},
+    {name:'携帯電話',             amount:7000},
+    {name:'WEBサービス・サブスク',amount:5000},
+    {name:'インターネット',       amount:4000},
+  ];
+  if(!data.expenseDetails) data.expenseDetails={entertainment:[],other:[]};
+  const entNames=new Set((data.expenseDetails.entertainment||[]).map(x=>x.name));
+  const othNames=new Set((data.expenseDetails.other||[]).map(x=>x.name));
+  const toAddEnt=ENT_ITEMS.filter(x=>!entNames.has(x.name));
+  const toAddOth=OTH_ITEMS.filter(x=>!othNames.has(x.name));
+  if(!toAddEnt.length&&!toAddOth.length){showToast('ℹ️ 月次固定費はすでに追加済みです');return;}
+  const changes=[
+    ...toAddEnt.map(x=>`娯楽に「${x.name}」+${addCommas(x.amount)}円/月`),
+    ...toAddOth.map(x=>`その他に「${x.name}」+${addCommas(x.amount)}円/月`),
+  ];
+  if(!confirm(`以下の内容を追加します:\n\n${changes.join('\n')}\n\n続けますか？`)) return;
+  toAddEnt.forEach(x=>data.expenseDetails.entertainment.push({...x}));
+  toAddOth.forEach(x=>data.expenseDetails.other.push({...x}));
+  _saveAndRenderDetails();
+  showToast('✅ 月次固定費を反映しました');
 }
 
 function addLifestyleData(){

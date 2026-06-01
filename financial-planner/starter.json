@@ -16,17 +16,22 @@
   "expenses": {
     "housing":80000,"food":55000,"utilities":22000,"insurance":65000,
     "education":75000,"transport":25000,"medical":30000,
-    "entertainment":110000,"other":75000
+    "entertainment":147000,"other":115000
   },
   "expenseDetails": {
     "entertainment":[
-      {"name":"ゴルフ",           "amount":30000},
-      {"name":"外食・飲み会",     "amount":50000},
-      {"name":"趣味・レジャー",   "amount":30000}
+      {"name":"スポーツクラブ",        "amount":37000},
+      {"name":"ゴルフ",                "amount":30000},
+      {"name":"外食・飲み会",          "amount":50000},
+      {"name":"趣味・レジャー",        "amount":30000}
     ],
     "other":[
-      {"name":"家族旅行（年30万）","amount":25000},
-      {"name":"日用品・雑費",     "amount":50000}
+      {"name":"家族旅行（年30万）",    "amount":25000},
+      {"name":"日用品・雑費",          "amount":50000},
+      {"name":"美容（美容院等）",      "amount":24000},
+      {"name":"携帯電話",              "amount":7000},
+      {"name":"WEBサービス・サブスク", "amount":5000},
+      {"name":"インターネット",        "amount":4000}
     ]
   },
   "savings": {
