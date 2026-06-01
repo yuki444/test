@@ -261,7 +261,7 @@
     </div>
     <div id="retire-progress-widget" style="margin:0 12px 8px"></div>
     <div class="sidebar-footer">
-      <button class="btn-save-all" onclick="saveAll()">💾 データを保存</button>
+      <button class="btn-save-all" id="btn-save-all" onclick="saveAll()">💾 データを保存</button>
       <div class="footer-tools">
         <button class="btn-tool" onclick="exportData()" title="JSONファイルとしてダウンロード">⬇ エクスポート</button>
         <button class="btn-tool" onclick="importData()" title="JSONファイルから読み込み">⬆ インポート</button>
@@ -315,7 +315,7 @@
       <div class="card">
         <div class="card-title">📉 支出（月額）</div>
         <div class="form-grid">
-          <div class="field"><label>住居費（家賃・住宅ローン含む）</label><input type="number" id="exp-housing" value="100000" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field"><label>住居費（管理費・固定資産税・維持費のみ）<span style="font-size:11px;color:var(--danger);font-weight:400"> ※住宅ローンは「負債」欄に入力</span></label><input type="number" id="exp-housing" value="100000" step="5000"><span class="hint">円 / 月</span></div>
           <div class="field"><label>食費</label><input type="number" id="exp-food" value="60000" step="5000"><span class="hint">円 / 月</span></div>
           <div class="field"><label>光熱費・通信費</label><input type="number" id="exp-utilities" value="25000" step="1000"><span class="hint">円 / 月</span></div>
           <div class="field"><label>保険料</label><input type="number" id="exp-insurance" value="30000" step="1000"><span class="hint">円 / 月</span></div>
@@ -997,7 +997,6 @@ function renamePlan(id,name){const p=data.plans.find(p=>p.id===id);if(p)p.name=n
 function addPlan(){
   if(data.plans.length>=6){showToast('❌ シナリオは最大6つまでです');return;}
   const id=Date.now();
-  const base=data.plans.find(p=>p.id===activePlanId);
   data.plans.push({id,name:`シナリオ ${data.plans.length+1}`,color:PLAN_COLORS[data.plans.length%4],
     events:[]});
   activePlanId=id;renderPlans();
@@ -1182,10 +1181,13 @@ function simulate(plan){
         case 'expense-change':
           expenses+=ev.amount*12; break;
         case 'child-born':
-          expenses+=ev.amount*12*inflF; break;
+          expenses+=ev.amount*12; break;
         case 'loan-start':
           if(age===ev.age) otherDebt+=ev.amount;
-          expenses+=(ev.amount/ev.duration)*inflF; break;
+          // 固定返済額にインフレ掛けない、残高を毎年返済額分減らす
+          if(age>=ev.age && age<ev.age+ev.duration)
+            otherDebt=Math.max(0,otherDebt-(ev.amount/ev.duration));
+          expenses+=ev.amount/ev.duration; break;
         case 'sell-home':
           // Sell house: net proceeds (salePrice - remaining mortgage) go to FA
           if(age===ev.age){
@@ -1213,7 +1215,8 @@ function simulate(plan){
       mortgageBalance=Math.max(0,mortgageBalance-mortgageMonthly*12);
     }
 
-    const ret=FA>0?FA*r:0;
+    // FAがマイナスの場合も同率で借入コストを計上（楽観的過大評価を防ぐ）
+    const ret=FA*r;
     const netCash=income-expenses+lump;
     FA=FA+ret+netCash;
 
@@ -1366,7 +1369,7 @@ function renderAdvice(){
   const lastRow=simBase[simBase.length-1];
   const depletionRow=simBase.find(r=>r.netWorth<0);
   const targetRetire=monthlyExp*12*25; // 4% rule
-  const nisaMonthlyMax=30000; // 年360万÷12
+  const nisaMonthlyMax=300000; // 年360万÷12
   const idecoMax=23000;
   const advice=[];
 
@@ -1424,10 +1427,15 @@ function renderAdvice(){
       desc:`退職時（${retireRow.age}歳）純資産${fmtM(retireRow.netWorth)}は、生活費25年分の目標${fmtM(targetRetire)}を上回っています。現在の計画を維持しましょう。`});
   }
 
+  // 金融資産枯渇（純資産はプラスでも流動資産がマイナスになる早期警告）
+  const liquidDeplRow=simBase.find(r=>r.financialAssets<0);
   // 資産枯渇
   if(depletionRow){
     advice.push({type:'alert',icon:'📉',title:`${depletionRow.age}歳頃に資産が枯渇する見込みです`,
       desc:`現在のシナリオでは${depletionRow.year}年頃（${depletionRow.age}歳）に純資産がマイナスになります。年金の繰り下げ受給（75歳まで最大84%増）、退職後の生活費削減（10〜20%）、パートタイム収入の追加を検討してください。`});
+  } else if(liquidDeplRow){
+    advice.push({type:'warn',icon:'⚠️',title:`${liquidDeplRow.age}歳頃に流動資産が枯渇する見込みです`,
+      desc:`純資産はプラスですが、${liquidDeplRow.age}歳頃に現金・株式などの流動資産がマイナスになります。不動産などの資産は残りますが、日常の生活費を賄えなくなる可能性があります。売却・取り崩しの検討を。`});
   } else if(lastRow.netWorth>0){
     advice.push({type:'good',icon:'🏆',title:`${lastRow.age}歳まで資産が持続します`,
       desc:`シミュレーション終端（${lastRow.age}歳）時点でも純資産${fmtM(lastRow.netWorth)}が残ります。資産の長期持続性は確保されています。`});
@@ -1463,9 +1471,21 @@ function renderAdvice(){
 // ============================================================
 // DATA MANAGEMENT
 // ============================================================
+let _dirty=false;
+function markDirty(){
+  _dirty=true;
+  const btn=document.getElementById('btn-save-all');
+  if(btn) btn.textContent='💾 保存（未保存の変更あり）';
+}
+function clearDirty(){
+  _dirty=false;
+  const btn=document.getElementById('btn-save-all');
+  if(btn) btn.textContent='💾 データを保存';
+}
 function saveAll(){
   syncFromDOM();
   localStorage.setItem('fp-data',JSON.stringify(data));
+  clearDirty();
   showToast('✅ 保存しました');
 }
 
@@ -1625,12 +1645,14 @@ function renderHoldings(){
     </tr>`;
   });
   const totalVal=h.reduce((s,x)=>s+x.value,0);
+  const totalCost=h.reduce((s,x)=>s+(x.cost>0?x.cost:0),0);
+  const totalGainPct=totalCost>0?Math.round(totalGain/totalCost*100):null;
   html+=`</tbody><tfoot><tr style="font-weight:700;border-top:2px solid var(--border);background:var(--bg)">
     <td colspan="3" style="padding:8px;color:var(--text-muted)">合計 ${h.length}件</td>
     <td style="text-align:right;padding:8px">${fmtM(totalVal)}</td>
-    <td style="padding:8px"></td>
+    <td style="text-align:right;padding:8px;color:var(--text-muted)">${totalCost>0?fmtM(totalCost):'—'}</td>
     <td style="text-align:right;padding:8px;color:${totalGain>=0?'var(--secondary)':'var(--danger)'}">
-      ${totalGain>=0?'+':''}${fmtM(totalGain)}
+      ${totalGain>=0?'+':''}${fmtM(totalGain)}${totalGainPct!==null?`<br><span style="font-size:10px">(${totalGain>=0?'+':''}${totalGainPct}%)</span>`:''}
     </td>
     <td></td>
   </tr></tfoot></table></div>`;
@@ -1699,7 +1721,7 @@ function syncHoldingsToAssets(){
     if(cat) totals[cat.field]=(totals[cat.field]||0)+h.value;
   });
   Object.entries(totals).forEach(([field,val])=>{
-    if(val>0) data.assets[field]=val;
+    data.assets[field]=val;
   });
   syncToDOM();
   updateNetWorthSummary();
@@ -1793,13 +1815,22 @@ function addDefaultHoldings(){
   if(!data.holdings) data.holdings=[];
   const existing=new Set(data.holdings.map(h=>h.account+'|'+h.name));
   const toAdd=DEFAULT_HOLDINGS.filter(h=>!existing.has(h.account+'|'+h.name));
-  if(toAdd.length===0){showToast('ℹ️ すべての銘柄はすでに登録済みです');return;}
-  if(!confirm(`${toAdd.length}件の銘柄を現在のデータに追加します。続けますか？`)) return;
+  // 既存銘柄に shares が未設定なら補完
+  let backfilled=0;
+  data.holdings.forEach(h=>{
+    if(!h.shares){
+      const def=DEFAULT_HOLDINGS.find(d=>d.account===h.account&&d.name===h.name);
+      if(def){h.shares=def.shares;backfilled++;}
+    }
+  });
+  if(toAdd.length===0&&backfilled===0){showToast('ℹ️ すべての銘柄はすでに登録済みです');return;}
+  const msg=[toAdd.length>0?`${toAdd.length}件を追加`:'',backfilled>0?`${backfilled}件に保有株数を補完`:''].filter(Boolean).join('、');
+  if(!confirm(`${msg}します。続けますか？`)) return;
   data.holdings.push(...toAdd);
   if(data.assets.stocks<8000000) data.assets.stocks=8882862;
   localStorage.setItem('fp-data',JSON.stringify(data));
   syncToDOM(); renderHoldings(); renderAllocChart();
-  showToast(`✅ ${toAdd.length}件の銘柄を追加しました`);
+  showToast(`✅ ${msg}しました`);
 }
 
 function addHousingScenarios(){
@@ -1859,6 +1890,11 @@ function addHousingScenarios(){
 // ============================================================
 function init(){
   initPin();
+  // 旧バージョンからのマイグレーション：新フィールドの安全なデフォルト補完
+  data.settings=Object.assign({retireAge:65,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0},data.settings);
+  data.debts=Object.assign({mortgage:0,mortgageMonthly:0,car:0,education:0,consumer:0,other:0},data.debts);
+  data.savings=Object.assign({invest:50000,deposit:30000,pensionSelf:150000,pensionSpouse:80000},data.savings);
+  data.income=Object.assign({self:0,spouse:0,side:0,investment:0,bonusSelf:0,bonusSpouse:0},data.income);
   if(!data.holdings) data.holdings=[];
   initMoneyInputs();
   renderMembers();
@@ -1872,13 +1908,13 @@ function init(){
     'exp-housing','exp-food','exp-utilities','exp-insurance','exp-education','exp-transport',
     'exp-medical','exp-entertainment','exp-other','saving-invest','saving-deposit'];
   incomeIds.forEach(id=>{
-    document.getElementById(id)?.addEventListener('input',updateMonthlySummary);
+    document.getElementById(id)?.addEventListener('input',()=>{updateMonthlySummary();markDirty();});
   });
   const assetIds=['asset-cash','asset-fixed-deposit','asset-stocks','asset-ideco','asset-home',
     'asset-realestate','asset-insurance','asset-other','debt-mortgage','debt-mortgage-monthly',
     'debt-car','debt-education','debt-consumer','debt-other'];
   assetIds.forEach(id=>{
-    document.getElementById(id)?.addEventListener('input',()=>{updateNetWorthSummary();renderAllocChart();});
+    document.getElementById(id)?.addEventListener('input',()=>{updateNetWorthSummary();renderAllocChart();markDirty();});
   });
   document.getElementById('retire-age')?.addEventListener('input',updateRetireWidget);
 }
