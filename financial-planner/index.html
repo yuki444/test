@@ -644,6 +644,19 @@
         <button class="btn btn-primary" onclick="addEducationSteps()">📚 教育費ステップを現在のデータに反映</button>
       </div>
       <div class="card">
+        <div class="card-title">🏦 FP観点アップデートを反映</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">FP観点で重要な費用・スケジュールを現在のデータに反映します。同内容は重複追加されません。</p>
+        <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
+          <strong>固定資産税</strong> — その他支出に +13,000円/月 追加<br>
+          <strong>住宅ローン控除</strong> — 38歳〜 −30,000円/月（0.7%×残債 年約36万）／51歳で終了<br>
+          <strong>加齢による医療費増加</strong> — 55歳 +10,000 / 65歳 +20,000 / 75歳 +20,000円/月<br>
+          <strong>家電・設備買い替え</strong> — 48/58/68/78歳 各 −100万円（全プランに追加）<br>
+          <strong>ESPP保有銘柄</strong> — アクセンチュア ESPP（46株 推計200万円）追加<br>
+          <strong>ESPP副収入</strong> — 副収入 +15,000円/月（15%割引ベネフィット）<br>
+        </div>
+        <button class="btn btn-primary" onclick="addFPUpdates()">🏦 FPアップデートを現在のデータに反映</button>
+      </div>
+      <div class="card">
         <div class="card-title">🗑️ データ管理</div>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">すべてのデータを削除してリセットします。</p>
         <button class="btn btn-danger" onclick="clearAllData()">⚠️ 全データを削除してリセット</button>
@@ -670,10 +683,11 @@ const DEFAULTS = {
   ],
   settings:{retireAge:55,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0},
   // 手取り推計: 本人1500万gross→月85万, 配偶者500万gross→月32.5万（税・社保控除後）
-  income:{self:850000,spouse:325000,side:0,investment:0,bonusSelf:1000000,bonusSpouse:0},
+  income:{self:850000,spouse:325000,side:15000,investment:0,bonusSelf:1000000,bonusSpouse:0},
+  // ↑ side:15000 = ACN ESPP 15%割引ベネフィット（毎月8.5万で購入→市場価値10万、差額1.5万/月）
   // housing=固定資産税・管理費・修繕（住宅ローンは別途 debts.mortgageMonthly で管理）
   expenses:{housing:80000,food:55000,utilities:22000,insurance:65000,education:75000,
-    transport:25000,medical:30000,entertainment:197000,other:115000},
+    transport:25000,medical:30000,entertainment:197000,other:128000},
   expenseDetails:{
     entertainment:[
       {name:'スポーツクラブ',       amount:37000},
@@ -682,6 +696,7 @@ const DEFAULTS = {
       {name:'趣味・レジャー',       amount:30000},
     ],
     other:[
+      {name:'固定資産税',           amount:13000},
       {name:'家族旅行（年30万）',   amount:25000},
       {name:'日用品・雑費',         amount:50000},
       {name:'美容（美容院等）',     amount:24000},
@@ -694,6 +709,7 @@ const DEFAULTS = {
   savings:{invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000},
   // 年齢別生活費スケジュール（全シナリオ共通）
   expenseSteps:[
+    {fromAge:38,delta:-30000,memo:'住宅ローン控除（0.7%×残債相当 年約36万）'},
     {fromAge:39,delta:-31000,memo:'オリックス 払込終了（2027年3月）'},
     {fromAge:39,delta:2000,  memo:'第1子 小学生 小遣い開始（2,000円/月）'},
     {fromAge:39,delta:-10000,memo:'第1子 小学校入学・保育料終了（-3.5万→塾等+2.5万）'},
@@ -703,11 +719,15 @@ const DEFAULTS = {
     {fromAge:48,delta:5000,  memo:'第1子 高校生 小遣い増額（10,000円/月）'},
     {fromAge:49,delta:3000,  memo:'第2子 中学生 小遣い増額（5,000円/月）'},
     {fromAge:51,delta:-10000,memo:'第1子 独立 小遣い終了'},
+    {fromAge:51,delta:30000, memo:'住宅ローン控除 終了（13年経過）'},
     {fromAge:52,delta:5000,  memo:'第2子 高校生 小遣い増額（10,000円/月）'},
     {fromAge:55,delta:-10000,memo:'第2子 独立 小遣い終了'},
     {fromAge:55,delta:-25000,memo:'第1子 独立・教育費半減（-2.5万）'},
+    {fromAge:55,delta:10000, memo:'加齢による医療費増加（55歳〜 +1万/月）'},
     {fromAge:59,delta:-25000,memo:'第2子 大学卒業・教育費終了（-2.5万→累計0）'},
     {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
+    {fromAge:65,delta:20000, memo:'加齢による医療費増加（65歳〜 さらに+2万/月）'},
+    {fromAge:75,delta:20000, memo:'加齢による医療費増加（75歳〜 さらに+2万/月）'},
   ],
   // 3年前に7,000万円の家を購入（自宅評価額）
   assets:{cash:3000000,fixedDeposit:2000000,stocks:18978775,ideco:500000,home:70000000,realEstate:0,insurance:0,other:270000},
@@ -765,7 +785,8 @@ const DEFAULTS = {
     {account:'SBI証券（特定）',          name:'ヤマハ発動機 (7272)',             category:'stocks',shares:300,    value:383550,  cost:324000},
     {account:'SBI証券（特定）',          name:'Joshin (8173)',                  category:'stocks',shares:1,      value:3060,    cost:2319},
     {account:'SBI証券（特定・投信）',    name:'eMAXIS Slim 米国株式(S&P500)',   category:'stocks',shares:212554, value:940764,  cost:750018},
-    {account:'SBI証券（特定・投信）',    name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:251077, value:947489,  cost:750017}
+    {account:'SBI証券（特定・投信）',    name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:251077, value:947489,  cost:750017},
+    {account:'アクセンチュア ESPP',      name:'アクセンチュア ESPP (ACN)',        category:'stocks',shares:46,      value:2000000, cost:1700000}
   ],
   plans:[
     // ── プラン1: ローン完済・住み続ける ─────────────────────────────
@@ -789,6 +810,10 @@ const DEFAULTS = {
       {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
+      {type:'lump-expense',  name:'家電・設備買い替え①',   age:48,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'家電・設備買い替え④',   age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
     ]},
     // ── プラン2: 20年後（58歳）に半値売却→賃貸転居 ────────────────
     {id:2,name:'20年後売却→賃貸',color:'#10b981',events:[
@@ -814,6 +839,10 @@ const DEFAULTS = {
       {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
+      {type:'lump-expense',  name:'家電・設備買い替え①',   age:48,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'家電・設備買い替え④',   age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
     ]},
     // ── プラン3: 8年ごとに新築へ住み替え（2割ずつ縮小） ───────────
     {id:3,name:'8年ごとに新築',color:'#f59e0b',events:[
@@ -848,6 +877,10 @@ const DEFAULTS = {
       {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
+      {type:'lump-expense',  name:'家電・設備買い替え①',   age:48,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'家電・設備買い替え④',   age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
     ]},
   ]
 };
@@ -2850,6 +2883,69 @@ function addInsuranceData(){
   renderExpenseSteps();
   renderPlans();
   showToast('✅ 保険データを反映しました');
+}
+
+function addFPUpdates(){
+  const FP_OTH_ITEMS=[
+    {name:'固定資産税', amount:13000},
+  ];
+  const FP_EXPENSE_STEPS=[
+    {fromAge:38,delta:-30000,memo:'住宅ローン控除（0.7%×残債相当 年約36万）'},
+    {fromAge:51,delta:30000, memo:'住宅ローン控除 終了（13年経過）'},
+    {fromAge:55,delta:10000, memo:'加齢による医療費増加（55歳〜 +1万/月）'},
+    {fromAge:65,delta:20000, memo:'加齢による医療費増加（65歳〜 さらに+2万/月）'},
+    {fromAge:75,delta:20000, memo:'加齢による医療費増加（75歳〜 さらに+2万/月）'},
+  ];
+  const FP_PLAN_EVENTS=[
+    {type:'lump-expense',name:'家電・設備買い替え①',age:48,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+    {type:'lump-expense',name:'家電・設備買い替え②',age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+    {type:'lump-expense',name:'家電・設備買い替え③',age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+    {type:'lump-expense',name:'家電・設備買い替え④',age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+  ];
+  const ESPP_HOLDING={account:'アクセンチュア ESPP',name:'アクセンチュア ESPP (ACN)',category:'stocks',shares:46,value:2000000,cost:1700000};
+
+  if(!data.expenseDetails) data.expenseDetails={entertainment:[],other:[]};
+  if(!data.expenseDetails.other) data.expenseDetails.other=[];
+  if(!data.expenseSteps) data.expenseSteps=[];
+  if(!data.holdings) data.holdings=[];
+
+  const othNames=new Set(data.expenseDetails.other.map(x=>x.name));
+  const existingMemos=new Set(data.expenseSteps.map(s=>s.memo));
+  const existingHoldings=new Set(data.holdings.map(h=>h.name));
+
+  const changes=[];
+  FP_OTH_ITEMS.forEach(x=>{if(!othNames.has(x.name)) changes.push(`支出その他に「${x.name}」+${addCommas(x.amount)}円/月 を追加`);});
+  FP_EXPENSE_STEPS.forEach(s=>{if(!existingMemos.has(s.memo)) changes.push(`年齢別スケジュール: ${s.fromAge}歳〜 ${s.delta>0?'+':''}${addCommas(s.delta)}円/月（${s.memo}）`);});
+  FP_PLAN_EVENTS.forEach(ev=>{
+    const plans=data.plans.filter(p=>!p.events.some(e=>e.name===ev.name));
+    if(plans.length) changes.push(`イベント追加: ${ev.name}（${ev.age}歳 ${addCommas(ev.amount)}円）×${plans.length}プラン`);
+  });
+  if(!existingHoldings.has(ESPP_HOLDING.name)) changes.push(`保有銘柄: ${ESPP_HOLDING.name} 追加（${addCommas(ESPP_HOLDING.value)}円）`);
+  if(data.income.side<15000) changes.push(`副収入: ${addCommas(data.income.side)} → 15,000円/月（ESPP割引ベネフィット）`);
+
+  if(!changes.length){showToast('ℹ️ FPアップデートはすでに反映済みです');return;}
+  if(!confirm(`以下のFP観点データを追加します:\n\n${changes.join('\n')}\n\n続けますか？`)) return;
+
+  FP_OTH_ITEMS.forEach(x=>{if(!othNames.has(x.name)) data.expenseDetails.other.push({...x});});
+  FP_EXPENSE_STEPS.forEach(s=>{if(!existingMemos.has(s.memo)) data.expenseSteps.push({...s});});
+  data.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
+  FP_PLAN_EVENTS.forEach(ev=>{
+    data.plans.forEach(p=>{if(!p.events.some(e=>e.name===ev.name)) p.events.push({...ev});});
+  });
+  if(!existingHoldings.has(ESPP_HOLDING.name)) data.holdings.push({...ESPP_HOLDING});
+  if(data.income.side<15000) data.income.side=15000;
+
+  // 固定資産税でother合計を再計算
+  data.expenses.other=(data.expenseDetails.other||[]).reduce((s,x)=>s+(+x.amount||0),0);
+
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  syncToDOM();
+  renderExpenseDetails();
+  renderExpenseSteps();
+  renderPlans();
+  renderHoldings();
+  updateMonthlySummary();
+  showToast('✅ FPアップデートを反映しました（固定資産税・住宅ローン控除・医療費増加・家電買い替え・ESPP）');
 }
 
 // ============================================================

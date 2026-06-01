@@ -10,13 +10,13 @@
     "investReturn":3.0,"inflation":1.5,"salaryGrowth":1.0
   },
   "income": {
-    "self":850000,"spouse":325000,"side":0,"investment":0,
+    "self":850000,"spouse":325000,"side":15000,"investment":0,
     "bonusSelf":1000000,"bonusSpouse":0
   },
   "expenses": {
     "housing":80000,"food":55000,"utilities":22000,"insurance":65000,
     "education":75000,"transport":25000,"medical":30000,
-    "entertainment":197000,"other":115000
+    "entertainment":197000,"other":128000
   },
   "expenseDetails": {
     "entertainment":[
@@ -26,6 +26,7 @@
       {"name":"趣味・レジャー",        "amount":30000}
     ],
     "other":[
+      {"name":"固定資産税",            "amount":13000},
       {"name":"家族旅行（年30万）",    "amount":25000},
       {"name":"日用品・雑費",          "amount":50000},
       {"name":"美容（美容院等）",      "amount":24000},
@@ -38,6 +39,7 @@
     "invest":200000,"deposit":100000,"pensionSelf":200000,"pensionSpouse":140000
   },
   "expenseSteps": [
+    {"fromAge":38,"delta":-30000,"memo":"住宅ローン控除（0.7%×残債相当 年約36万）"},
     {"fromAge":39,"delta":-31000,"memo":"オリックス 払込終了（2027年3月）"},
     {"fromAge":39,"delta":2000,  "memo":"第1子 小学生 小遣い開始（2,000円/月）"},
     {"fromAge":39,"delta":-10000,"memo":"第1子 小学校入学・保育料終了（-3.5万→塾等+2.5万）"},
@@ -47,11 +49,15 @@
     {"fromAge":48,"delta":5000,  "memo":"第1子 高校生 小遣い増額（10,000円/月）"},
     {"fromAge":49,"delta":3000,  "memo":"第2子 中学生 小遣い増額（5,000円/月）"},
     {"fromAge":51,"delta":-10000,"memo":"第1子 独立 小遣い終了"},
+    {"fromAge":51,"delta":30000, "memo":"住宅ローン控除 終了（13年経過）"},
     {"fromAge":52,"delta":5000,  "memo":"第2子 高校生 小遣い増額（10,000円/月）"},
     {"fromAge":55,"delta":-10000,"memo":"第2子 独立 小遣い終了"},
     {"fromAge":55,"delta":-25000,"memo":"第1子 独立・教育費半減（-2.5万）"},
+    {"fromAge":55,"delta":10000, "memo":"加齢による医療費増加（55歳〜 +1万/月）"},
     {"fromAge":59,"delta":-25000,"memo":"第2子 大学卒業・教育費終了（-2.5万→累計0）"},
-    {"fromAge":60,"delta":-20000,"memo":"メットライフ① 払込終了"}
+    {"fromAge":60,"delta":-20000,"memo":"メットライフ① 払込終了"},
+    {"fromAge":65,"delta":20000, "memo":"加齢による医療費増加（65歳〜 さらに+2万/月）"},
+    {"fromAge":75,"delta":20000, "memo":"加齢による医療費増加（75歳〜 さらに+2万/月）"}
   ],
   "assets": {
     "cash":3000000,"fixedDeposit":2000000,"stocks":18978775,"ideco":500000,
@@ -112,7 +118,8 @@
     {"account":"SBI証券（特定）",         "name":"ヤマハ発動機 (7272)",             "category":"stocks","shares":300,    "value":383550,  "cost":324000},
     {"account":"SBI証券（特定）",         "name":"Joshin (8173)",                  "category":"stocks","shares":1,      "value":3060,    "cost":2319},
     {"account":"SBI証券（特定・投信）",   "name":"eMAXIS Slim 米国株式(S&P500)",   "category":"stocks","shares":212554, "value":940764,  "cost":750018},
-    {"account":"SBI証券（特定・投信）",   "name":"eMAXIS Slim 全世界株式(オルカン)","category":"stocks","shares":251077, "value":947489,  "cost":750017}
+    {"account":"SBI証券（特定・投信）",   "name":"eMAXIS Slim 全世界株式(オルカン)","category":"stocks","shares":251077, "value":947489,  "cost":750017},
+    {"account":"アクセンチュア ESPP",     "name":"アクセンチュア ESPP (ACN)",       "category":"stocks","shares":46,      "value":2000000, "cost":1700000}
   ],
   "plans": [
     {
@@ -138,7 +145,11 @@
         {"type":"lump-income",   "name":"企業型DC退職金（本人）",  "age":55,"amount":19000000,"duration":1,"memo":"2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）"},
         {"type":"lump-income",   "name":"メットライフ①解約・払戻", "age":60,"amount":9425000, "duration":1,"memo":"USD建終身保険 65,000ドル（145円換算）受取時課税あり"},
         {"type":"lump-expense",  "name":"第1子 結婚お祝い",      "age":61,"amount":-3000000,"duration":1,"memo":"第1子28歳 お祝い300万円"},
-        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"}
+        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え①",   "age":48,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え②",   "age":58,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え③",   "age":68,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え④",   "age":78,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"}
       ]
     },
     {
@@ -166,7 +177,11 @@
         {"type":"lump-income",   "name":"企業型DC退職金（本人）",  "age":55,"amount":19000000,"duration":1,"memo":"2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）"},
         {"type":"lump-income",   "name":"メットライフ①解約・払戻", "age":60,"amount":9425000, "duration":1,"memo":"USD建終身保険 65,000ドル（145円換算）受取時課税あり"},
         {"type":"lump-expense",  "name":"第1子 結婚お祝い",      "age":61,"amount":-3000000,"duration":1,"memo":"第1子28歳 お祝い300万円"},
-        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"}
+        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え①",   "age":48,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え②",   "age":58,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え③",   "age":68,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え④",   "age":78,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"}
       ]
     },
     {
@@ -201,7 +216,11 @@
         {"type":"lump-income",   "name":"企業型DC退職金（本人）",  "age":55,"amount":19000000,"duration":1,"memo":"2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）"},
         {"type":"lump-income",   "name":"メットライフ①解約・払戻", "age":60,"amount":9425000, "duration":1,"memo":"USD建終身保険 65,000ドル（145円換算）受取時課税あり"},
         {"type":"lump-expense",  "name":"第1子 結婚お祝い",      "age":61,"amount":-3000000,"duration":1,"memo":"第1子28歳 お祝い300万円"},
-        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"}
+        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え①",   "age":48,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え②",   "age":58,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え③",   "age":68,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"},
+        {"type":"lump-expense",  "name":"家電・設備買い替え④",   "age":78,"amount":-1000000,"duration":1,"memo":"家電・設備 一括買い替え概算（10年ごと）"}
       ]
     }
   ]
