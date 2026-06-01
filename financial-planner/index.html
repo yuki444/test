@@ -582,6 +582,18 @@
         <button class="btn btn-primary" onclick="addCryptoHoldings()">₿ 暗号資産を現在のデータに追加</button>
       </div>
       <div class="card">
+        <div class="card-title">📊 投資信託（楽天証券）を反映</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">楽天証券の投資信託（特定・NISA・旧NISA）を保有明細に追加します。同口座・同ファンドは重複追加されません。</p>
+        <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
+          <strong>特定口座</strong> — eMAXIS Slim SP500 1,198円 / オルカン 1,179円<br>
+          <strong>つみたてNISA</strong> — eMAXIS Slim SP500 3,005,891円<br>
+          <strong>成長NISA</strong> — 楽天VTI 311,747円 / SP500 1,472,972円 / オルカン 412,085円<br>
+          <strong>旧NISA</strong> — オルカン 2,595,978円<br>
+          <strong style="color:var(--secondary)">合計 7,801,050円</strong>
+        </div>
+        <button class="btn btn-primary" onclick="addInvestmentTrusts()">📊 投資信託を現在のデータに追加</button>
+      </div>
+      <div class="card">
         <div class="card-title">📱 月次固定費を反映</div>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">スポーツクラブ・美容・通信費・サブスクを支出明細に追加します。同名の項目は重複追加されません。</p>
         <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
@@ -677,7 +689,7 @@ const DEFAULTS = {
     {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
   ],
   // 3年前に7,000万円の家を購入（自宅評価額）
-  assets:{cash:3000000,fixedDeposit:2000000,stocks:8882862,ideco:500000,home:70000000,realEstate:0,insurance:0,other:270000},
+  assets:{cash:3000000,fixedDeposit:2000000,stocks:16683912,ideco:500000,home:70000000,realEstate:0,insurance:0,other:270000},
   // 35年ローン・1.5%固定・月20万返済。3年経過後残高約6,000万
   debts:{mortgage:60000000,mortgageMonthly:200000,car:0,education:0,consumer:0,other:0},
   holdings:[
@@ -720,7 +732,14 @@ const DEFAULTS = {
     {account:'楽天証券（米国）',name:'iシェアーズ米国債20年 (TLT)',category:'stocks',shares:7,value:87046,cost:104456},
     {account:'楽天証券（米国）',name:'ヴィアトリス (VTRS)',category:'stocks',shares:1,value:2358,cost:0},
     {account:'メルカリ',name:'ビットコイン (BTC)',category:'crypto',value:200000,cost:0},
-    {account:'メルカリ',name:'イーサリアム (ETH)',category:'crypto',value:70000,cost:0}
+    {account:'メルカリ',name:'イーサリアム (ETH)',category:'crypto',value:70000,cost:0},
+    {account:'楽天証券（特定・投信）',   name:'eMAXIS Slim 米国株式(S&P500)',  category:'stocks',shares:270,    value:1198,    cost:1067},
+    {account:'楽天証券（特定・投信）',   name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:311,    value:1179,    cost:1036},
+    {account:'楽天証券（つみたてNISA）', name:'eMAXIS Slim 米国株式(S&P500)',  category:'stocks',shares:677338, value:3005891, cost:2300000},
+    {account:'楽天証券（成長NISA）',     name:'楽天・全米株式インデックス(楽天VTI)',category:'stocks',shares:69633,  value:311747,  cost:199999},
+    {account:'楽天証券（成長NISA）',     name:'eMAXIS Slim 米国株式(S&P500)',  category:'stocks',shares:331915, value:1472972, cost:900000},
+    {account:'楽天証券（成長NISA）',     name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:108744, value:412085,  cost:249999},
+    {account:'楽天証券（旧NISA）',       name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:685045, value:2595978, cost:1199993}
   ],
   plans:[
     // ── プラン1: ローン完済・住み続ける ─────────────────────────────
@@ -2386,6 +2405,28 @@ function addFPSheetData(){
   renderExpenseSteps();
   updateMonthlySummary();
   showToast('✅ 最新データを反映しました');
+}
+
+function addInvestmentTrusts(){
+  const TRUSTS=[
+    {account:'楽天証券（特定・投信）',   name:'eMAXIS Slim 米国株式(S&P500)',   category:'stocks',shares:270,    value:1198,    cost:1067},
+    {account:'楽天証券（特定・投信）',   name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:311,    value:1179,    cost:1036},
+    {account:'楽天証券（つみたてNISA）', name:'eMAXIS Slim 米国株式(S&P500)',   category:'stocks',shares:677338, value:3005891, cost:2300000},
+    {account:'楽天証券（成長NISA）',     name:'楽天・全米株式インデックス(楽天VTI)',category:'stocks',shares:69633,  value:311747,  cost:199999},
+    {account:'楽天証券（成長NISA）',     name:'eMAXIS Slim 米国株式(S&P500)',   category:'stocks',shares:331915, value:1472972, cost:900000},
+    {account:'楽天証券（成長NISA）',     name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:108744, value:412085,  cost:249999},
+    {account:'楽天証券（旧NISA）',       name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:685045, value:2595978, cost:1199993},
+  ];
+  if(!data.holdings) data.holdings=[];
+  const existingKeys=new Set(data.holdings.map(h=>`${h.account}::${h.name}`));
+  const toAdd=TRUSTS.filter(h=>!existingKeys.has(`${h.account}::${h.name}`));
+  if(!toAdd.length){showToast('ℹ️ 投資信託はすでに追加済みです');return;}
+  const totalVal=toAdd.reduce((s,h)=>s+h.value,0);
+  if(!confirm(`以下 ${toAdd.length}件の投資信託を追加します（合計 ${addCommas(totalVal)}円）:\n\n${toAdd.map(h=>`・${h.account} ${h.name} ${addCommas(h.value)}円`).join('\n')}\n\n続けますか？`)) return;
+  data.holdings.push(...toAdd);
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderHoldings();
+  showToast(`✅ 投資信託 ${toAdd.length}件を追加しました`);
 }
 
 function addCryptoHoldings(){

@@ -54,7 +54,7 @@
     {"fromAge":60,"delta":-20000,"memo":"メットライフ① 払込終了"}
   ],
   "assets": {
-    "cash":3000000,"fixedDeposit":2000000,"stocks":8882862,"ideco":500000,
+    "cash":3000000,"fixedDeposit":2000000,"stocks":16683912,"ideco":500000,
     "home":70000000,"realEstate":0,"insurance":0,"other":270000
   },
   "debts": {
@@ -100,7 +100,14 @@
     {"account":"楽天証券（米国）","name":"iシェアーズ米国債20年 (TLT)","category":"stocks","shares":7,"value":87046,"cost":104456},
     {"account":"楽天証券（米国）","name":"ヴィアトリス (VTRS)","category":"stocks","shares":1,"value":2358,"cost":0},
     {"account":"メルカリ","name":"ビットコイン (BTC)","category":"crypto","value":200000,"cost":0},
-    {"account":"メルカリ","name":"イーサリアム (ETH)","category":"crypto","value":70000,"cost":0}
+    {"account":"メルカリ","name":"イーサリアム (ETH)","category":"crypto","value":70000,"cost":0},
+    {"account":"楽天証券（特定・投信）",  "name":"eMAXIS Slim 米国株式(S&P500)",   "category":"stocks","shares":270,    "value":1198,    "cost":1067},
+    {"account":"楽天証券（特定・投信）",  "name":"eMAXIS Slim 全世界株式(オルカン)","category":"stocks","shares":311,    "value":1179,    "cost":1036},
+    {"account":"楽天証券（つみたてNISA）","name":"eMAXIS Slim 米国株式(S&P500)",   "category":"stocks","shares":677338, "value":3005891, "cost":2300000},
+    {"account":"楽天証券（成長NISA）",    "name":"楽天・全米株式インデックス(楽天VTI)","category":"stocks","shares":69633,  "value":311747,  "cost":199999},
+    {"account":"楽天証券（成長NISA）",    "name":"eMAXIS Slim 米国株式(S&P500)",   "category":"stocks","shares":331915, "value":1472972, "cost":900000},
+    {"account":"楽天証券（成長NISA）",    "name":"eMAXIS Slim 全世界株式(オルカン)","category":"stocks","shares":108744, "value":412085,  "cost":249999},
+    {"account":"楽天証券（旧NISA）",      "name":"eMAXIS Slim 全世界株式(オルカン)","category":"stocks","shares":685045, "value":2595978, "cost":1199993}
   ],
   "plans": [
     {
