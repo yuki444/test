@@ -434,10 +434,21 @@
             <div style="height:200px"><canvas id="chart-portfolio-cat"></canvas></div>
           </div>
         </div>
+        <div class="chart-grid" style="margin-top:16px">
+          <div>
+            <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text-muted)">地域別配分</div>
+            <div style="height:200px"><canvas id="chart-portfolio-region"></canvas></div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text-muted)">タイプ別（インデックス/個別/暗号資産）</div>
+            <div style="height:200px"><canvas id="chart-portfolio-type"></canvas></div>
+          </div>
+        </div>
         <div style="margin-top:20px">
           <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text-muted)">含み損益（評価額上位）</div>
           <div id="chart-portfolio-gain-wrap" style="overflow-x:auto"></div>
         </div>
+        <div style="margin-top:20px" id="portfolio-advice-wrap"></div>
       </div>
     </div>
 
@@ -1894,12 +1905,93 @@ const HOLDING_CATS=[
   {value:'other',    label:'その他資産',             field:'other'},
 ];
 
+// Sector / region / type metadata per holding name (partial match on name)
+const HOLDING_INFO=[
+  // JP 個別株
+  {pat:'1343',  sector:'リート',       region:'JP',     type:'個別株・ETF'},
+  {pat:'1357',  sector:'ヘッジ',       region:'JP',     type:'個別株・ETF'},
+  {pat:'1605',  sector:'エネルギー',   region:'JP',     type:'個別株・ETF'},
+  {pat:'2181',  sector:'人材・サービス',region:'JP',     type:'個別株・ETF'},
+  {pat:'2502',  sector:'食品・飲料',   region:'JP',     type:'個別株・ETF'},
+  {pat:'2503',  sector:'食品・飲料',   region:'JP',     type:'個別株・ETF'},
+  {pat:'2695',  sector:'外食',         region:'JP',     type:'個別株・ETF'},
+  {pat:'2871',  sector:'食品',         region:'JP',     type:'個別株・ETF'},
+  {pat:'2928',  sector:'フィットネス', region:'JP',     type:'個別株・ETF'},
+  {pat:'3350',  sector:'小売',         region:'JP',     type:'個別株・ETF'},
+  {pat:'3421',  sector:'素材・建材',   region:'JP',     type:'個別株・ETF'},
+  {pat:'3962',  sector:'IT',           region:'JP',     type:'個別株・ETF'},
+  {pat:'4188',  sector:'化学',         region:'JP',     type:'個別株・ETF'},
+  {pat:'4452',  sector:'日用品',       region:'JP',     type:'個別株・ETF'},
+  {pat:'4502',  sector:'医薬品',       region:'JP',     type:'個別株・ETF'},
+  {pat:'5288',  sector:'化学',         region:'JP',     type:'個別株・ETF'},
+  {pat:'6971',  sector:'電子部品',     region:'JP',     type:'個別株・ETF'},
+  {pat:'7203',  sector:'自動車',       region:'JP',     type:'個別株・ETF'},
+  {pat:'7267',  sector:'自動車',       region:'JP',     type:'個別株・ETF'},
+  {pat:'7272',  sector:'自動車',       region:'JP',     type:'個別株・ETF'},
+  {pat:'7388',  sector:'金融',         region:'JP',     type:'個別株・ETF'},
+  {pat:'7522',  sector:'小売',         region:'JP',     type:'個別株・ETF'},
+  {pat:'7867',  sector:'玩具',         region:'JP',     type:'個別株・ETF'},
+  {pat:'8173',  sector:'小売',         region:'JP',     type:'個別株・ETF'},
+  {pat:'8267',  sector:'小売',         region:'JP',     type:'個別株・ETF'},
+  {pat:'8410',  sector:'銀行',         region:'JP',     type:'個別株・ETF'},
+  {pat:'8473',  sector:'金融',         region:'JP',     type:'個別株・ETF'},
+  {pat:'9201',  sector:'航空',         region:'JP',     type:'個別株・ETF'},
+  {pat:'9432',  sector:'通信',         region:'JP',     type:'個別株・ETF'},
+  {pat:'9433',  sector:'通信',         region:'JP',     type:'個別株・ETF'},
+  {pat:'9434',  sector:'通信',         region:'JP',     type:'個別株・ETF'},
+  {pat:'9830',  sector:'商社',         region:'JP',     type:'個別株・ETF'},
+  // US 個別株・ETF
+  {pat:'ACN',   sector:'IT',           region:'US',     type:'個別株・ETF'},
+  {pat:'CXSE',  sector:'中国株',       region:'US',     type:'個別株・ETF'},
+  {pat:'DAL',   sector:'航空',         region:'US',     type:'個別株・ETF'},
+  {pat:'MSFT',  sector:'テクノロジー', region:'US',     type:'個別株・ETF'},
+  {pat:'TDOC',  sector:'ヘルスケア',   region:'US',     type:'個別株・ETF'},
+  {pat:'TLT',   sector:'債券',         region:'US',     type:'個別株・ETF'},
+  {pat:'VTRS',  sector:'医薬品',       region:'US',     type:'個別株・ETF'},
+  // 投資信託
+  {pat:'S&P500',        sector:'米国株指数',  region:'US',     type:'インデックス'},
+  {pat:'オルカン',      sector:'全世界株指数', region:'Global', type:'インデックス'},
+  {pat:'楽天VTI',       sector:'米国株指数',  region:'US',     type:'インデックス'},
+  {pat:'VTI',           sector:'米国株指数',  region:'US',     type:'インデックス'},
+  // 暗号資産
+  {pat:'BTC',   sector:'暗号資産',     region:'Global', type:'暗号資産'},
+  {pat:'ETH',   sector:'暗号資産',     region:'Global', type:'暗号資産'},
+];
+function getHoldingInfo(name){
+  return HOLDING_INFO.find(x=>name.includes(x.pat))||{sector:'その他',region:'JP',type:'個別株・ETF'};
+}
+function getRatingLabel(r){return r==='buy'?'▲買い':r==='sell'?'▼売り':r==='watch'?'◎注目':'─中立';}
+function getRatingColor(r){return r==='buy'?'var(--secondary)':r==='sell'?'var(--danger)':r==='watch'?'var(--accent)':'var(--text-muted)';}
+
 function syncDividendToIncome(){
   const totalAnnual=(data.holdings||[]).reduce((s,h)=>s+(h.annualDividend||0),0);
   data.income.investment=Math.round(totalAnnual/12);
   const el=document.getElementById('income-investment');
   if(el) el.value=data.income.investment;
   updateMonthlySummary();
+}
+
+function generateComment(h, info, gainPct){
+  const type=h.type||info.type;
+  const sector=h.sector||info.sector;
+  const region=h.region||info.region;
+  if(type==='インデックス'){
+    if(sector==='全世界株指数') return '全世界分散インデックス。低コストで世界経済成長を享受できる長期保有の核。';
+    if(sector==='米国株指数') return 'S&P500/全米連動。米国経済の長期成長を享受する定番インデックス。積立継続が有効。';
+    return '低コスト指数連動型。長期・積立・分散の原則に合致した安定的な選択。';
+  }
+  if(type==='暗号資産') return 'ハイリスク・ハイリターン資産。価格変動が大きく、ポートフォリオの5%以内が目安。';
+  if(sector==='債券') return '米国長期国債ETF。金利低下局面で価値上昇。株式の逆相関でリスク分散に機能。';
+  if(sector==='リート') return 'J-REIT ETF。不動産収益を分散投資で享受。高配当期待だが金利上昇に注意。';
+  if(gainPct!==null&&gainPct<=-30) return `含み損${gainPct}%。損切りラインか損出しの検討を推奨。ポジションの見直しが必要。`;
+  if(gainPct!==null&&gainPct>=100) return `含み益${gainPct}%超。利益確定や税損失との相殺を検討する好機。`;
+  if(gainPct!==null&&gainPct>=30) return `含み益${gainPct}%。好調を維持。定期的なリバランスで利益を確定する選択肢も。`;
+  if(sector==='通信'&&region==='JP') return '日本通信大手。高い配当利回りと安定したキャッシュフローが特徴のディフェンシブ銘柄。';
+  if(sector==='自動車'&&region==='JP') return '日本自動車セクター。EV移行リスクを抱えつつも、グローバルな競争力を有する。';
+  if(sector==='テクノロジー'&&region==='US') return '米国テクノロジーリーダー。AI需要の恩恵を受けやすいグロース銘柄。';
+  if(sector==='医薬品') return '医薬品セクター。景気に左右されにくいディフェンシブ性と配当が魅力。';
+  if(region==='US'&&type==='個別株・ETF') return '米国個別株。為替リスクを伴うが、グローバルな成長を狙えるポジション。';
+  return `${sector}セクター（${region}）。定期的な業績確認とポートフォリオ内ウェイト管理を推奨。`;
 }
 
 function renderHoldings(){
@@ -1919,7 +2011,6 @@ function renderHoldings(){
     <thead><tr style="border-bottom:2px solid var(--border);color:var(--text-muted)">
       <th style="text-align:left;padding:6px 8px">口座名</th>
       <th style="text-align:left;padding:6px 8px">銘柄・資産名</th>
-      <th style="text-align:left;padding:6px 8px">カテゴリ</th>
       <th style="text-align:right;padding:6px 8px">現在価額</th>
       <th style="text-align:right;padding:6px 8px">取得価額</th>
       <th style="text-align:right;padding:6px 8px">含み損益</th>
@@ -1927,16 +2018,34 @@ function renderHoldings(){
       <th style="padding:4px"></th>
     </tr></thead><tbody>`;
   h.forEach((x,i)=>{
+    const info=getHoldingInfo(x.name);
+    const sector=x.sector||info.sector;
+    const region=x.region||info.region;
+    const type=x.type||info.type;
     const gain=x.cost>0?x.value-x.cost:null;
     const gainPct=x.cost>0?Math.round((x.value-x.cost)/x.cost*100):null;
     const gainColor=gain===null?'var(--text-muted)':gain>=0?'var(--secondary)':'var(--danger)';
     const gainStr=gain===null?'—':`${gain>=0?'+':''}${fmtM(gain)}<br><span style="font-size:10px">(${gain>=0?'+':''}${gainPct}%)</span>`;
-    const catLabel=HOLDING_CATS.find(c=>c.value===x.category)?.label||x.category;
     const divStr=x.annualDividend>0?`<span style="color:var(--secondary);font-weight:700">${fmtM(x.annualDividend)}</span><br><span style="font-size:10px;color:var(--text-muted)">${x.value>0?'利回'+(x.annualDividend/x.value*100).toFixed(1)+'%':''}</span>`:'<span style="color:var(--text-muted)">—</span>';
+    const ratingLabel=x.rating?getRatingLabel(x.rating):'';
+    const ratingColor=x.rating?getRatingColor(x.rating):'';
+    const targetUpside=x.targetPrice>0&&x.value>0?Math.round((x.targetPrice-x.value)/x.value*100):null;
+    const regionTag={JP:'🇯🇵',US:'🇺🇸',Global:'🌐'}[region]||'';
+    const typeBg=type==='インデックス'?'#dbeafe':type==='暗号資産'?'#fef3c7':'#f0fdf4';
+    const typeColor=type==='インデックス'?'#1d4ed8':type==='暗号資産'?'#92400e':'#166534';
+    const comment=x.comment||generateComment(x,info,gainPct);
     html+=`<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:8px">${x.account||'—'}</td>
-      <td style="padding:8px;font-weight:700">${x.name}${x.shares?`<br><span style="font-size:10px;color:var(--text-muted);font-weight:400">${x.shares.toLocaleString()}株</span>`:''}</td>
-      <td style="padding:8px;color:var(--text-muted)">${catLabel}</td>
+      <td style="padding:8px;color:var(--text-muted);font-size:11px">${x.account||'—'}</td>
+      <td style="padding:8px">
+        <div style="font-weight:700">${x.name}${x.shares?`<span style="font-size:10px;color:var(--text-muted);font-weight:400"> ${x.shares.toLocaleString()}株/口</span>`:''}</div>
+        <div style="margin-top:3px;display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:10px;padding:1px 6px;border-radius:10px;background:${typeBg};color:${typeColor};font-weight:700">${type}</span>
+          <span style="font-size:10px;padding:1px 6px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text-muted)">${regionTag} ${sector}</span>
+          ${x.rating?`<span style="font-size:10px;font-weight:700;color:${ratingColor}">${ratingLabel}</span>`:''}
+          ${targetUpside!==null?`<span style="font-size:10px;color:${targetUpside>=0?'var(--secondary)':'var(--danger)'}">目標${targetUpside>=0?'+':''}${targetUpside}%</span>`:''}
+        </div>
+        ${comment?`<div style="font-size:10px;color:var(--text-muted);margin-top:3px;line-height:1.5;max-width:320px">${comment}</div>`:''}
+      </td>
       <td style="text-align:right;padding:8px;font-weight:700">${fmtM(x.value)}</td>
       <td style="text-align:right;padding:8px;color:var(--text-muted)">${x.cost>0?fmtM(x.cost):'—'}</td>
       <td style="text-align:right;padding:8px;color:${gainColor}">${gainStr}</td>
@@ -1948,7 +2057,7 @@ function renderHoldings(){
   const totalCost=h.reduce((s,x)=>s+(x.cost>0?x.cost:0),0);
   const totalGainPct=totalCost>0?Math.round(totalGain/totalCost*100):null;
   html+=`</tbody><tfoot><tr style="font-weight:700;border-top:2px solid var(--border);background:var(--bg)">
-    <td colspan="3" style="padding:8px;color:var(--text-muted)">合計 ${h.length}件</td>
+    <td colspan="2" style="padding:8px;color:var(--text-muted)">合計 ${h.length}件</td>
     <td style="text-align:right;padding:8px">${fmtM(totalVal)}</td>
     <td style="text-align:right;padding:8px;color:var(--text-muted)">${totalCost>0?fmtM(totalCost):'—'}</td>
     <td style="text-align:right;padding:8px;color:${totalGain>=0?'var(--secondary)':'var(--danger)'}">
