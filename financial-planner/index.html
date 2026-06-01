@@ -594,6 +594,16 @@
         <button class="btn btn-primary" onclick="addInvestmentTrusts()">📊 投資信託を現在のデータに追加</button>
       </div>
       <div class="card">
+        <div class="card-title">🏦 SBI証券保有銘柄を反映</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">SBI証券（特定口座）の株式・投資信託を保有明細に追加します。同口座・同銘柄は重複追加されません。</p>
+        <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
+          <strong>株式</strong> — A-RIZAP G 20,000円 / ヤマハ発動機 383,550円 / Joshin 3,060円<br>
+          <strong>投資信託</strong> — eMAXIS Slim SP500 940,764円 / オルカン 947,489円<br>
+          <strong style="color:var(--secondary)">合計 2,294,863円</strong>
+        </div>
+        <button class="btn btn-primary" onclick="addSBIHoldings()">🏦 SBI証券銘柄を現在のデータに追加</button>
+      </div>
+      <div class="card">
         <div class="card-title">📱 月次固定費を反映</div>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">スポーツクラブ・美容・通信費・サブスクを支出明細に追加します。同名の項目は重複追加されません。</p>
         <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
@@ -689,7 +699,7 @@ const DEFAULTS = {
     {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
   ],
   // 3年前に7,000万円の家を購入（自宅評価額）
-  assets:{cash:3000000,fixedDeposit:2000000,stocks:16683912,ideco:500000,home:70000000,realEstate:0,insurance:0,other:270000},
+  assets:{cash:3000000,fixedDeposit:2000000,stocks:18978775,ideco:500000,home:70000000,realEstate:0,insurance:0,other:270000},
   // 35年ローン・1.5%固定・月20万返済。3年経過後残高約6,000万
   debts:{mortgage:60000000,mortgageMonthly:200000,car:0,education:0,consumer:0,other:0},
   holdings:[
@@ -739,7 +749,12 @@ const DEFAULTS = {
     {account:'楽天証券（成長NISA）',     name:'楽天・全米株式インデックス(楽天VTI)',category:'stocks',shares:69633,  value:311747,  cost:199999},
     {account:'楽天証券（成長NISA）',     name:'eMAXIS Slim 米国株式(S&P500)',  category:'stocks',shares:331915, value:1472972, cost:900000},
     {account:'楽天証券（成長NISA）',     name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:108744, value:412085,  cost:249999},
-    {account:'楽天証券（旧NISA）',       name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:685045, value:2595978, cost:1199993}
+    {account:'楽天証券（旧NISA）',       name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:685045, value:2595978, cost:1199993},
+    {account:'SBI証券（特定）',          name:'A-RIZAP G (2928)',               category:'stocks',shares:100,    value:20000,   cost:28000},
+    {account:'SBI証券（特定）',          name:'ヤマハ発動機 (7272)',             category:'stocks',shares:300,    value:383550,  cost:324000},
+    {account:'SBI証券（特定）',          name:'Joshin (8173)',                  category:'stocks',shares:1,      value:3060,    cost:2319},
+    {account:'SBI証券（特定・投信）',    name:'eMAXIS Slim 米国株式(S&P500)',   category:'stocks',shares:212554, value:940764,  cost:750018},
+    {account:'SBI証券（特定・投信）',    name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:251077, value:947489,  cost:750017}
   ],
   plans:[
     // ── プラン1: ローン完済・住み続ける ─────────────────────────────
@@ -2405,6 +2420,26 @@ function addFPSheetData(){
   renderExpenseSteps();
   updateMonthlySummary();
   showToast('✅ 最新データを反映しました');
+}
+
+function addSBIHoldings(){
+  const SBI=[
+    {account:'SBI証券（特定）',       name:'A-RIZAP G (2928)',               category:'stocks',shares:100,    value:20000,   cost:28000},
+    {account:'SBI証券（特定）',       name:'ヤマハ発動機 (7272)',             category:'stocks',shares:300,    value:383550,  cost:324000},
+    {account:'SBI証券（特定）',       name:'Joshin (8173)',                  category:'stocks',shares:1,      value:3060,    cost:2319},
+    {account:'SBI証券（特定・投信）', name:'eMAXIS Slim 米国株式(S&P500)',   category:'stocks',shares:212554, value:940764,  cost:750018},
+    {account:'SBI証券（特定・投信）', name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:251077, value:947489,  cost:750017},
+  ];
+  if(!data.holdings) data.holdings=[];
+  const existingKeys=new Set(data.holdings.map(h=>`${h.account}::${h.name}`));
+  const toAdd=SBI.filter(h=>!existingKeys.has(`${h.account}::${h.name}`));
+  if(!toAdd.length){showToast('ℹ️ SBI証券銘柄はすでに追加済みです');return;}
+  const totalVal=toAdd.reduce((s,h)=>s+h.value,0);
+  if(!confirm(`以下 ${toAdd.length}件を追加します（合計 ${addCommas(totalVal)}円）:\n\n${toAdd.map(h=>`・${h.account} ${h.name} ${addCommas(h.value)}円`).join('\n')}\n\n続けますか？`)) return;
+  data.holdings.push(...toAdd);
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderHoldings();
+  showToast(`✅ SBI証券 ${toAdd.length}件を追加しました`);
 }
 
 function addInvestmentTrusts(){

@@ -54,7 +54,7 @@
     {"fromAge":60,"delta":-20000,"memo":"メットライフ① 払込終了"}
   ],
   "assets": {
-    "cash":3000000,"fixedDeposit":2000000,"stocks":16683912,"ideco":500000,
+    "cash":3000000,"fixedDeposit":2000000,"stocks":18978775,"ideco":500000,
     "home":70000000,"realEstate":0,"insurance":0,"other":270000
   },
   "debts": {
@@ -107,7 +107,12 @@
     {"account":"楽天証券（成長NISA）",    "name":"楽天・全米株式インデックス(楽天VTI)","category":"stocks","shares":69633,  "value":311747,  "cost":199999},
     {"account":"楽天証券（成長NISA）",    "name":"eMAXIS Slim 米国株式(S&P500)",   "category":"stocks","shares":331915, "value":1472972, "cost":900000},
     {"account":"楽天証券（成長NISA）",    "name":"eMAXIS Slim 全世界株式(オルカン)","category":"stocks","shares":108744, "value":412085,  "cost":249999},
-    {"account":"楽天証券（旧NISA）",      "name":"eMAXIS Slim 全世界株式(オルカン)","category":"stocks","shares":685045, "value":2595978, "cost":1199993}
+    {"account":"楽天証券（旧NISA）",      "name":"eMAXIS Slim 全世界株式(オルカン)","category":"stocks","shares":685045, "value":2595978, "cost":1199993},
+    {"account":"SBI証券（特定）",         "name":"A-RIZAP G (2928)",               "category":"stocks","shares":100,    "value":20000,   "cost":28000},
+    {"account":"SBI証券（特定）",         "name":"ヤマハ発動機 (7272)",             "category":"stocks","shares":300,    "value":383550,  "cost":324000},
+    {"account":"SBI証券（特定）",         "name":"Joshin (8173)",                  "category":"stocks","shares":1,      "value":3060,    "cost":2319},
+    {"account":"SBI証券（特定・投信）",   "name":"eMAXIS Slim 米国株式(S&P500)",   "category":"stocks","shares":212554, "value":940764,  "cost":750018},
+    {"account":"SBI証券（特定・投信）",   "name":"eMAXIS Slim 全世界株式(オルカン)","category":"stocks","shares":251077, "value":947489,  "cost":750017}
   ],
   "plans": [
     {
