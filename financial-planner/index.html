@@ -1818,6 +1818,31 @@ function renderPortfolioCharts(){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:6}},tooltip:{callbacks:{label:ctx=>{const v=catEntries[ctx.dataIndex][1];return ` ${fmtM(v)} (${totalVal>0?Math.round(v/totalVal*100):0}%)`;}}}}},
   });
 
+  // ── 地域別 donut ──
+  const byRegion={};
+  h.forEach(x=>{const info=getHoldingInfo(x.name);const k=x.region||info.region||'その他';byRegion[k]=(byRegion[k]||0)+x.value;});
+  const regionEntries=Object.entries(byRegion).sort((a,b)=>b[1]-a[1]);
+  const regionLabels={'JP':'🇯🇵 日本','US':'🇺🇸 米国','Global':'🌐 グローバル'};
+  destroyChart('portfolioRegion');
+  const regionCanvas=document.getElementById('chart-portfolio-region');
+  if(regionCanvas) charts.portfolioRegion=new Chart(regionCanvas,{
+    type:'doughnut',
+    data:{labels:regionEntries.map(e=>regionLabels[e[0]]||e[0]),datasets:[{data:regionEntries.map(e=>e[1]),backgroundColor:['#60a5fa','#f87171','#34d399','#f59e0b'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:6}},tooltip:{callbacks:{label:ctx=>{const v=regionEntries[ctx.dataIndex][1];return ` ${fmtM(v)} (${totalVal>0?Math.round(v/totalVal*100):0}%)`;}}}}},
+  });
+
+  // ── タイプ別 donut ──
+  const byType={};
+  h.forEach(x=>{const info=getHoldingInfo(x.name);const k=x.type||info.type||'個別株・ETF';byType[k]=(byType[k]||0)+x.value;});
+  const typeEntries=Object.entries(byType).sort((a,b)=>b[1]-a[1]);
+  destroyChart('portfolioType');
+  const typeCanvas=document.getElementById('chart-portfolio-type');
+  if(typeCanvas) charts.portfolioType=new Chart(typeCanvas,{
+    type:'doughnut',
+    data:{labels:typeEntries.map(e=>e[0]),datasets:[{data:typeEntries.map(e=>e[1]),backgroundColor:['#818cf8','#34d399','#f59e0b','#f87171','#60a5fa'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:6}},tooltip:{callbacks:{label:ctx=>{const v=typeEntries[ctx.dataIndex][1];return ` ${fmtM(v)} (${totalVal>0?Math.round(v/totalVal*100):0}%)`;}}}}},
+  });
+
   // ── 含み損益 horizontal bar ──
   const withCost=h.filter(x=>x.cost>0).sort((a,b)=>b.value-a.value).slice(0,15);
   const gainWrap=document.getElementById('chart-portfolio-gain-wrap');
@@ -1843,6 +1868,87 @@ function renderPortfolioCharts(){
   } else if(gainWrap){
     gainWrap.innerHTML='<p style="font-size:12px;color:var(--text-muted);padding:8px 0">取得価額が入力されている銘柄がありません。</p>';
   }
+
+  // ── 総評・アドバイス ──
+  const adviceWrap=document.getElementById('portfolio-advice-wrap');
+  if(adviceWrap) adviceWrap.innerHTML=renderPortfolioAdvice(h,totalVal,totalGain,totalCost,byRegion,byType);
+}
+
+function renderPortfolioAdvice(h,totalVal,totalGain,totalCost,byRegion,byType){
+  const jpRatio=totalVal>0?((byRegion['JP']||0)/totalVal*100):0;
+  const usRatio=totalVal>0?((byRegion['US']||0)/totalVal*100):0;
+  const globalRatio=totalVal>0?((byRegion['Global']||0)/totalVal*100):0;
+  const idxRatio=totalVal>0?((byType['インデックス']||0)/totalVal*100):0;
+  const cryptoRatio=totalVal>0?((byType['暗号資産']||0)/totalVal*100):0;
+  const gainPct=totalCost>0?(totalGain/totalCost*100):0;
+
+  // 集中度 (上位3銘柄の割合)
+  const sorted=[...h].sort((a,b)=>b.value-a.value);
+  const top3Val=sorted.slice(0,3).reduce((s,x)=>s+x.value,0);
+  const top3Pct=totalVal>0?(top3Val/totalVal*100):0;
+  const top1=sorted[0];
+  const top1Pct=totalVal>0?(top1.value/totalVal*100):0;
+
+  // スコア計算 (100点満点)
+  let score=60;
+  if(idxRatio>=30) score+=10;
+  if(idxRatio>=50) score+=5;
+  if(usRatio+globalRatio>=20) score+=5;
+  if(jpRatio<=70) score+=5;
+  if(top1Pct<=20) score+=5;
+  if(cryptoRatio<=5) score+=5;
+  if(gainPct>=0) score+=5;
+  score=Math.min(100,score);
+  const grade=score>=90?'S':score>=80?'A':score>=70?'B':score>=55?'C':'D';
+  const gradeColor=score>=80?'var(--secondary)':score>=65?'var(--accent)':'var(--danger)';
+
+  // アドバイス生成
+  const advices=[];
+  if(idxRatio<30) advices.push({icon:'📈',text:`インデックス比率が${idxRatio.toFixed(0)}%と低めです。eMAXIS Slim等の積立を増やすとリスク分散が改善します。`});
+  else advices.push({icon:'✅',text:`インデックス比率${idxRatio.toFixed(0)}%は良好です。低コストで長期成長を取り込む土台ができています。`});
+
+  if(jpRatio>70) advices.push({icon:'⚠️',text:`日本株比率が${jpRatio.toFixed(0)}%と高め。円安・日本経済リスクの集中を避けるため、米国・グローバル資産の増加を検討してください。`});
+  else advices.push({icon:'🌍',text:`地域分散は良好です（日本${jpRatio.toFixed(0)}% / 米国${usRatio.toFixed(0)}% / グローバル${globalRatio.toFixed(0)}%）。`});
+
+  if(top1Pct>25) advices.push({icon:'⚠️',text:`「${top1?.name}」が${top1Pct.toFixed(0)}%を占めています。1銘柄の集中リスクがあります。利益確定・分散を検討してください。`});
+  else if(top3Pct>60) advices.push({icon:'📊',text:`上位3銘柄で${top3Pct.toFixed(0)}%を占めます。適度な集中度ですが、定期的なリバランスで分散を維持しましょう。`});
+  else advices.push({icon:'✅',text:`銘柄集中リスクは低く、上位3銘柄で${top3Pct.toFixed(0)}%と適切に分散されています。`});
+
+  if(cryptoRatio>10) advices.push({icon:'⚡',text:`暗号資産が${cryptoRatio.toFixed(0)}%を占めています。目安は全体の5%以内。価格変動リスクを把握した上でポジションを管理してください。`});
+
+  const lossHoldings=h.filter(x=>x.cost>0&&x.value<x.cost);
+  if(lossHoldings.length>0){
+    const worstLoss=lossHoldings.sort((a,b)=>(a.value-a.cost)/a.cost-(b.value-b.cost)/b.cost)[0];
+    const worstPct=Math.round((worstLoss.value-worstLoss.cost)/worstLoss.cost*100);
+    advices.push({icon:'📉',text:`「${worstLoss.name}」が含み損${worstPct}%（${fmtM(worstLoss.value-worstLoss.cost)}）。損出しによる節税効果や損切りラインの再確認を推奨します。`});
+  }
+
+  const totalDivYield=totalVal>0?((h.reduce((s,x)=>s+(x.annualDividend||0),0)/totalVal)*100):0;
+  if(totalDivYield>0) advices.push({icon:'💰',text:`ポートフォリオ全体の配当利回りは${totalDivYield.toFixed(2)}%（年間${fmtM(Math.round(h.reduce((s,x)=>s+(x.annualDividend||0),0)))}）。配当再投資で複利効果を活用できます。`});
+
+  return `<div style="border-top:2px solid var(--border);padding-top:16px">
+    <div style="font-size:12px;font-weight:700;margin-bottom:12px;color:var(--text-muted)">🤖 Claude 総評・アドバイス</div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:14px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">
+      <div style="text-align:center">
+        <div style="font-size:36px;font-weight:900;color:${gradeColor};line-height:1">${grade}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">総合評価</div>
+      </div>
+      <div style="flex:1">
+        <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:4px">
+          <div style="width:${score}%;height:100%;background:${gradeColor};border-radius:4px;transition:width 0.5s"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted)">${score}/100点 — ${grade==='S'?'非常に優秀':grade==='A'?'優秀':grade==='B'?'良好':grade==='C'?'改善余地あり':'要見直し'}</div>
+        <div style="margin-top:6px;font-size:11px;display:flex;gap:8px;flex-wrap:wrap">
+          <span>📊 評価額 ${fmtM(totalVal)}</span>
+          <span style="color:${gainPct>=0?'var(--secondary)':'var(--danger)'}">${gainPct>=0?'▲':'▼'} 含み損益 ${gainPct>=0?'+':''}${gainPct.toFixed(1)}%</span>
+          <span>📁 ${h.length}銘柄</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${advices.map(a=>`<div style="font-size:12px;padding:8px 12px;background:var(--bg);border-radius:8px;border-left:3px solid var(--border);line-height:1.6"><span style="margin-right:6px">${a.icon}</span>${a.text}</div>`).join('')}
+    </div>
+  </div>`;
 }
 
 function renderAllocChart(){
@@ -2083,10 +2189,24 @@ function openHoldingModal(editIdx){
         <select id="h-cat">
           ${HOLDING_CATS.map(c=>`<option value="${c.value}"${existing?.category===c.value?' selected':''}>${c.label}</option>`).join('')}
         </select></div>
-      <div class="field"><label>保有数量（株・口） <span style="font-size:11px;color:var(--text-muted);font-weight:400">— 価格自動更新に使用</span></label><input type="number" id="h-shares" placeholder="例: 100" value="${existing?.shares||''}" min="0" step="1" style="text-align:right"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="field"><label>保有数量（株・口）</label><input type="number" id="h-shares" placeholder="例: 100" value="${existing?.shares||''}" min="0" step="1" style="text-align:right"></div>
+        <div class="field"><label>評価（みんかぶ等）</label>
+          <select id="h-rating">
+            <option value="">─ 未設定</option>
+            <option value="buy"${existing?.rating==='buy'?' selected':''}>▲ 買い</option>
+            <option value="watch"${existing?.rating==='watch'?' selected':''}>◎ 注目</option>
+            <option value="hold"${existing?.rating==='hold'?' selected':''}>─ 中立</option>
+            <option value="sell"${existing?.rating==='sell'?' selected':''}>▼ 売り</option>
+          </select></div>
+      </div>
       <div class="field"><label>現在価額（円）</label><input type="text" inputmode="numeric" data-money="1" id="h-value" value="${addCommas(existing?.value||0)}" style="text-align:right"></div>
-      <div class="field"><label>取得価額（円）<span style="font-size:11px;color:var(--text-muted);font-weight:400">（不明な場合は0）</span></label><input type="text" inputmode="numeric" data-money="1" id="h-cost" value="${addCommas(existing?.cost||0)}" style="text-align:right"></div>
-      <div class="field"><label>年間配当・分配金（見込み）<span style="font-size:11px;color:var(--text-muted);font-weight:400">— 税引前・円換算</span></label><input type="text" inputmode="numeric" data-money="1" id="h-dividend" value="${addCommas(existing?.annualDividend||0)}" style="text-align:right"><span style="font-size:12px;color:var(--text-muted);align-self:center">円 / 年</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="field"><label>取得価額（円）</label><input type="text" inputmode="numeric" data-money="1" id="h-cost" value="${addCommas(existing?.cost||0)}" style="text-align:right"></div>
+        <div class="field"><label>目標株価（円）<span style="font-size:11px;color:var(--text-muted);font-weight:400"> みんかぶ等</span></label><input type="text" inputmode="numeric" data-money="1" id="h-target" value="${addCommas(existing?.targetPrice||0)}" style="text-align:right"></div>
+      </div>
+      <div class="field"><label>年間配当・分配金（見込み）</label><input type="text" inputmode="numeric" data-money="1" id="h-dividend" value="${addCommas(existing?.annualDividend||0)}" style="text-align:right"><span style="font-size:12px;color:var(--text-muted);align-self:center">円 / 年</span></div>
+      <div class="field"><label>分析コメント <span style="font-size:11px;color:var(--text-muted);font-weight:400">（空欄で自動生成）</span></label><textarea id="h-comment" rows="2" style="width:100%;resize:vertical;font-size:13px;padding:6px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);color:var(--text)">${existing?.comment||''}</textarea></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
       <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">キャンセル</button>
@@ -2102,6 +2222,9 @@ function saveHolding(editIdx){
   if(!name){showToast('❌ 銘柄・資産名を入力してください');return;}
   const sharesRaw=parseInt(document.getElementById('h-shares').value)||0;
   const annualDiv=stripCommas(document.getElementById('h-dividend').value)||0;
+  const targetPrice=stripCommas(document.getElementById('h-target').value)||0;
+  const rating=document.getElementById('h-rating').value;
+  const comment=document.getElementById('h-comment').value.trim();
   const h={
     account:document.getElementById('h-account').value.trim(),
     name,
@@ -2110,9 +2233,15 @@ function saveHolding(editIdx){
     value:stripCommas(document.getElementById('h-value').value),
     cost:stripCommas(document.getElementById('h-cost').value),
     annualDividend:annualDiv||undefined,
+    targetPrice:targetPrice||undefined,
+    rating:rating||undefined,
+    comment:comment||undefined,
   };
   if(!h.shares) delete h.shares;
   if(!h.annualDividend) delete h.annualDividend;
+  if(!h.targetPrice) delete h.targetPrice;
+  if(!h.rating) delete h.rating;
+  if(!h.comment) delete h.comment;
   if(editIdx!=null) data.holdings[editIdx]=h;
   else data.holdings.push(h);
   syncDividendToIncome();
