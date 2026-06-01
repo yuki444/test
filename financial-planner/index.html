@@ -1508,13 +1508,13 @@ function simulate(plan){
     // ④ Side income (ESPP等) stops at retirement; investment dividend income continues
     income+=(retired?0:data.income.side)*12+data.income.investment*12;
 
-    // ③⑦ Expenses: base×inflation, stepDeltas as fixed nominal (no inflation), then retire reduction, then mortgage
+    // ③⑦ Expenses: base×inflation → retirement reduction → then add stepDeltas (nominal, not reduced)
     let baseExpenses=Object.values(data.expenses).reduce((a,b)=>a+b,0)*12*inflF;
+    if(retired) baseExpenses*=0.85; // ③ retirement reduction on base lifestyle only (not structural changes)
     if(data.expenseSteps?.length){
       const stepDelta=data.expenseSteps.filter(s=>age>=s.fromAge).reduce((sum,s)=>sum+s.delta,0);
-      if(stepDelta) baseExpenses+=stepDelta*12; // ⑦ nominal amounts, inflation already baked in
+      if(stepDelta) baseExpenses+=stepDelta*12; // ⑦ nominal amounts added after reduction (medical increases etc. unaffected)
     }
-    if(retired) baseExpenses*=0.85; // ③ retirement reduction applies only to living expenses
     let expenses=baseExpenses;
     if(mortgageMonthly>0 && mortgageBalance>0) expenses+=mortgageMonthly*12; // ③ mortgage added after reduction
 
@@ -1527,8 +1527,9 @@ function simulate(plan){
           if(age===ev.age) lump+=ev.amount; break;
         case 'lump-income': case 'retire-early':
           if(age===ev.age) lump+=ev.amount; break;
-        case 'drawdown': // ① shows in income column; offset with lump so FA is correctly reduced
-          income+=ev.amount*12; lump-=ev.amount*12; break;
+        case 'drawdown': { // ① shows in income column; offset with lump so FA correctly depletes
+          const drawAmt=Math.abs(ev.amount); // guard against accidental negative entry
+          income+=drawAmt*12; lump-=drawAmt*12; break; }
         case 'income-change':
           income+=ev.amount*12; break;
         case 'expense-change':
@@ -3118,7 +3119,7 @@ function renderUpdateBadge(){
   const ALL_MIGRATIONS=[
     addHousingScenarios,addDefaultHoldings,addInsuranceData,addFPSheetData,
     addCryptoHoldings,addInvestmentTrusts,addSBIHoldings,
-    addMonthlyFixedCosts,addLifestyleData,addEducationSteps,addFPUpdates
+    addMonthlyFixedCosts,addLifestyleData,addEducationSteps,addFPUpdates,addDrawdownIncome
   ];
   ALL_MIGRATIONS.forEach(fn=>{try{fn();}catch(e){}});
   window.confirm=origConfirm;
