@@ -305,6 +305,7 @@
           <div class="field"><label>投資・運用利回り（想定）</label><input type="number" id="investment-return" value="3.0" min="0" max="15" step="0.1"><span class="hint">% / 年</span></div>
           <div class="field"><label>物価上昇率（想定）</label><input type="number" id="inflation-rate" value="1.5" min="0" max="10" step="0.1"><span class="hint">% / 年</span></div>
           <div class="field"><label>給与増加率（退職まで）</label><input type="number" id="salary-growth" value="1.0" min="0" max="10" step="0.1"><span class="hint">% / 年</span></div>
+          <div class="field"><label>退職後の生活費倍率</label><input type="number" id="retire-expense-ratio" value="1.0" min="0.5" max="1.5" step="0.05"><span class="hint">倍（1.0=変化なし、0.85=15%減、1.1=10%増）</span></div>
         </div>
       </div>
     </div>
@@ -703,7 +704,7 @@ const DEFAULTS = {
     {id:3,name:'第1子', role:'child', age:5, birthdate:'2021-01-01',gender:'male'},
     {id:4,name:'第2子', role:'child', age:1, birthdate:'2025-01-01',gender:'female'}
   ],
-  settings:{retireAge:55,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0},
+  settings:{retireAge:55,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0,retireExpenseRatio:1.0},
   // 手取り推計: 本人1500万gross→月85万, 配偶者500万gross→月32.5万（税・社保控除後）
   income:{self:850000,spouse:325000,side:15000,investment:0,bonusSelf:1000000,bonusSpouse:0},
   // ↑ side:15000 = ACN ESPP 15%割引ベネフィット（毎月8.5万で購入→市場価値10万、差額1.5万/月）
@@ -752,7 +753,7 @@ const DEFAULTS = {
     {fromAge:75,delta:20000, memo:'加齢による医療費増加（75歳〜 さらに+2万/月）'},
   ],
   // 3年前に7,000万円の家を購入（自宅評価額）
-  assets:{cash:3000000,fixedDeposit:2000000,stocks:18978775,ideco:500000,home:70000000,realEstate:0,insurance:0,other:270000},
+  assets:{cash:3000000,fixedDeposit:2000000,stocks:18978775,ideco:0,home:70000000,realEstate:0,insurance:0,other:270000},
   // 35年ローン・1.5%固定・月20万返済。3年経過後残高約6,000万
   debts:{mortgage:60000000,mortgageMonthly:200000,mortgageRate:1.5,car:0,education:0,consumer:0,other:0},
   holdings:[
@@ -914,9 +915,11 @@ let data = JSON.parse(localStorage.getItem('fp-data') || JSON.stringify(DEFAULTS
 // Startup migrations: fix data shape from older versions
 (()=>{
   let dirty=false;
-  // Add mortgageRate if missing
   if(data.debts && data.debts.mortgageRate==null){data.debts.mortgageRate=1.5;dirty=true;}
-  // Convert old income-change drawdown events to drawdown type
+  // retireExpenseRatio: 1.0 = no change in retirement (replaces hardcoded 0.85 assumption)
+  if(data.settings && data.settings.retireExpenseRatio==null){data.settings.retireExpenseRatio=1.0;dirty=true;}
+  // iDeCo未使用のためデフォルト値500000をリセット
+  if(data.assets && data.assets.ideco===500000){data.assets.ideco=0;dirty=true;}
   if(data.plans){
     data.plans.forEach(p=>{
       p.events.forEach(ev=>{
@@ -1133,6 +1136,7 @@ function syncFromDOM(){
   data.settings.investReturn=+document.getElementById('investment-return').value;
   data.settings.inflation=+document.getElementById('inflation-rate').value;
   data.settings.salaryGrowth=+document.getElementById('salary-growth').value;
+  data.settings.retireExpenseRatio=+document.getElementById('retire-expense-ratio').value||1.0;
   data.income={self:g('income-self'),spouse:g('income-spouse'),side:g('income-side'),
     investment:g('income-investment'),bonusSelf:g('bonus-self'),bonusSpouse:g('bonus-spouse')};
   ['housing','food','utilities','insurance','education','transport','medical']
@@ -1158,6 +1162,7 @@ function syncToDOM(){
   s('investment-return',data.settings.investReturn);
   s('inflation-rate',data.settings.inflation);
   s('salary-growth',data.settings.salaryGrowth);
+  s('retire-expense-ratio',data.settings.retireExpenseRatio??1.0);
   s('income-self',data.income.self); s('income-spouse',data.income.spouse);
   s('income-side',data.income.side); s('income-investment',data.income.investment);
   s('bonus-self',data.income.bonusSelf); s('bonus-spouse',data.income.bonusSpouse);
@@ -1473,7 +1478,7 @@ function simulate(plan){
   const spouse=data.members.find(m=>m.role==='spouse');
   const startAge=self?.age||35;
   const currentYear=new Date().getFullYear();
-  const {endAge,retireAge,retireAgeSpouse,investReturn:ir,inflation,salaryGrowth}=data.settings;
+  const {endAge,retireAge,retireAgeSpouse,investReturn:ir,inflation,salaryGrowth,retireExpenseRatio=1.0}=data.settings;
   const r=ir/100, inf=inflation/100, sg=salaryGrowth/100;
 
   let FA=data.assets.cash+data.assets.fixedDeposit+data.assets.stocks+data.assets.ideco+data.assets.insurance+data.assets.other;
@@ -1510,7 +1515,7 @@ function simulate(plan){
 
     // ③⑦ Expenses: base×inflation → retirement reduction → then add stepDeltas (nominal, not reduced)
     let baseExpenses=Object.values(data.expenses).reduce((a,b)=>a+b,0)*12*inflF;
-    if(retired) baseExpenses*=0.85; // ③ retirement reduction on base lifestyle only (not structural changes)
+    if(retired) baseExpenses*=retireExpenseRatio; // configurable: 1.0=変化なし, 0.85=15%減, 1.1=10%増
     if(data.expenseSteps?.length){
       const stepDelta=data.expenseSteps.filter(s=>age>=s.fromAge).reduce((sum,s)=>sum+s.delta,0);
       if(stepDelta) baseExpenses+=stepDelta*12; // ⑦ nominal amounts added after reduction (medical increases etc. unaffected)

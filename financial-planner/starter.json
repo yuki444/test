@@ -7,7 +7,7 @@
   ],
   "settings": {
     "retireAge":55,"retireAgeSpouse":63,"endAge":90,
-    "investReturn":3.0,"inflation":1.5,"salaryGrowth":1.0
+    "investReturn":3.0,"inflation":1.5,"salaryGrowth":1.0,"retireExpenseRatio":1.0
   },
   "income": {
     "self":850000,"spouse":325000,"side":15000,"investment":0,
@@ -60,7 +60,7 @@
     {"fromAge":75,"delta":20000, "memo":"加齢による医療費増加（75歳〜 さらに+2万/月）"}
   ],
   "assets": {
-    "cash":3000000,"fixedDeposit":2000000,"stocks":18978775,"ideco":500000,
+    "cash":3000000,"fixedDeposit":2000000,"stocks":18978775,"ideco":0,
     "home":70000000,"realEstate":0,"insurance":0,"other":270000
   },
   "debts": {
