@@ -1,3 +1,23 @@
+# 開発ルール（Claude Code 必読）
+
+## Git ブランチ運用
+
+- **作業ブランチ**: `claude/financial-planner-tool-QVzK9`
+- **すべての変更は作業ブランチへのコミット後、必ず `main` にもマージ・プッシュする**
+
+```bash
+# 変更完了後の標準フロー
+git add <files>
+git commit -m "コミットメッセージ"
+git push -u origin claude/financial-planner-tool-QVzK9
+git checkout main
+git merge claude/financial-planner-tool-QVzK9 --no-edit
+git push -u origin main
+git checkout claude/financial-planner-tool-QVzK9
+```
+
+---
+
 # Suno AI Lyrics Integration
 
 毎日歌詞を整理し、Suno AIで5つのスタイルの曲を自動生成するシステム。
