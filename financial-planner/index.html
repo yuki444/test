@@ -515,6 +515,18 @@
         <button class="btn btn-primary" onclick="addDefaultHoldings()">📋 38銘柄を現在のデータに追加</button>
       </div>
       <div class="card">
+        <div class="card-title">🔒 保険データを反映</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">保険の払込終了・解約払戻イベントを現在のデータに追加します。</p>
+        <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
+          <strong>年齢別スケジュール</strong> — 39歳〜 −31,000円（オリックス払込終了）/ 60歳〜 −20,000円（メット①払込終了）<br>
+          <strong>イベント①</strong> — 49歳 オリックス解約 払戻400万円<br>
+          <strong>イベント②</strong> — 55歳 メットライフ② 解約 176,450ドル ≒ 2,558万円<br>
+          <strong>イベント③</strong> — 60歳 メットライフ① 解約 65,000ドル ≒ 942万円<br>
+          <span style="color:var(--warning);font-weight:600">※ ドル換算は145円/ドルで計算。為替変動に注意。</span>
+        </div>
+        <button class="btn btn-primary" onclick="addInsuranceData()">🔒 保険データを現在のデータに反映</button>
+      </div>
+      <div class="card">
         <div class="card-title">📋 家計シートデータを反映</div>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">最新の収入・支出・積立データを現在のデータに反映します。既存データは上書きされますが、他の項目は変更されません。</p>
         <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
@@ -561,7 +573,11 @@ const DEFAULTS = {
   // 年金見込み: 本人厚生年金+国民年金(65歳~)≈20万/月, 配偶者≈14万/月
   savings:{invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000},
   // 年齢別生活費スケジュール（全シナリオ共通）
-  expenseSteps:[],
+  // オリックス払込終了(2027/3=39歳) / メットライフ①払込終了(60歳)
+  expenseSteps:[
+    {fromAge:39,delta:-31000,memo:'オリックス 払込終了（2027年3月）'},
+    {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
+  ],
   // 3年前に7,000万円の家を購入（自宅評価額）
   assets:{cash:3000000,fixedDeposit:2000000,stocks:8882862,ideco:500000,home:70000000,realEstate:0,insurance:0,other:0},
   // 35年ローン・1.5%固定・月20万返済。3年経過後残高約6,000万
@@ -622,9 +638,12 @@ const DEFAULTS = {
       {type:'education-fee', name:'第2子 大学入学費用',    age:55,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第2子18歳'},
       {type:'expense-change',name:'第2子 大学 授業料',     age:55,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第2子18〜21歳'},
       {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行 第2子20歳'},
+      {type:'lump-income',   name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
+      {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:25585000,duration:1,memo:'一時払USD建終身 176,450ドル（145円換算）受取時課税あり'},
+      {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
+      {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
-      {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
     ]},
     // ── プラン2: 20年後（58歳）に半値売却→賃貸転居 ────────────────
     {id:2,name:'20年後売却→賃貸',color:'#10b981',events:[
@@ -644,9 +663,12 @@ const DEFAULTS = {
       // 58歳で半値売却。残債~2,500万精算後 約1,000万がFAに加算、以降ローン消滅
       {type:'sell-home',     name:'住宅売却（半値）',      age:58,amount:35000000,duration:1,memo:'7,000万→3,500万(半値)で売却。残債~2,500万精算・純益~1,000万FA算入。ローン消滅'},
       {type:'expense-change',name:'管理費→家賃 差額',      age:58,amount:20000,  duration:40,memo:'固定資産税・管理費8万→家賃10万へ 月+2万'},
+      {type:'lump-income',   name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
+      {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:25585000,duration:1,memo:'一時払USD建終身 176,450ドル（145円換算）受取時課税あり'},
+      {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
+      {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
-      {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
     ]},
     // ── プラン3: 8年ごとに新築へ住み替え（2割ずつ縮小） ───────────
     {id:3,name:'8年ごとに新築',color:'#f59e0b',events:[
@@ -675,9 +697,12 @@ const DEFAULTS = {
       {type:'move-home',     name:'新築③へ住替（59歳）',  age:59,amount:0,duration:1,
        salePrice:44800000,newPrice:35840000,newLoan:7040000,newMonthly:22000,
        memo:'売却4,480万-残債→益2,880万を頭金/新ローン704万@1.5%35年=月2.2万'},
+      {type:'lump-income',   name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
+      {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:25585000,duration:1,memo:'一時払USD建終身 176,450ドル（145円換算）受取時課税あり'},
+      {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
+      {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
-      {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
     ]},
   ]
 };
@@ -1966,9 +1991,12 @@ function addHousingScenarios(){
     {type:'education-fee', name:'第2子 大学入学費用',    age:55,amount:-1500000,duration:1,memo:'私立大 第2子18歳'},
     {type:'expense-change',name:'第2子 大学 授業料',     age:55,amount:100000, duration:4,memo:'月+10万円 私立文系'},
     {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行'},
+    {type:'lump-income',   name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
+    {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:25585000,duration:1,memo:'一時払USD建終身 176,450ドル（145円換算）受取時課税あり'},
+    {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
     {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳'},
     {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳'},
-    {type:'lump-income',   name:'企業型DC退職金（本人）',age:65,amount:30000000,duration:1,memo:'年収5%×27年 運用3%推計 約3,000万（受取時課税あり）'},
+    {type:'lump-income',   name:'企業型DC退職金（本人）',age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
   ];
   if(!existingNames.includes('住み続ける（ローン完済）'))
     toAdd.push({name:'住み続ける（ローン完済）',color:'#3b82f6',events:[...commonEvents]});
@@ -2056,6 +2084,46 @@ function addFPSheetData(){
   syncToDOM();
   updateMonthlySummary();
   showToast('✅ 最新データを反映しました');
+}
+
+function addInsuranceData(){
+  const INS_STEPS=[
+    {fromAge:39,delta:-31000,memo:'オリックス 払込終了（2027年3月）'},
+    {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
+  ];
+  const INS_EVENTS=[
+    {type:'lump-income',name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
+    {type:'lump-income',name:'メットライフ②解約・払戻', age:55,amount:25585000,duration:1,memo:'一時払USD建終身 176,450ドル（145円換算）受取時課税あり'},
+    {type:'lump-income',name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
+  ];
+
+  if(!data.expenseSteps) data.expenseSteps=[];
+  const changes=[];
+  INS_STEPS.forEach(s=>{
+    if(!data.expenseSteps.some(e=>e.memo===s.memo))
+      changes.push(`年齢別スケジュール追加: ${s.fromAge}歳〜 ${s.delta>0?'+':''}${addCommas(s.delta)}円/月（${s.memo}）`);
+  });
+  INS_EVENTS.forEach(ev=>{
+    const plans=data.plans.filter(p=>!p.events.some(e=>e.name===ev.name));
+    if(plans.length>0) changes.push(`イベント追加: ${ev.name}（${ev.age}歳 ${addCommas(ev.amount)}円）× ${plans.length}プラン`);
+  });
+
+  if(changes.length===0){showToast('ℹ️ 保険データはすでに反映済みです');return;}
+  if(!confirm(`以下の保険情報を追加します:\n\n${changes.join('\n')}\n\n続けますか？`)) return;
+
+  INS_STEPS.forEach(s=>{
+    if(!data.expenseSteps.some(e=>e.memo===s.memo)) data.expenseSteps.push({...s});
+  });
+  INS_EVENTS.forEach(ev=>{
+    data.plans.forEach(p=>{
+      if(!p.events.some(e=>e.name===ev.name)) p.events.push({...ev});
+    });
+  });
+
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderExpenseSteps();
+  renderPlans();
+  showToast('✅ 保険データを反映しました');
 }
 
 // ============================================================
