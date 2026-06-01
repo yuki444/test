@@ -14,15 +14,23 @@
     "bonusSelf":1000000,"bonusSpouse":0
   },
   "expenses": {
-    "housing":80000,"food":55000,"utilities":22000,"insurance":57000,
+    "housing":80000,"food":55000,"utilities":22000,"insurance":65000,
     "education":75000,"transport":25000,"medical":30000,
-    "entertainment":80000,"other":50000
+    "entertainment":110000,"other":75000
   },
   "savings": {
     "invest":200000,"deposit":100000,"pensionSelf":200000,"pensionSpouse":140000
   },
   "expenseSteps": [
     {"fromAge":39,"delta":-31000,"memo":"オリックス 払込終了（2027年3月）"},
+    {"fromAge":39,"delta":2000,  "memo":"第1子 小学生 小遣い開始（2,000円/月）"},
+    {"fromAge":43,"delta":2000,  "memo":"第2子 小学生 小遣い開始（2,000円/月）"},
+    {"fromAge":45,"delta":3000,  "memo":"第1子 中学生 小遣い増額（5,000円/月）"},
+    {"fromAge":48,"delta":5000,  "memo":"第1子 高校生 小遣い増額（10,000円/月）"},
+    {"fromAge":49,"delta":3000,  "memo":"第2子 中学生 小遣い増額（5,000円/月）"},
+    {"fromAge":51,"delta":-10000,"memo":"第1子 独立 小遣い終了"},
+    {"fromAge":52,"delta":5000,  "memo":"第2子 高校生 小遣い増額（10,000円/月）"},
+    {"fromAge":55,"delta":-10000,"memo":"第2子 独立 小遣い終了"},
     {"fromAge":60,"delta":-20000,"memo":"メットライフ① 払込終了"}
   ],
   "assets": {

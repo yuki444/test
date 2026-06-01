@@ -531,13 +531,22 @@
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">最新の収入・支出・積立データを現在のデータに反映します。既存データは上書きされますが、他の項目は変更されません。</p>
         <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
           <strong>収入</strong> — 本人月収85万（1500万gross手取り）・ボーナス100万・配偶者月収32.5万（500万gross手取り）・ボーナス0<br>
-          <strong>支出</strong> — 食費5.5万・光熱費等2.2万・保険5.7万・教育費7.5万・交通費2.5万・医療費3万・娯楽費8万・その他5万<br>
+          <strong>支出</strong> — 食費5.5万・光熱費等2.2万・保険6.5万・教育費7.5万・交通費2.5万・医療費3万・娯楽費11万・その他7.5万<br>
           <strong>積立</strong> — NISA20万＋追加積立10万（NISA外）<br>
           <strong>年金見込み</strong> — 本人20万/月・配偶者14万/月（厚生年金+国民年金 推計）<br>
           <strong>退職金</strong> — 企業型DC：年収5%×19年（2024年10月入社・55歳退職）×運用3% ≈ 1,900万円（55歳・全プラン更新）<br>
           <strong>その他</strong> — 退職年齢55歳に変更 / 公的年金は65歳から受取（シミュレーション修正済み）
         </div>
         <button class="btn btn-primary" onclick="addFPSheetData()">📋 家計シートデータを現在のデータに反映</button>
+      </div>
+      <div class="card">
+        <div class="card-title">🏌️ ライフスタイル費用を反映</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">ゴルフ・家族旅行・火災保険・子供小遣いを現在のデータに追加します。同内容は重複追加されません。</p>
+        <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
+          <strong>月次支出増加</strong> — ゴルフ +30,000円 / 家族旅行30万/年 +25,000円 / 火災保険 +8,000円<br>
+          <strong>子供小遣い</strong> — 小学生2,000・中学生5,000・高校生10,000円/月（各子供・18歳で終了）
+        </div>
+        <button class="btn btn-primary" onclick="addLifestyleData()">🏌️ ライフスタイル費用を現在のデータに反映</button>
       </div>
       <div class="card">
         <div class="card-title">🗑️ データ管理</div>
@@ -568,14 +577,21 @@ const DEFAULTS = {
   // 手取り推計: 本人1500万gross→月85万, 配偶者500万gross→月32.5万（税・社保控除後）
   income:{self:850000,spouse:325000,side:0,investment:0,bonusSelf:1000000,bonusSpouse:0},
   // housing=固定資産税・管理費・修繕（住宅ローンは別途 debts.mortgageMonthly で管理）
-  expenses:{housing:80000,food:55000,utilities:22000,insurance:57000,education:75000,
-    transport:25000,medical:30000,entertainment:80000,other:50000},
+  expenses:{housing:80000,food:55000,utilities:22000,insurance:65000,education:75000,
+    transport:25000,medical:30000,entertainment:110000,other:75000},
   // 年金見込み: 本人厚生年金+国民年金(65歳~)≈20万/月, 配偶者≈14万/月
   savings:{invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000},
   // 年齢別生活費スケジュール（全シナリオ共通）
-  // オリックス払込終了(2027/3=39歳) / メットライフ①払込終了(60歳)
   expenseSteps:[
     {fromAge:39,delta:-31000,memo:'オリックス 払込終了（2027年3月）'},
+    {fromAge:39,delta:2000,  memo:'第1子 小学生 小遣い開始（2,000円/月）'},
+    {fromAge:43,delta:2000,  memo:'第2子 小学生 小遣い開始（2,000円/月）'},
+    {fromAge:45,delta:3000,  memo:'第1子 中学生 小遣い増額（5,000円/月）'},
+    {fromAge:48,delta:5000,  memo:'第1子 高校生 小遣い増額（10,000円/月）'},
+    {fromAge:49,delta:3000,  memo:'第2子 中学生 小遣い増額（5,000円/月）'},
+    {fromAge:51,delta:-10000,memo:'第1子 独立 小遣い終了'},
+    {fromAge:52,delta:5000,  memo:'第2子 高校生 小遣い増額（10,000円/月）'},
+    {fromAge:55,delta:-10000,memo:'第2子 独立 小遣い終了'},
     {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
   ],
   // 3年前に7,000万円の家を購入（自宅評価額）
@@ -2035,7 +2051,7 @@ function addFPSheetData(){
   // 企業型DC: 年収5%×19年(2024/10入社・55歳退職)×運用3% ≈ 1,900万
   const NEW_SETTINGS={retireAge:55};
   const NEW_INCOME={self:850000,spouse:325000,side:0,bonusSelf:1000000,bonusSpouse:0};
-  const NEW_EXPENSES={food:55000,utilities:22000,insurance:57000,education:75000,transport:25000,medical:30000,entertainment:80000,other:50000};
+  const NEW_EXPENSES={food:55000,utilities:22000,insurance:65000,education:75000,transport:25000,medical:30000,entertainment:110000,other:75000};
   const NEW_SAVINGS={invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000};
   const DC_EVENT={type:'lump-income',name:'企業型DC退職金（本人）',age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'};
   const OLD_RETIRE_NAMES=['退職金（本人）','企業型DC退職金（本人）'];
@@ -2068,6 +2084,22 @@ function addFPSheetData(){
   });
   if(plansToUpdate.length>0) changes.push(`企業型DC退職金（55歳・1,900万）に更新（${plansToUpdate.length}プラン）`);
 
+  // 子供小遣いステップ
+  const CHILD_STEPS=[
+    {fromAge:39,delta:2000,  memo:'第1子 小学生 小遣い開始（2,000円/月）'},
+    {fromAge:43,delta:2000,  memo:'第2子 小学生 小遣い開始（2,000円/月）'},
+    {fromAge:45,delta:3000,  memo:'第1子 中学生 小遣い増額（5,000円/月）'},
+    {fromAge:48,delta:5000,  memo:'第1子 高校生 小遣い増額（10,000円/月）'},
+    {fromAge:49,delta:3000,  memo:'第2子 中学生 小遣い増額（5,000円/月）'},
+    {fromAge:51,delta:-10000,memo:'第1子 独立 小遣い終了'},
+    {fromAge:52,delta:5000,  memo:'第2子 高校生 小遣い増額（10,000円/月）'},
+    {fromAge:55,delta:-10000,memo:'第2子 独立 小遣い終了'},
+  ];
+  if(!data.expenseSteps) data.expenseSteps=[];
+  const existingMemos=new Set(data.expenseSteps.map(s=>s.memo));
+  const newChildSteps=CHILD_STEPS.filter(s=>!existingMemos.has(s.memo));
+  if(newChildSteps.length>0) changes.push(`子供小遣いステップ: ${newChildSteps.length}件追加`);
+
   if(changes.length===0){showToast('ℹ️ 最新データはすでに反映済みです');return;}
   if(!confirm(`以下の内容を更新します:\n\n${changes.join('\n')}\n\n続けますか？`)) return;
 
@@ -2079,11 +2111,57 @@ function addFPSheetData(){
     p.events=p.events.filter(e=>!OLD_RETIRE_NAMES.includes(e.name));
     p.events.push({...DC_EVENT});
   });
+  newChildSteps.forEach(s=>data.expenseSteps.push({...s}));
+  data.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
 
   localStorage.setItem('fp-data',JSON.stringify(data));
   syncToDOM();
+  renderExpenseSteps();
   updateMonthlySummary();
   showToast('✅ 最新データを反映しました');
+}
+
+function addLifestyleData(){
+  const GOLF_DELTA=30000, TRAVEL_DELTA=25000, FIRE_INS_DELTA=8000;
+  const CHILD_STEPS=[
+    {fromAge:39,delta:2000,  memo:'第1子 小学生 小遣い開始（2,000円/月）'},
+    {fromAge:43,delta:2000,  memo:'第2子 小学生 小遣い開始（2,000円/月）'},
+    {fromAge:45,delta:3000,  memo:'第1子 中学生 小遣い増額（5,000円/月）'},
+    {fromAge:48,delta:5000,  memo:'第1子 高校生 小遣い増額（10,000円/月）'},
+    {fromAge:49,delta:3000,  memo:'第2子 中学生 小遣い増額（5,000円/月）'},
+    {fromAge:51,delta:-10000,memo:'第1子 独立 小遣い終了'},
+    {fromAge:52,delta:5000,  memo:'第2子 高校生 小遣い増額（10,000円/月）'},
+    {fromAge:55,delta:-10000,memo:'第2子 独立 小遣い終了'},
+  ];
+  if(!data.expenseSteps) data.expenseSteps=[];
+  const existingMemos=new Set(data.expenseSteps.map(s=>s.memo));
+  const newSteps=CHILD_STEPS.filter(s=>!existingMemos.has(s.memo));
+
+  const hasGolf=data.expenses.entertainment>=110000;
+  const hasTravel=data.expenses.other>=75000;
+  const hasFireIns=data.expenses.insurance>=65000;
+
+  const changes=[];
+  if(!hasGolf) changes.push(`趣味・娯楽: ${addCommas(data.expenses.entertainment)} → ${addCommas(data.expenses.entertainment+GOLF_DELTA)}円/月（ゴルフ +30,000）`);
+  if(!hasTravel) changes.push(`その他: ${addCommas(data.expenses.other)} → ${addCommas(data.expenses.other+TRAVEL_DELTA)}円/月（家族旅行30万/年 +25,000）`);
+  if(!hasFireIns) changes.push(`保険料: ${addCommas(data.expenses.insurance)} → ${addCommas(data.expenses.insurance+FIRE_INS_DELTA)}円/月（火災保険 +8,000）`);
+  if(newSteps.length) changes.push(`子供小遣いステップ: ${newSteps.length}件追加`);
+
+  if(changes.length===0){showToast('ℹ️ ライフスタイル費用はすでに反映済みです');return;}
+  if(!confirm(`以下の内容を追加します:\n\n${changes.join('\n')}\n\n続けますか？`)) return;
+
+  if(!hasGolf) data.expenses.entertainment+=GOLF_DELTA;
+  if(!hasTravel) data.expenses.other+=TRAVEL_DELTA;
+  if(!hasFireIns) data.expenses.insurance+=FIRE_INS_DELTA;
+  newSteps.forEach(s=>data.expenseSteps.push({...s}));
+  data.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
+
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  syncToDOM();
+  renderExpenseSteps();
+  updateMonthlySummary();
+  markDirty();
+  showToast('✅ ライフスタイル費用を反映しました');
 }
 
 function addInsuranceData(){
