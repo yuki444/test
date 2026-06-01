@@ -704,7 +704,7 @@ const DEFAULTS = {
     {id:3,name:'第1子', role:'child', age:5, birthdate:'2021-01-01',gender:'male'},
     {id:4,name:'第2子', role:'child', age:1, birthdate:'2025-01-01',gender:'female'}
   ],
-  settings:{retireAge:55,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0,retireExpenseRatio:1.0},
+  settings:{retireAge:55,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0,retireExpenseRatio:1.1},
   // 手取り推計: 本人1500万gross→月85万, 配偶者500万gross→月32.5万（税・社保控除後）
   income:{self:850000,spouse:325000,side:15000,investment:0,bonusSelf:1000000,bonusSpouse:0},
   // ↑ side:15000 = ACN ESPP 15%割引ベネフィット（毎月8.5万で購入→市場価値10万、差額1.5万/月）
@@ -917,7 +917,7 @@ let data = JSON.parse(localStorage.getItem('fp-data') || JSON.stringify(DEFAULTS
   let dirty=false;
   if(data.debts && data.debts.mortgageRate==null){data.debts.mortgageRate=1.5;dirty=true;}
   // retireExpenseRatio: 1.0 = no change in retirement (replaces hardcoded 0.85 assumption)
-  if(data.settings && data.settings.retireExpenseRatio==null){data.settings.retireExpenseRatio=1.0;dirty=true;}
+  if(data.settings && (data.settings.retireExpenseRatio==null||data.settings.retireExpenseRatio===1.0)){data.settings.retireExpenseRatio=1.1;dirty=true;}
   // iDeCo未使用のためデフォルト値500000をリセット
   if(data.assets && data.assets.ideco===500000){data.assets.ideco=0;dirty=true;}
   if(data.plans){

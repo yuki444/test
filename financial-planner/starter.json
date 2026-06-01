@@ -7,7 +7,7 @@
   ],
   "settings": {
     "retireAge":55,"retireAgeSpouse":63,"endAge":90,
-    "investReturn":3.0,"inflation":1.5,"salaryGrowth":1.0,"retireExpenseRatio":1.0
+    "investReturn":3.0,"inflation":1.5,"salaryGrowth":1.0,"retireExpenseRatio":1.1
   },
   "income": {
     "self":850000,"spouse":325000,"side":15000,"investment":0,
