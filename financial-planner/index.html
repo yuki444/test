@@ -330,8 +330,22 @@
           <div class="field"><label>教育費</label><input type="number" id="exp-education" value="20000" step="5000"><span class="hint">円 / 月</span></div>
           <div class="field"><label>交通費・自動車費</label><input type="number" id="exp-transport" value="20000" step="5000"><span class="hint">円 / 月</span></div>
           <div class="field"><label>医療費</label><input type="number" id="exp-medical" value="10000" step="1000"><span class="hint">円 / 月</span></div>
-          <div class="field"><label>趣味・娯楽・外食</label><input type="number" id="exp-entertainment" value="30000" step="5000"><span class="hint">円 / 月</span></div>
-          <div class="field"><label>その他・雑費</label><input type="number" id="exp-other" value="20000" step="5000"><span class="hint">円 / 月</span></div>
+          <div class="field" style="grid-column:1/-1">
+            <label style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span>趣味・娯楽・外食</span>
+              <span style="font-size:12px;color:var(--text-muted)">合計 <strong id="exp-entertainment-total" style="color:var(--text)">0</strong> 円/月</span>
+            </label>
+            <div id="expense-detail-entertainment"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addExpenseDetailItem('entertainment')" style="margin-top:6px">＋ 項目を追加</button>
+          </div>
+          <div class="field" style="grid-column:1/-1">
+            <label style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span>その他・雑費</span>
+              <span style="font-size:12px;color:var(--text-muted)">合計 <strong id="exp-other-total" style="color:var(--text)">0</strong> 円/月</span>
+            </label>
+            <div id="expense-detail-other"></div>
+            <button class="btn btn-secondary btn-sm" onclick="addExpenseDetailItem('other')" style="margin-top:6px">＋ 項目を追加</button>
+          </div>
         </div>
         <hr class="divider">
         <div id="monthly-summary" class="inline-summary"></div>
@@ -590,6 +604,17 @@ const DEFAULTS = {
   // housing=固定資産税・管理費・修繕（住宅ローンは別途 debts.mortgageMonthly で管理）
   expenses:{housing:80000,food:55000,utilities:22000,insurance:65000,education:75000,
     transport:25000,medical:30000,entertainment:110000,other:75000},
+  expenseDetails:{
+    entertainment:[
+      {name:'ゴルフ',           amount:30000},
+      {name:'外食・飲み会',     amount:50000},
+      {name:'趣味・レジャー',   amount:30000},
+    ],
+    other:[
+      {name:'家族旅行（年30万）',amount:25000},
+      {name:'日用品・雑費',     amount:50000},
+    ]
+  },
   // 年金見込み: 本人厚生年金+国民年金(65歳~)≈20万/月, 配偶者≈14万/月
   savings:{invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000},
   // 年齢別生活費スケジュール（全シナリオ共通）
@@ -929,7 +954,7 @@ function showPage(id){
   document.getElementById('nav-'+id).classList.add('active');
   if(id==='page-simulation'){syncFromDOM();renderSimulation();}
   if(id==='page-advice'){syncFromDOM();renderAdvice();}
-  if(id==='page-income'){updateMonthlySummary();renderExpenseSteps();}
+  if(id==='page-income'){updateMonthlySummary();renderExpenseSteps();renderExpenseDetails();}
   if(id==='page-assets'){updateNetWorthSummary();renderAllocChart();renderHoldings();}
   if(id==='page-settings'){updatePinStatus();}
 }
@@ -947,8 +972,9 @@ function syncFromDOM(){
   data.settings.salaryGrowth=+document.getElementById('salary-growth').value;
   data.income={self:g('income-self'),spouse:g('income-spouse'),side:g('income-side'),
     investment:g('income-investment'),bonusSelf:g('bonus-self'),bonusSpouse:g('bonus-spouse')};
-  ['housing','food','utilities','insurance','education','transport','medical','entertainment','other']
+  ['housing','food','utilities','insurance','education','transport','medical']
     .forEach(k=>data.expenses[k]=g('exp-'+k));
+  // entertainment/other are computed from expenseDetails
   data.savings={invest:g('saving-invest'),deposit:g('saving-deposit'),
     pensionSelf:g('pension-self'),pensionSpouse:g('pension-spouse')};
   ['cash','fixedDeposit','stocks','ideco','home','realEstate','insurance','other'].forEach((k,i)=>{
@@ -972,8 +998,9 @@ function syncToDOM(){
   s('income-self',data.income.self); s('income-spouse',data.income.spouse);
   s('income-side',data.income.side); s('income-investment',data.income.investment);
   s('bonus-self',data.income.bonusSelf); s('bonus-spouse',data.income.bonusSpouse);
-  ['housing','food','utilities','insurance','education','transport','medical','entertainment','other']
+  ['housing','food','utilities','insurance','education','transport','medical']
     .forEach(k=>s('exp-'+k,data.expenses[k]));
+  renderExpenseDetails();
   s('saving-invest',data.savings.invest); s('saving-deposit',data.savings.deposit);
   s('pension-self',data.savings.pensionSelf); s('pension-spouse',data.savings.pensionSpouse);
   ['cash','fixedDeposit','stocks','ideco','home','realEstate','insurance','other'].forEach((k,i)=>{
@@ -1893,6 +1920,80 @@ async function refreshHoldingPrices(){
 }
 
 // ============================================================
+// EXPENSE DETAILS (娯楽・その他 の明細内訳)
+// ============================================================
+function renderExpenseDetails(){
+  _renderDetailCat('entertainment','exp-entertainment-total');
+  _renderDetailCat('other','exp-other-total');
+}
+
+function _renderDetailCat(cat,totalId){
+  if(!data.expenseDetails) data.expenseDetails={entertainment:[],other:[]};
+  if(!data.expenseDetails[cat]) data.expenseDetails[cat]=[];
+  const wrap=document.getElementById(`expense-detail-${cat}`);
+  if(!wrap) return;
+  const items=data.expenseDetails[cat];
+  const total=items.reduce((s,x)=>s+(+x.amount||0),0);
+  data.expenses[cat]=total;
+  const totEl=document.getElementById(totalId);
+  if(totEl) totEl.textContent=addCommas(total);
+  if(!items.length){
+    wrap.innerHTML=`<p style="font-size:12px;color:var(--text-muted);padding:4px 0 2px">まだ項目がありません。「＋ 項目を追加」から登録してください。</p>`;
+    return;
+  }
+  let html=`<table style="width:100%;font-size:12px;border-collapse:collapse;border:1px solid var(--border);border-radius:6px;overflow:hidden">`;
+  items.forEach((item,i)=>{
+    html+=`<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:5px 8px">
+        <input type="text" value="${(item.name||'').replace(/"/g,'&quot;')}" placeholder="例：外食・飲み会"
+          onchange="updateExpenseDetail('${cat}',${i},'name',this.value)"
+          style="width:100%;background:transparent;border:none;font-size:12px;color:var(--text);outline:none">
+      </td>
+      <td style="padding:5px 8px;width:130px">
+        <input type="text" inputmode="numeric" data-money="1" value="${addCommas(item.amount||0)}"
+          onchange="updateExpenseDetail('${cat}',${i},'amount',stripCommas(this.value))"
+          style="width:100%;text-align:right;background:transparent;border:none;font-size:12px;font-weight:700;color:var(--text);outline:none">
+      </td>
+      <td style="padding:5px 6px;width:28px;color:var(--text-muted);font-size:11px;white-space:nowrap">円/月</td>
+      <td style="padding:5px 4px;width:30px;text-align:center">
+        <button onclick="deleteExpenseDetail('${cat}',${i})"
+          style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;line-height:1;padding:2px">×</button>
+      </td>
+    </tr>`;
+  });
+  html+=`</table>`;
+  wrap.innerHTML=html;
+}
+
+function addExpenseDetailItem(cat){
+  if(!data.expenseDetails) data.expenseDetails={entertainment:[],other:[]};
+  if(!data.expenseDetails[cat]) data.expenseDetails[cat]=[];
+  data.expenseDetails[cat].push({name:'',amount:0});
+  _saveAndRenderDetails();
+}
+
+function updateExpenseDetail(cat,i,key,val){
+  if(!data.expenseDetails?.[cat]?.[i]) return;
+  data.expenseDetails[cat][i][key]=key==='amount'?+val:val;
+  _saveAndRenderDetails();
+}
+
+function deleteExpenseDetail(cat,i){
+  data.expenseDetails[cat].splice(i,1);
+  _saveAndRenderDetails();
+}
+
+function _saveAndRenderDetails(){
+  if(!data.expenseDetails) data.expenseDetails={entertainment:[],other:[]};
+  data.expenses.entertainment=(data.expenseDetails.entertainment||[]).reduce((s,x)=>s+(+x.amount||0),0);
+  data.expenses.other=(data.expenseDetails.other||[]).reduce((s,x)=>s+(+x.amount||0),0);
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderExpenseDetails();
+  updateMonthlySummary();
+  markDirty();
+}
+
+// ============================================================
 // EXPENSE STEPS
 // ============================================================
 function renderExpenseSteps(){
@@ -2085,7 +2186,8 @@ function addFPSheetData(){
   // 企業型DC: 年収5%×19年(2024/10入社・55歳退職)×運用3% ≈ 1,900万
   const NEW_SETTINGS={retireAge:55};
   const NEW_INCOME={self:850000,spouse:325000,side:0,bonusSelf:1000000,bonusSpouse:0};
-  const NEW_EXPENSES={food:55000,utilities:22000,insurance:65000,education:75000,transport:25000,medical:30000,entertainment:110000,other:75000};
+  const NEW_EXPENSES={food:55000,utilities:22000,insurance:65000,education:75000,transport:25000,medical:30000};
+  // entertainment/other are managed via expenseDetails
   const NEW_SAVINGS={invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000};
   const DC_EVENT={type:'lump-income',name:'企業型DC退職金（本人）',age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'};
   const OLD_RETIRE_NAMES=['退職金（本人）','企業型DC退職金（本人）'];
@@ -2103,8 +2205,6 @@ function addFPSheetData(){
   if(data.expenses.education!==NEW_EXPENSES.education) changes.push(`教育費: ${addCommas(data.expenses.education)}円 → ${addCommas(NEW_EXPENSES.education)}円`);
   if(data.expenses.transport!==NEW_EXPENSES.transport) changes.push(`交通費: ${addCommas(data.expenses.transport)}円 → ${addCommas(NEW_EXPENSES.transport)}円`);
   if(data.expenses.medical!==NEW_EXPENSES.medical) changes.push(`医療費: ${addCommas(data.expenses.medical)}円 → ${addCommas(NEW_EXPENSES.medical)}円`);
-  if(data.expenses.entertainment!==NEW_EXPENSES.entertainment) changes.push(`娯楽・交際費: ${addCommas(data.expenses.entertainment)}円 → ${addCommas(NEW_EXPENSES.entertainment)}円`);
-  if(data.expenses.other!==NEW_EXPENSES.other) changes.push(`その他支出: ${addCommas(data.expenses.other)}円 → ${addCommas(NEW_EXPENSES.other)}円`);
   if(data.savings.invest!==NEW_SAVINGS.invest) changes.push(`積立投資（NISA）: ${addCommas(data.savings.invest)}円 → ${addCommas(NEW_SAVINGS.invest)}円`);
   if(data.savings.deposit!==NEW_SAVINGS.deposit) changes.push(`追加積立（NISA以外）: ${addCommas(data.savings.deposit)}円 → ${addCommas(NEW_SAVINGS.deposit)}円`);
   if(data.savings.pensionSelf!==NEW_SAVINGS.pensionSelf) changes.push(`年金見込み（本人）: ${addCommas(data.savings.pensionSelf)}円 → ${addCommas(NEW_SAVINGS.pensionSelf)}円/月（厚生年金+国民年金 推計）`);
@@ -2179,7 +2279,9 @@ function addEducationSteps(){
 }
 
 function addLifestyleData(){
-  const GOLF_DELTA=30000, TRAVEL_DELTA=25000, FIRE_INS_DELTA=8000;
+  const FIRE_INS_DELTA=8000;
+  const GOLF_ITEM   ={name:'ゴルフ',            amount:30000};
+  const TRAVEL_ITEM ={name:'家族旅行（年30万）', amount:25000};
   const CHILD_STEPS=[
     {fromAge:39,delta:2000,  memo:'第1子 小学生 小遣い開始（2,000円/月）'},
     {fromAge:43,delta:2000,  memo:'第2子 小学生 小遣い開始（2,000円/月）'},
@@ -2190,34 +2292,33 @@ function addLifestyleData(){
     {fromAge:52,delta:5000,  memo:'第2子 高校生 小遣い増額（10,000円/月）'},
     {fromAge:55,delta:-10000,memo:'第2子 独立 小遣い終了'},
   ];
+  if(!data.expenseDetails) data.expenseDetails={entertainment:[],other:[]};
   if(!data.expenseSteps) data.expenseSteps=[];
+  const entNames=new Set((data.expenseDetails.entertainment||[]).map(x=>x.name));
+  const othNames=new Set((data.expenseDetails.other||[]).map(x=>x.name));
   const existingMemos=new Set(data.expenseSteps.map(s=>s.memo));
   const newSteps=CHILD_STEPS.filter(s=>!existingMemos.has(s.memo));
 
-  const hasGolf=data.expenses.entertainment>=110000;
-  const hasTravel=data.expenses.other>=75000;
+  const hasGolf=entNames.has(GOLF_ITEM.name);
+  const hasTravel=othNames.has(TRAVEL_ITEM.name);
   const hasFireIns=data.expenses.insurance>=65000;
 
   const changes=[];
-  if(!hasGolf) changes.push(`趣味・娯楽: ${addCommas(data.expenses.entertainment)} → ${addCommas(data.expenses.entertainment+GOLF_DELTA)}円/月（ゴルフ +30,000）`);
-  if(!hasTravel) changes.push(`その他: ${addCommas(data.expenses.other)} → ${addCommas(data.expenses.other+TRAVEL_DELTA)}円/月（家族旅行30万/年 +25,000）`);
+  if(!hasGolf) changes.push(`趣味・娯楽に「ゴルフ」30,000円/月 を追加`);
+  if(!hasTravel) changes.push(`その他に「家族旅行（年30万）」25,000円/月 を追加`);
   if(!hasFireIns) changes.push(`保険料: ${addCommas(data.expenses.insurance)} → ${addCommas(data.expenses.insurance+FIRE_INS_DELTA)}円/月（火災保険 +8,000）`);
   if(newSteps.length) changes.push(`子供小遣いステップ: ${newSteps.length}件追加`);
 
   if(changes.length===0){showToast('ℹ️ ライフスタイル費用はすでに反映済みです');return;}
   if(!confirm(`以下の内容を追加します:\n\n${changes.join('\n')}\n\n続けますか？`)) return;
 
-  if(!hasGolf) data.expenses.entertainment+=GOLF_DELTA;
-  if(!hasTravel) data.expenses.other+=TRAVEL_DELTA;
+  if(!hasGolf) data.expenseDetails.entertainment.push({...GOLF_ITEM});
+  if(!hasTravel) data.expenseDetails.other.push({...TRAVEL_ITEM});
   if(!hasFireIns) data.expenses.insurance+=FIRE_INS_DELTA;
   newSteps.forEach(s=>data.expenseSteps.push({...s}));
   data.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
-
-  localStorage.setItem('fp-data',JSON.stringify(data));
-  syncToDOM();
+  _saveAndRenderDetails();
   renderExpenseSteps();
-  updateMonthlySummary();
-  markDirty();
   showToast('✅ ライフスタイル費用を反映しました');
 }
 
@@ -2273,10 +2374,20 @@ function init(){
   data.income=Object.assign({self:0,spouse:0,side:0,investment:0,bonusSelf:0,bonusSpouse:0},data.income);
   if(!data.holdings) data.holdings=[];
   if(!data.expenseSteps) data.expenseSteps=[];
+  // expenseDetails migration: 既存データは現在の合計値を一括項目として初期化
+  if(!data.expenseDetails){
+    data.expenseDetails={
+      entertainment:[{name:'趣味・娯楽・外食', amount:data.expenses.entertainment||110000}],
+      other:[{name:'その他・雑費', amount:data.expenses.other||75000}]
+    };
+  }
+  if(!data.expenseDetails.entertainment) data.expenseDetails.entertainment=[];
+  if(!data.expenseDetails.other) data.expenseDetails.other=[];
   initMoneyInputs();
   renderMembers();
   syncToDOM();
   syncDividendToIncome();
+  renderExpenseDetails();
   renderExpenseSteps();
   renderPlans();
   updateMonthlySummary();
@@ -2285,7 +2396,7 @@ function init(){
   // Live recalculation listeners
   const incomeIds=['income-self','income-spouse','income-side','income-investment','bonus-self','bonus-spouse',
     'exp-housing','exp-food','exp-utilities','exp-insurance','exp-education','exp-transport',
-    'exp-medical','exp-entertainment','exp-other','saving-invest','saving-deposit'];
+    'exp-medical','saving-invest','saving-deposit'];
   incomeIds.forEach(id=>{
     document.getElementById(id)?.addEventListener('input',()=>{updateMonthlySummary();markDirty();});
   });

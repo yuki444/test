@@ -18,6 +18,17 @@
     "education":75000,"transport":25000,"medical":30000,
     "entertainment":110000,"other":75000
   },
+  "expenseDetails": {
+    "entertainment":[
+      {"name":"ゴルフ",           "amount":30000},
+      {"name":"外食・飲み会",     "amount":50000},
+      {"name":"趣味・レジャー",   "amount":30000}
+    ],
+    "other":[
+      {"name":"家族旅行（年30万）","amount":25000},
+      {"name":"日用品・雑費",     "amount":50000}
+    ]
+  },
   "savings": {
     "invest":200000,"deposit":100000,"pensionSelf":200000,"pensionSpouse":140000
   },
