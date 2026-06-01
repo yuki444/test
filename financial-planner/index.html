@@ -598,6 +598,61 @@ const PRESETS = [
 ];
 
 // ============================================================
+// NUMBER / MONEY FORMATTING
+// ============================================================
+const MONEY_IDS=[
+  'income-self','income-spouse','income-side','income-investment','bonus-self','bonus-spouse',
+  'exp-housing','exp-food','exp-utilities','exp-insurance','exp-education','exp-transport',
+  'exp-medical','exp-entertainment','exp-other',
+  'saving-invest','saving-deposit','pension-self','pension-spouse',
+  'asset-cash','asset-fixed-deposit','asset-stocks','asset-ideco','asset-home',
+  'asset-realestate','asset-insurance','asset-other',
+  'debt-mortgage','debt-mortgage-monthly','debt-car','debt-education','debt-consumer','debt-other'
+];
+
+function addCommas(n){
+  if(n===null||n===undefined||n==='') return '';
+  const s=String(n);
+  if(s==='-') return '-';
+  const neg=s.startsWith('-');
+  const abs=s.replace(/[^\d]/g,'');
+  if(!abs) return '';
+  return (neg?'-':'')+abs.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+}
+function stripCommas(v){
+  if(!v&&v!==0) return 0;
+  const s=String(v).replace(/,/g,'').trim();
+  if(!s||s==='-') return 0;
+  return parseInt(s,10)||0;
+}
+
+// Auto-format money inputs while typing, with cursor-position preservation
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(!el.dataset.money) return;
+  const pos=el.selectionStart, val=el.value;
+  const neg=val.startsWith('-');
+  const digits=val.replace(/[^\d]/g,'');
+  // Count non-comma chars before cursor to restore position after reformatting
+  let nc=0; for(let i=0;i<pos;i++) if(val[i]!==',') nc++;
+  const fmt=(neg&&digits)?('-'+digits.replace(/\B(?=(\d{3})+(?!\d))/g,',')):
+            neg?'-':digits?digits.replace(/\B(?=(\d{3})+(?!\d))/g,','):'';
+  el.value=fmt;
+  let c=0,np=fmt.length;
+  for(let i=0;i<fmt.length;i++){if(fmt[i]!==',')c++;if(c===nc){np=i+1;break;}}
+  try{el.setSelectionRange(np,np);}catch(_){}
+},true);
+
+function initMoneyInputs(){
+  MONEY_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.type='text'; el.inputMode='numeric'; el.dataset.money='1';
+    el.removeAttribute('step'); el.style.textAlign='right';
+  });
+}
+
+// ============================================================
 // PIN LOGIC
 // ============================================================
 let pinBuffer = '';
@@ -710,7 +765,7 @@ function showPage(id){
 // DOM SYNC
 // ============================================================
 function syncFromDOM(){
-  const g=id=>+(document.getElementById(id)?.value||0);
+  const g=id=>stripCommas(document.getElementById(id)?.value);
   data.settings.retireAge=g('retire-age');
   data.settings.retireAgeSpouse=g('retire-age-spouse');
   data.settings.endAge=g('end-age');
@@ -734,7 +789,7 @@ function syncFromDOM(){
 }
 
 function syncToDOM(){
-  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  const s=(id,v)=>{const el=document.getElementById(id);if(!el)return;el.value=el.dataset.money?addCommas(v):v;};
   s('retire-age',data.settings.retireAge);
   s('retire-age-spouse',data.settings.retireAgeSpouse);
   s('end-age',data.settings.endAge);
@@ -953,7 +1008,7 @@ function openEventModal(planId,existing){
         </select></div>
       <div class="field"><label>イベント名（任意）</label><input type="text" id="m-name" placeholder="例：第1子誕生"></div>
       <div class="field"><label>発生年齢（本人）</label><input type="number" id="m-age" value="${defaultAge}" min="0" max="90"><span class="hint">歳時点で発生</span></div>
-      <div class="field"><label id="m-amt-label">金額</label><input type="number" id="m-amt" value="-500000" step="100000"><span class="hint" id="m-amt-hint"></span></div>
+      <div class="field"><label id="m-amt-label">金額</label><input type="text" inputmode="numeric" data-money="1" id="m-amt" value="-500,000" style="text-align:right"><span class="hint" id="m-amt-hint"></span></div>
       <div class="field"><label>継続期間</label><input type="number" id="m-dur" value="1" min="1" max="60"><span class="hint">年（単発は1）</span></div>
       <div class="field"><label>メモ</label><input type="text" id="m-memo" placeholder="備考"></div>
     </div>
@@ -973,7 +1028,7 @@ function updateModalAmtLabel(){
   const type=EVENT_TYPES.find(t=>t.value===sel.value)||EVENT_TYPES[0];
   document.getElementById('m-amt-label').textContent=type.amtLabel;
   document.getElementById('m-amt-hint').textContent=type.amtHint;
-  document.getElementById('m-amt').value=type.defaultAmt;
+  document.getElementById('m-amt').value=addCommas(type.defaultAmt);
   document.getElementById('m-dur').value=type.defaultDur;
 }
 
@@ -984,7 +1039,7 @@ function saveEvent(planId){
     type:document.getElementById('m-type').value,
     name:document.getElementById('m-name').value,
     age:+document.getElementById('m-age').value,
-    amount:+document.getElementById('m-amt').value,
+    amount:stripCommas(document.getElementById('m-amt').value),
     duration:Math.max(1,+document.getElementById('m-dur').value),
     memo:document.getElementById('m-memo').value
   });
@@ -1394,6 +1449,7 @@ function showToast(msg){
 // ============================================================
 function init(){
   initPin();
+  initMoneyInputs();
   renderMembers();
   syncToDOM();
   renderPlans();
