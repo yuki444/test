@@ -549,6 +549,17 @@
         <button class="btn btn-primary" onclick="addLifestyleData()">🏌️ ライフスタイル費用を現在のデータに反映</button>
       </div>
       <div class="card">
+        <div class="card-title">📚 教育費ステップを反映</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">保育料終了・子供独立に伴う教育費の段階的削減ステップを追加します。同内容は重複追加されません。</p>
+        <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
+          <strong>39歳〜</strong> −10,000円（第1子 小学校入学・保育料-3.5万→塾等+2.5万）<br>
+          <strong>43歳〜</strong> −15,000円（第2子 小学校入学・保育料-4万→塾等+2.5万）<br>
+          <strong>55歳〜</strong> −25,000円（第1子 独立・教育費半減）<br>
+          <strong>59歳〜</strong> −25,000円（第2子 大学卒業・教育費終了 → <span style="color:var(--secondary);font-weight:700">累計0円</span>）
+        </div>
+        <button class="btn btn-primary" onclick="addEducationSteps()">📚 教育費ステップを現在のデータに反映</button>
+      </div>
+      <div class="card">
         <div class="card-title">🗑️ データ管理</div>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">すべてのデータを削除してリセットします。</p>
         <button class="btn btn-danger" onclick="clearAllData()">⚠️ 全データを削除してリセット</button>
@@ -585,13 +596,17 @@ const DEFAULTS = {
   expenseSteps:[
     {fromAge:39,delta:-31000,memo:'オリックス 払込終了（2027年3月）'},
     {fromAge:39,delta:2000,  memo:'第1子 小学生 小遣い開始（2,000円/月）'},
+    {fromAge:39,delta:-10000,memo:'第1子 小学校入学・保育料終了（-3.5万→塾等+2.5万）'},
     {fromAge:43,delta:2000,  memo:'第2子 小学生 小遣い開始（2,000円/月）'},
+    {fromAge:43,delta:-15000,memo:'第2子 小学校入学・保育料終了（-4万→塾等+2.5万）'},
     {fromAge:45,delta:3000,  memo:'第1子 中学生 小遣い増額（5,000円/月）'},
     {fromAge:48,delta:5000,  memo:'第1子 高校生 小遣い増額（10,000円/月）'},
     {fromAge:49,delta:3000,  memo:'第2子 中学生 小遣い増額（5,000円/月）'},
     {fromAge:51,delta:-10000,memo:'第1子 独立 小遣い終了'},
     {fromAge:52,delta:5000,  memo:'第2子 高校生 小遣い増額（10,000円/月）'},
     {fromAge:55,delta:-10000,memo:'第2子 独立 小遣い終了'},
+    {fromAge:55,delta:-25000,memo:'第1子 独立・教育費半減（-2.5万）'},
+    {fromAge:59,delta:-25000,memo:'第2子 大学卒業・教育費終了（-2.5万→累計0）'},
     {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
   ],
   // 3年前に7,000万円の家を購入（自宅評価額）
@@ -2138,6 +2153,29 @@ function addFPSheetData(){
   renderExpenseSteps();
   updateMonthlySummary();
   showToast('✅ 最新データを反映しました');
+}
+
+function addEducationSteps(){
+  const EDU_STEPS=[
+    {fromAge:39,delta:-10000,memo:'第1子 小学校入学・保育料終了（-3.5万→塾等+2.5万）'},
+    {fromAge:43,delta:-15000,memo:'第2子 小学校入学・保育料終了（-4万→塾等+2.5万）'},
+    {fromAge:55,delta:-25000,memo:'第1子 独立・教育費半減（-2.5万）'},
+    {fromAge:59,delta:-25000,memo:'第2子 大学卒業・教育費終了（-2.5万→累計0）'},
+  ];
+  if(!data.expenseSteps) data.expenseSteps=[];
+  const existingMemos=new Set(data.expenseSteps.map(s=>s.memo));
+  const newSteps=EDU_STEPS.filter(s=>!existingMemos.has(s.memo));
+
+  if(newSteps.length===0){showToast('ℹ️ 教育費ステップはすでに反映済みです');return;}
+  const lines=newSteps.map(s=>`${s.fromAge}歳〜 ${s.delta>0?'+':''}${s.delta.toLocaleString()}円  ${s.memo}`);
+  if(!confirm(`以下の教育費ステップを追加します:\n\n${lines.join('\n')}\n\n続けますか？`)) return;
+
+  newSteps.forEach(s=>data.expenseSteps.push({...s}));
+  data.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderExpenseSteps();
+  markDirty();
+  showToast('✅ 教育費ステップを反映しました');
 }
 
 function addLifestyleData(){
