@@ -508,6 +508,14 @@
     <!-- ===== 設定 ===== -->
     <div class="page" id="page-settings">
       <div class="page-header"><h2>⚙️ 設定・プライバシー</h2></div>
+      <div class="card" style="border:2px solid var(--primary);background:linear-gradient(135deg,var(--primary-light) 0%,#ffffff 60%)">
+        <div class="card-title" style="font-size:17px;color:var(--primary)">🔄 すべてのアップデートを一括反映</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">未反映の更新を自動検出して一括で適用します。新しいデータが追加されたときはこのボタン1つで最新状態に更新できます。</p>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button id="btn-apply-all" class="btn btn-primary" style="font-size:14px;padding:11px 28px;font-weight:800" onclick="applyAllUpdates()">🔄 未反映の更新を確認して一括適用</button>
+          <span id="update-badge" style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:white;background:var(--secondary)">確認中…</span>
+        </div>
+      </div>
       <div class="card">
         <div class="card-title">🔒 プライバシーについて</div>
         <div style="background:var(--secondary-light);border-radius:10px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.8">
@@ -1078,7 +1086,7 @@ function showPage(id){
   if(id==='page-advice'){syncFromDOM();renderAdvice();}
   if(id==='page-income'){updateMonthlySummary();renderExpenseSteps();renderExpenseDetails();}
   if(id==='page-assets'){updateNetWorthSummary();renderAllocChart();renderHoldings();renderPortfolioCharts();}
-  if(id==='page-settings'){updatePinStatus();}
+  if(id==='page-settings'){updatePinStatus();renderUpdateBadge();}
 }
 
 // ============================================================
@@ -2949,6 +2957,70 @@ function addFPUpdates(){
 }
 
 // ============================================================
+// APPLY ALL UPDATES (one-shot batch migration)
+// ============================================================
+function applyAllUpdates(){
+  const ALL_MIGRATIONS=[
+    addHousingScenarios, addDefaultHoldings, addInsuranceData, addFPSheetData,
+    addCryptoHoldings, addInvestmentTrusts, addSBIHoldings,
+    addMonthlyFixedCosts, addLifestyleData, addEducationSteps, addFPUpdates
+  ];
+
+  const origConfirm=window.confirm;
+  const allPending=[];
+
+  // Phase 1: dry-run — capture pending items from each confirm dialog (return false = no apply)
+  window.confirm=(msg)=>{
+    const m=msg.match(/\n\n([\s\S]+?)\n\n続けますか/);
+    if(m) allPending.push(...m[1].split('\n').filter(l=>l.trim()));
+    return false;
+  };
+  ALL_MIGRATIONS.forEach(fn=>{try{fn();}catch(e){}});
+  window.confirm=origConfirm;
+
+  if(!allPending.length){
+    showToast('✅ すべての更新はすでに適用済みです');
+    return;
+  }
+
+  const label=allPending.length===1?'1件':allPending.length+'件';
+  if(!origConfirm(`【一括アップデート】未反映の更新が ${label} あります:\n\n${allPending.join('\n')}\n\n一括適用しますか？`)) return;
+
+  // Phase 2: apply all — auto-confirm every individual dialog
+  window.confirm=()=>true;
+  ALL_MIGRATIONS.forEach(fn=>{try{fn();}catch(e){}});
+  window.confirm=origConfirm;
+
+  showToast(`✅ ${label}の未反映アップデートを一括適用しました`);
+  renderUpdateBadge();
+}
+
+function renderUpdateBadge(){
+  const btn=document.getElementById('btn-apply-all');
+  if(!btn) return;
+  const origConfirm=window.confirm;
+  let count=0;
+  window.confirm=(msg)=>{
+    const m=msg.match(/\n\n([\s\S]+?)\n\n続けますか/);
+    if(m) count+=m[1].split('\n').filter(l=>l.trim()).length;
+    return false;
+  };
+  const ALL_MIGRATIONS=[
+    addHousingScenarios,addDefaultHoldings,addInsuranceData,addFPSheetData,
+    addCryptoHoldings,addInvestmentTrusts,addSBIHoldings,
+    addMonthlyFixedCosts,addLifestyleData,addEducationSteps,addFPUpdates
+  ];
+  ALL_MIGRATIONS.forEach(fn=>{try{fn();}catch(e){}});
+  window.confirm=origConfirm;
+  const badge=document.getElementById('update-badge');
+  if(badge){
+    badge.textContent=count>0?`未反映 ${count} 件`:'✅ 最新';
+    badge.style.background=count>0?'var(--danger)':'var(--secondary)';
+  }
+  btn.disabled=count===0;
+}
+
+// ============================================================
 // INIT
 // ============================================================
 function init(){
@@ -2978,6 +3050,8 @@ function init(){
   renderPlans();
   updateMonthlySummary();
   updateNetWorthSummary();
+  // バッジを少し遅延させてDOM確実反映後に実行
+  setTimeout(renderUpdateBadge, 100);
 
   // Live recalculation listeners
   const incomeIds=['income-self','income-spouse','income-side','income-investment','bonus-self','bonus-spouse',
