@@ -171,6 +171,20 @@
     .positive{color:var(--secondary);font-weight:700}.negative{color:var(--danger);font-weight:700}
     .highlight-row td{background:#eff6ff!important;font-weight:700}
     .retire-row td{background:#ecfdf5!important}
+    /* ===== DETAIL BREAKDOWN TABLE ===== */
+    .detail-wrap{overflow-x:auto;max-height:72vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px}
+    .dtbl{width:max-content;min-width:100%;border-collapse:collapse;font-size:11px}
+    .dtbl thead{position:sticky;top:0;z-index:4}
+    .dtbl th{padding:5px 9px;white-space:nowrap;border-bottom:1px solid #e2e8f0;border-right:1px solid #f1f5f9;font-size:10px;font-weight:700}
+    .dtbl td{padding:4px 9px;white-space:nowrap;border-bottom:1px solid #f1f5f9;border-right:1px solid #f8fafc;text-align:right}
+    .dtbl tr:hover td{background:#f8fafc!important}
+    .dtbl .retire-row td{background:#f0fdf4!important}
+    .dtbl .sticky-l0{position:sticky;left:0;z-index:2;background:white}
+    .dtbl .sticky-l1{position:sticky;left:48px;z-index:2;background:white;border-right:2px solid #e2e8f0!important}
+    .dtbl thead .sticky-l0,.dtbl thead .sticky-l1{z-index:5}
+    .dtbl .retire-row .sticky-l0,.dtbl .retire-row .sticky-l1{background:#f0fdf4!important}
+    .chip-filter{padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);font-size:11px;font-weight:700;cursor:pointer;background:white;color:var(--text-muted);transition:all .15s}
+    .chip-filter.active{background:var(--primary);color:white;border-color:var(--primary)}
 
     /* ===== MISC ===== */
     .divider{border:none;border-top:1px solid var(--border);margin:18px 0}
@@ -498,6 +512,28 @@
               <th>金融資産</th><th>負債</th><th>純資産</th>
             </tr></thead>
             <tbody id="cashflow-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+          <div class="card-title" style="margin:0">🔍 収支内訳テーブル <span style="font-size:11px;font-weight:400;color:var(--text-muted)">（金額はすべて万円単位）</span></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label style="font-size:12px;font-weight:700;color:var(--text-muted)">シナリオ：</label>
+            <select id="detail-scenario-select" onchange="renderDetailTable()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px"></select>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+          <span style="font-size:11px;font-weight:700;color:var(--text-muted)">表示グループ：</span>
+          <button class="chip-filter active" data-group="income"       onclick="toggleDetailGroup(this)">💴 収入内訳</button>
+          <button class="chip-filter active" data-group="expense-base" onclick="toggleDetailGroup(this)">🏠 生活費</button>
+          <button class="chip-filter active" data-group="expense-adj"  onclick="toggleDetailGroup(this)">📊 支出調整</button>
+          <button class="chip-filter active" data-group="balance"      onclick="toggleDetailGroup(this)">📈 収支・資産</button>
+        </div>
+        <div class="detail-wrap">
+          <table class="dtbl">
+            <thead id="detail-thead"></thead>
+            <tbody id="detail-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -1480,17 +1516,16 @@ function simulate(plan){
   const currentYear=new Date().getFullYear();
   const {endAge,retireAge,retireAgeSpouse,investReturn:ir,inflation,salaryGrowth,retireExpenseRatio=1.0}=data.settings;
   const r=ir/100, inf=inflation/100, sg=salaryGrowth/100;
+  const ECATS=['housing','food','utilities','insurance','education','transport','medical','entertainment','other'];
 
   let FA=data.assets.cash+data.assets.fixedDeposit+data.assets.stocks+data.assets.ideco+data.assets.insurance+data.assets.other;
-  // Per-plan mortgage and home tracking (each plan gets its own state)
   let mortgageBalance=data.debts.mortgage;
   let mortgageMonthly=data.debts.mortgageMonthly;
-  const mortgageRate=(data.debts.mortgageRate||1.5)/100; // ⑥ annual interest rate
+  const mortgageRate=(data.debts.mortgageRate||1.5)/100;
   let otherDebt=data.debts.car+data.debts.education+data.debts.consumer+data.debts.other;
-  // ⑤ Home: land 50% is permanent, building 50% depreciates to 0 over 10 years from purchase
   let homeOwned=data.assets.home>0;
   let initialHomeValue=data.assets.home;
-  let homeAcquiredAge=startAge-3; // assume purchased ~3 years before current age (age 35)
+  let homeAcquiredAge=startAge-3;
   const rows=[];
 
   for(let age=startAge;age<=endAge;age++){
@@ -1502,96 +1537,98 @@ function simulate(plan){
     const gf=retired?1:Math.pow(1+sg,off);
     const inflF=Math.pow(1+inf,off);
 
-    // Income (公的年金は65歳固定受取開始。retireAgeが55等でも55-64は年金収入なし)
+    // --- Income (simulation totals: same logic as before) ---
     let income=0;
-    income+=retired
-      ?(age>=65?data.savings.pensionSelf*12:0)
-      :(data.income.self*12+data.income.bonusSelf)*gf;
-    if(spouse) income+=spouseRetired
-      ?(spouseAge>=65?data.savings.pensionSpouse*12:0)
-      :(data.income.spouse*12+data.income.bonusSpouse)*gf;
-    // ④ Side income (ESPP等) stops at retirement; investment dividend income continues
+    income+=retired?(age>=65?data.savings.pensionSelf*12:0):(data.income.self*12+data.income.bonusSelf)*gf;
+    if(spouse) income+=spouseRetired?(spouseAge>=65?data.savings.pensionSpouse*12:0):(data.income.spouse*12+data.income.bonusSpouse)*gf;
     income+=(retired?0:data.income.side)*12+data.income.investment*12;
 
-    // ③⑦ Expenses: base×inflation → retirement reduction → then add stepDeltas (nominal, not reduced)
-    let baseExpenses=Object.values(data.expenses).reduce((a,b)=>a+b,0)*12*inflF;
-    if(retired) baseExpenses*=retireExpenseRatio; // configurable: 1.0=変化なし, 0.85=15%減, 1.1=10%増
-    if(data.expenseSteps?.length){
-      const stepDelta=data.expenseSteps.filter(s=>age>=s.fromAge).reduce((sum,s)=>sum+s.delta,0);
-      if(stepDelta) baseExpenses+=stepDelta*12; // ⑦ nominal amounts added after reduction (medical increases etc. unaffected)
-    }
-    let expenses=baseExpenses;
-    if(mortgageMonthly>0 && mortgageBalance>0) expenses+=mortgageMonthly*12; // ③ mortgage added after reduction
+    // Income breakdown (display only)
+    const dI={
+      selfSalary:  Math.round(retired?0:(data.income.self*12+data.income.bonusSelf)*gf),
+      spouseSalary:!spouse?0:Math.round(spouseRetired?0:(data.income.spouse*12+data.income.bonusSpouse)*gf),
+      side:        Math.round((retired?0:data.income.side)*12),
+      inv:         Math.round(data.income.investment*12),
+      pensionSelf: Math.round(retired&&age>=65?data.savings.pensionSelf*12:0),
+      pensionSpouse:!spouse?0:Math.round(spouseRetired&&spouseAge>=65?data.savings.pensionSpouse*12:0),
+      drawdown:0, eventInc:0
+    };
 
-    // Events
-    let lump=0;
+    // --- Expenses (simulation totals: same logic as before) ---
+    let baseExpenses=Object.values(data.expenses).reduce((a,b)=>a+b,0)*12*inflF;
+    if(retired) baseExpenses*=retireExpenseRatio;
+    const stepDeltaVal=data.expenseSteps?.length?data.expenseSteps.filter(s=>age>=s.fromAge).reduce((sum,s)=>sum+s.delta,0):0;
+    if(stepDeltaVal) baseExpenses+=stepDeltaVal*12;
+    let expenses=baseExpenses;
+    if(mortgageMonthly>0&&mortgageBalance>0) expenses+=mortgageMonthly*12;
+
+    // Expense breakdown (display only, per-category rounded)
+    const dEbase={};
+    ECATS.forEach(k=>{dEbase[k]=Math.round((data.expenses[k]||0)*12*inflF*(retired?retireExpenseRatio:1));});
+    const dRetireAdj=Math.round(ECATS.reduce((s,k)=>s+(data.expenses[k]||0)*12*inflF,0)*(retired?retireExpenseRatio-1:0));
+    const dMortgage=(mortgageMonthly>0&&mortgageBalance>0)?mortgageMonthly*12:0;
+    let dEventExp=0;
+
+    // --- Events ---
+    let lump=0, dLumpNet=0;
     plan.events.forEach(ev=>{
       if(age<ev.age||age>=ev.age+ev.duration) return;
       switch(ev.type){
         case 'lump-expense': case 'buy-car': case 'buy-home': case 'education-fee':
-          if(age===ev.age) lump+=ev.amount; break;
+          if(age===ev.age){lump+=ev.amount; dLumpNet+=ev.amount;} break;
         case 'lump-income': case 'retire-early':
-          if(age===ev.age) lump+=ev.amount; break;
-        case 'drawdown': { // ① shows in income column; offset with lump so FA correctly depletes
-          const drawAmt=Math.abs(ev.amount); // guard against accidental negative entry
-          income+=drawAmt*12; lump-=drawAmt*12; break; }
+          if(age===ev.age){lump+=ev.amount; dLumpNet+=ev.amount; dI.eventInc+=ev.amount;} break;
+        case 'drawdown':{
+          const da=Math.abs(ev.amount);
+          income+=da*12; lump-=da*12; dI.drawdown+=da*12; break;}
         case 'income-change':
-          income+=ev.amount*12; break;
-        case 'expense-change':
-          expenses+=ev.amount*12; break;
-        case 'child-born':
-          expenses+=ev.amount*12; break;
+          income+=ev.amount*12; dI.eventInc+=ev.amount*12; break;
+        case 'expense-change': case 'child-born':
+          expenses+=ev.amount*12; dEventExp+=ev.amount*12; break;
         case 'loan-start':
           if(age===ev.age) otherDebt+=ev.amount;
-          if(age>=ev.age && age<ev.age+ev.duration)
-            otherDebt=Math.max(0,otherDebt-(ev.amount/ev.duration));
-          expenses+=ev.amount/ev.duration; break;
+          if(age>=ev.age&&age<ev.age+ev.duration) otherDebt=Math.max(0,otherDebt-(ev.amount/ev.duration));
+          expenses+=ev.amount/ev.duration; dEventExp+=ev.amount/ev.duration; break;
         case 'sell-home':
           if(age===ev.age){
-            lump+=ev.amount-mortgageBalance;
+            const net=ev.amount-mortgageBalance;
+            lump+=net; dLumpNet+=net;
             mortgageBalance=0; mortgageMonthly=0; homeOwned=false; initialHomeValue=0;
-          }
-          break;
+          } break;
         case 'move-home':
           if(age===ev.age){
-            const sp=ev.salePrice!=null?ev.salePrice:(ev.amount||0);
-            const np=ev.newPrice||0;
-            const nl=ev.newLoan||0;
-            lump+=(sp-mortgageBalance)-(np-nl);
-            mortgageBalance=nl;
-            mortgageMonthly=ev.newMonthly||0;
-            initialHomeValue=np; homeAcquiredAge=age; homeOwned=np>0; // ⑤ reset depreciation on move
-          }
-          break;
+            const sp=ev.salePrice!=null?ev.salePrice:(ev.amount||0),np=ev.newPrice||0,nl=ev.newLoan||0;
+            const net=(sp-mortgageBalance)-(np-nl);
+            lump+=net; dLumpNet+=net;
+            mortgageBalance=nl; mortgageMonthly=ev.newMonthly||0;
+            initialHomeValue=np; homeAcquiredAge=age; homeOwned=np>0;
+          } break;
       }
     });
 
-    // ⑤ Depreciated home value: land 50% stays, building 50% depreciates linearly over 10 years
-    const homeValue=homeOwned
-      ?initialHomeValue*Math.max(0.5,1-0.05*Math.max(0,age-homeAcquiredAge))
-      :0;
-
-    // ⑥ Reduce mortgage balance by principal only (monthly payment minus interest)
-    if(mortgageMonthly>0 && mortgageBalance>0){
-      const annualInterest=mortgageBalance*mortgageRate;
-      const annualPrincipal=Math.max(0,mortgageMonthly*12-annualInterest);
-      mortgageBalance=Math.max(0,mortgageBalance-annualPrincipal);
+    const homeValue=homeOwned?initialHomeValue*Math.max(0.5,1-0.05*Math.max(0,age-homeAcquiredAge)):0;
+    if(mortgageMonthly>0&&mortgageBalance>0){
+      const ai=mortgageBalance*mortgageRate;
+      mortgageBalance=Math.max(0,mortgageBalance-Math.max(0,mortgageMonthly*12-ai));
     }
-
     const ret=FA*r;
     const netCash=income-expenses+lump;
     FA=FA+ret+netCash;
-
     const totalDebt=mortgageBalance+otherDebt;
+
     rows.push({
       year,age,spouseAge,
-      income:Math.round(income),
-      expenses:Math.round(expenses),
-      cashFlow:Math.round(netCash),
-      financialAssets:Math.round(FA),
+      income:Math.round(income), expenses:Math.round(expenses),
+      cashFlow:Math.round(netCash), financialAssets:Math.round(FA),
       debts:Math.round(totalDebt),
       netWorth:Math.round(FA+homeValue+data.assets.realEstate-totalDebt),
-      isRetired:retired
+      isRetired:retired,
+      d:{
+        inc:{...dI, drawdown:Math.round(dI.drawdown), eventInc:Math.round(dI.eventInc)},
+        exp:{...dEbase, retireAdj:dRetireAdj, steps:Math.round(stepDeltaVal*12),
+             mortgage:Math.round(dMortgage), eventExp:Math.round(dEventExp)},
+        lump:Math.round(dLumpNet)
+      }
     });
   }
   return rows;
@@ -1685,6 +1722,13 @@ function renderSimulation(){
   const sel=document.getElementById('table-scenario-select');
   sel.innerHTML=data.plans.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   renderTable();
+
+  // Detail table scenario select
+  const dsel=document.getElementById('detail-scenario-select');
+  if(dsel){
+    dsel.innerHTML=data.plans.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+    renderDetailTable();
+  }
 }
 
 function renderTable(){
@@ -1705,6 +1749,96 @@ function renderTable(){
       <td class="${r.netWorth>=0?'positive':'negative'}"><strong>${fmtM(r.netWorth)}</strong></td>
     </tr>`;
   }).join('');
+}
+
+function renderDetailTable(){
+  const planId=+document.getElementById('detail-scenario-select')?.value||data.plans[0]?.id;
+  const plan=data.plans.find(p=>p.id===planId);
+  if(!plan) return;
+  const rows=simulate(plan);
+
+  const COLS=[
+    {fn:r=>r.d.inc.selfSalary,    label:'本人給与',    group:'income',       type:'inc'},
+    {fn:r=>r.d.inc.spouseSalary,  label:'配偶者給与',  group:'income',       type:'inc'},
+    {fn:r=>r.d.inc.side,          label:'副業収入',    group:'income',       type:'inc'},
+    {fn:r=>r.d.inc.inv,           label:'投資収入',    group:'income',       type:'inc'},
+    {fn:r=>r.d.inc.pensionSelf,   label:'年金(本人)',  group:'income',       type:'inc'},
+    {fn:r=>r.d.inc.pensionSpouse, label:'年金(配偶)',  group:'income',       type:'inc'},
+    {fn:r=>r.d.inc.drawdown,      label:'取り崩し',    group:'income',       type:'inc'},
+    {fn:r=>r.d.inc.eventInc,      label:'臨時収入',    group:'income',       type:'pm'},
+    {fn:r=>r.d.exp.housing,       label:'住居費',      group:'expense-base', type:'exp'},
+    {fn:r=>r.d.exp.food,          label:'食費',        group:'expense-base', type:'exp'},
+    {fn:r=>r.d.exp.utilities,     label:'光熱費',      group:'expense-base', type:'exp'},
+    {fn:r=>r.d.exp.insurance,     label:'保険',        group:'expense-base', type:'exp'},
+    {fn:r=>r.d.exp.education,     label:'教育費',      group:'expense-base', type:'exp'},
+    {fn:r=>r.d.exp.transport,     label:'交通費',      group:'expense-base', type:'exp'},
+    {fn:r=>r.d.exp.medical,       label:'医療費',      group:'expense-base', type:'exp'},
+    {fn:r=>r.d.exp.entertainment, label:'娯楽・趣味',  group:'expense-base', type:'exp'},
+    {fn:r=>r.d.exp.other,         label:'その他生活費',group:'expense-base', type:'exp'},
+    {fn:r=>r.d.exp.retireAdj,     label:'退職後調整',  group:'expense-adj',  type:'pm'},
+    {fn:r=>r.d.exp.steps,         label:'ライフ変化',  group:'expense-adj',  type:'pm'},
+    {fn:r=>r.d.exp.mortgage,      label:'住宅ローン',  group:'expense-adj',  type:'exp'},
+    {fn:r=>r.d.exp.eventExp,      label:'イベント変化',group:'expense-adj',  type:'pm'},
+    {fn:r=>r.d.lump,              label:'一時収支',    group:'balance',      type:'pm'},
+    {fn:r=>r.cashFlow,            label:'年間収支',    group:'balance',      type:'pm'},
+    {fn:r=>r.financialAssets,     label:'金融資産',    group:'balance',      type:'asset'},
+    {fn:r=>r.netWorth,            label:'純資産',      group:'balance',      type:'asset'},
+  ];
+
+  const GRP={
+    'income':       {label:'収入内訳',                 bg:'#dbeafe',fg:'#1e40af'},
+    'expense-base': {label:'基本支出（インフレ調整後）',bg:'#fee2e2',fg:'#dc2626'},
+    'expense-adj':  {label:'支出調整',                 bg:'#fef3c7',fg:'#d97706'},
+    'balance':      {label:'収支・資産',               bg:'#d1fae5',fg:'#059669'},
+  };
+
+  const active=new Set([...document.querySelectorAll('.chip-filter.active')].map(b=>b.dataset.group));
+  const cols=COLS.filter(c=>active.has(c.group));
+
+  let h1='<tr><th colspan="2" class="sticky-l0" style="min-width:108px;background:var(--bg)"></th>';
+  ['income','expense-base','expense-adj','balance'].forEach(g=>{
+    const n=cols.filter(c=>c.group===g).length;
+    if(!n) return;
+    h1+=`<th colspan="${n}" style="text-align:center;background:${GRP[g].bg};color:${GRP[g].fg}">${GRP[g].label}</th>`;
+  });
+  h1+='</tr>';
+
+  let h2='<tr>';
+  h2+=`<th class="sticky-l0" style="text-align:left;min-width:48px;background:var(--bg)">年</th>`;
+  h2+=`<th class="sticky-l1" style="text-align:left;min-width:60px;background:var(--bg)">年齢</th>`;
+  cols.forEach(c=>{
+    h2+=`<th style="background:${GRP[c.group].bg}55;color:${GRP[c.group].fg};min-width:68px">${c.label}</th>`;
+  });
+  h2+='</tr>';
+  document.getElementById('detail-thead').innerHTML=h1+h2;
+
+  function cell(v,type){
+    const m=Math.round(v/10000);
+    if(m===0) return `<td style="color:#cbd5e1">—</td>`;
+    if(type==='inc') return `<td style="color:var(--secondary);font-weight:700">${fmt(m)}</td>`;
+    if(type==='exp') return `<td style="color:var(--danger)">${fmt(m)}</td>`;
+    if(type==='pm'){
+      const col=m>0?'var(--secondary)':m<0?'var(--danger)':'inherit';
+      return `<td style="color:${col};font-weight:700">${m>0?'+':''}${fmt(m)}</td>`;
+    }
+    return `<td style="color:${v<0?'var(--danger)':'inherit'};font-weight:700">${fmt(m)}</td>`;
+  }
+
+  document.getElementById('detail-tbody').innerHTML=rows.map(r=>{
+    const bg=r.isRetired?'#f0fdf4':'white';
+    const badge=r.isRetired&&r.age===data.settings.retireAge?' 🎉':'';
+    let tr=`<tr class="${r.isRetired?'retire-row':''}">`;
+    tr+=`<td class="sticky-l0" style="background:${bg};text-align:left;font-size:11px">${r.year}${badge}</td>`;
+    tr+=`<td class="sticky-l1" style="background:${bg};text-align:left">${r.age}${r.spouseAge?'/'+r.spouseAge:''}</td>`;
+    cols.forEach(c=>{ tr+=cell(c.fn(r),c.type); });
+    tr+='</tr>';
+    return tr;
+  }).join('');
+}
+
+function toggleDetailGroup(btn){
+  btn.classList.toggle('active');
+  renderDetailTable();
 }
 
 // ============================================================
