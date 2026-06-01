@@ -520,7 +520,7 @@
         <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
           <strong>年齢別スケジュール</strong> — 39歳〜 −31,000円（オリックス払込終了）/ 60歳〜 −20,000円（メット①払込終了）<br>
           <strong>イベント①</strong> — 49歳 オリックス解約 払戻400万円<br>
-          <strong>イベント②</strong> — 55歳 メットライフ② 解約 176,450ドル ≒ 2,558万円<br>
+          <strong>イベント②</strong> — 55歳 メットライフ② 解約払戻 700万円<br>
           <strong>イベント③</strong> — 60歳 メットライフ① 解約 65,000ドル ≒ 942万円<br>
           <span style="color:var(--warning);font-weight:600">※ ドル換算は145円/ドルで計算。為替変動に注意。</span>
         </div>
@@ -639,7 +639,7 @@ const DEFAULTS = {
       {type:'expense-change',name:'第2子 大学 授業料',     age:55,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第2子18〜21歳'},
       {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行 第2子20歳'},
       {type:'lump-income',   name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
-      {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:25585000,duration:1,memo:'一時払USD建終身 176,450ドル（145円換算）受取時課税あり'},
+      {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:7000000,duration:1,memo:'一時払USD建終身保険 払戻700万円（元金300万入金済み）受取時課税あり'},
       {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
       {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
@@ -664,7 +664,7 @@ const DEFAULTS = {
       {type:'sell-home',     name:'住宅売却（半値）',      age:58,amount:35000000,duration:1,memo:'7,000万→3,500万(半値)で売却。残債~2,500万精算・純益~1,000万FA算入。ローン消滅'},
       {type:'expense-change',name:'管理費→家賃 差額',      age:58,amount:20000,  duration:40,memo:'固定資産税・管理費8万→家賃10万へ 月+2万'},
       {type:'lump-income',   name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
-      {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:25585000,duration:1,memo:'一時払USD建終身 176,450ドル（145円換算）受取時課税あり'},
+      {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:7000000,duration:1,memo:'一時払USD建終身保険 払戻700万円（元金300万入金済み）受取時課税あり'},
       {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
       {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
@@ -698,7 +698,7 @@ const DEFAULTS = {
        salePrice:44800000,newPrice:35840000,newLoan:7040000,newMonthly:22000,
        memo:'売却4,480万-残債→益2,880万を頭金/新ローン704万@1.5%35年=月2.2万'},
       {type:'lump-income',   name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
-      {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:25585000,duration:1,memo:'一時払USD建終身 176,450ドル（145円換算）受取時課税あり'},
+      {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:7000000,duration:1,memo:'一時払USD建終身保険 払戻700万円（元金300万入金済み）受取時課税あり'},
       {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
       {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
@@ -1992,7 +1992,7 @@ function addHousingScenarios(){
     {type:'expense-change',name:'第2子 大学 授業料',     age:55,amount:100000, duration:4,memo:'月+10万円 私立文系'},
     {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行'},
     {type:'lump-income',   name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
-    {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:25585000,duration:1,memo:'一時払USD建終身 176,450ドル（145円換算）受取時課税あり'},
+    {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:7000000,duration:1,memo:'一時払USD建終身保険 払戻700万円（元金300万入金済み）受取時課税あり'},
     {type:'lump-income',   name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
     {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳'},
     {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳'},
@@ -2093,7 +2093,7 @@ function addInsuranceData(){
   ];
   const INS_EVENTS=[
     {type:'lump-income',name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
-    {type:'lump-income',name:'メットライフ②解約・払戻', age:55,amount:25585000,duration:1,memo:'一時払USD建終身 176,450ドル（145円換算）受取時課税あり'},
+    {type:'lump-income',name:'メットライフ②解約・払戻', age:55,amount:7000000,duration:1,memo:'一時払USD建終身保険 払戻700万円（元金300万入金済み）受取時課税あり'},
     {type:'lump-income',name:'メットライフ①解約・払戻', age:60,amount:9425000, duration:1,memo:'USD建終身保険 65,000ドル（145円換算）受取時課税あり'},
   ];
 
