@@ -50,7 +50,7 @@
   ],
   "assets": {
     "cash":3000000,"fixedDeposit":2000000,"stocks":8882862,"ideco":500000,
-    "home":70000000,"realEstate":0,"insurance":0,"other":0
+    "home":70000000,"realEstate":0,"insurance":0,"other":270000
   },
   "debts": {
     "mortgage":60000000,"mortgageMonthly":200000,"car":0,"education":0,"consumer":0,"other":0
@@ -93,7 +93,9 @@
     {"account":"楽天証券（米国）","name":"マイクロソフト (MSFT)","category":"stocks","shares":10,"value":652848,"cost":565383},
     {"account":"楽天証券（米国）","name":"テラドック (TDOC)","category":"stocks","shares":10,"value":11035,"cost":269577},
     {"account":"楽天証券（米国）","name":"iシェアーズ米国債20年 (TLT)","category":"stocks","shares":7,"value":87046,"cost":104456},
-    {"account":"楽天証券（米国）","name":"ヴィアトリス (VTRS)","category":"stocks","shares":1,"value":2358,"cost":0}
+    {"account":"楽天証券（米国）","name":"ヴィアトリス (VTRS)","category":"stocks","shares":1,"value":2358,"cost":0},
+    {"account":"メルカリ","name":"ビットコイン (BTC)","category":"crypto","value":200000,"cost":0},
+    {"account":"メルカリ","name":"イーサリアム (ETH)","category":"crypto","value":70000,"cost":0}
   ],
   "plans": [
     {

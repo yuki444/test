@@ -420,6 +420,25 @@
         <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px">口座・銘柄ごとに資産を記録。「合計を反映」で上の資産欄を自動更新します。</p>
         <div id="holdings-container"></div>
       </div>
+      <!-- ポートフォリオ分析 -->
+      <div class="card" id="portfolio-analysis-card" style="display:none">
+        <div class="card-title">📊 ポートフォリオ分析</div>
+        <div id="portfolio-summary-bar" style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:12px"></div>
+        <div class="chart-grid">
+          <div>
+            <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text-muted)">口座別</div>
+            <div style="height:200px"><canvas id="chart-portfolio-account"></canvas></div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text-muted)">カテゴリ別（明細ベース）</div>
+            <div style="height:200px"><canvas id="chart-portfolio-cat"></canvas></div>
+          </div>
+        </div>
+        <div style="margin-top:20px">
+          <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text-muted)">含み損益（評価額上位）</div>
+          <div id="chart-portfolio-gain-wrap" style="overflow-x:auto"></div>
+        </div>
+      </div>
     </div>
 
     <!-- ===== ライフプラン ===== -->
@@ -554,6 +573,15 @@
         <button class="btn btn-primary" onclick="addFPSheetData()">📋 家計シートデータを現在のデータに反映</button>
       </div>
       <div class="card">
+        <div class="card-title">₿ 暗号資産を反映</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">メルカリで保有している暗号資産を保有明細に追加します。同名の銘柄は重複追加されません。</p>
+        <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
+          <strong>ビットコイン (BTC)</strong> — メルカリ 200,000円<br>
+          <strong>イーサリアム (ETH)</strong> — メルカリ 70,000円
+        </div>
+        <button class="btn btn-primary" onclick="addCryptoHoldings()">₿ 暗号資産を現在のデータに追加</button>
+      </div>
+      <div class="card">
         <div class="card-title">🏌️ ライフスタイル費用を反映</div>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">ゴルフ・家族旅行・火災保険・子供小遣いを現在のデータに追加します。同内容は重複追加されません。</p>
         <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
@@ -635,7 +663,7 @@ const DEFAULTS = {
     {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
   ],
   // 3年前に7,000万円の家を購入（自宅評価額）
-  assets:{cash:3000000,fixedDeposit:2000000,stocks:8882862,ideco:500000,home:70000000,realEstate:0,insurance:0,other:0},
+  assets:{cash:3000000,fixedDeposit:2000000,stocks:8882862,ideco:500000,home:70000000,realEstate:0,insurance:0,other:270000},
   // 35年ローン・1.5%固定・月20万返済。3年経過後残高約6,000万
   debts:{mortgage:60000000,mortgageMonthly:200000,car:0,education:0,consumer:0,other:0},
   holdings:[
@@ -676,7 +704,9 @@ const DEFAULTS = {
     {account:'楽天証券（米国）',name:'マイクロソフト (MSFT)',category:'stocks',shares:10,value:652848,cost:565383},
     {account:'楽天証券（米国）',name:'テラドック (TDOC)',category:'stocks',shares:10,value:11035,cost:269577},
     {account:'楽天証券（米国）',name:'iシェアーズ米国債20年 (TLT)',category:'stocks',shares:7,value:87046,cost:104456},
-    {account:'楽天証券（米国）',name:'ヴィアトリス (VTRS)',category:'stocks',shares:1,value:2358,cost:0}
+    {account:'楽天証券（米国）',name:'ヴィアトリス (VTRS)',category:'stocks',shares:1,value:2358,cost:0},
+    {account:'メルカリ',name:'ビットコイン (BTC)',category:'crypto',value:200000,cost:0},
+    {account:'メルカリ',name:'イーサリアム (ETH)',category:'crypto',value:70000,cost:0}
   ],
   plans:[
     // ── プラン1: ローン完済・住み続ける ─────────────────────────────
@@ -955,7 +985,7 @@ function showPage(id){
   if(id==='page-simulation'){syncFromDOM();renderSimulation();}
   if(id==='page-advice'){syncFromDOM();renderAdvice();}
   if(id==='page-income'){updateMonthlySummary();renderExpenseSteps();renderExpenseDetails();}
-  if(id==='page-assets'){updateNetWorthSummary();renderAllocChart();renderHoldings();}
+  if(id==='page-assets'){updateNetWorthSummary();renderAllocChart();renderHoldings();renderPortfolioCharts();}
   if(id==='page-settings'){updatePinStatus();}
 }
 
@@ -1676,6 +1706,86 @@ function showToast(msg){
 // ============================================================
 // ASSET ALLOCATION CHART
 // ============================================================
+// ============================================================
+// PORTFOLIO ANALYSIS CHARTS
+// ============================================================
+function renderPortfolioCharts(){
+  const h=(data.holdings||[]).filter(x=>x.value>0);
+  const card=document.getElementById('portfolio-analysis-card');
+  if(!card) return;
+  if(!h.length){card.style.display='none';return;}
+  card.style.display='';
+
+  const PALETTE=['#60a5fa','#34d399','#f59e0b','#a78bfa','#f87171','#fb923c','#e879f9','#2dd4bf','#facc15','#4ade80','#f472b6','#818cf8'];
+
+  // ── Summary bar ──
+  const totalVal=h.reduce((s,x)=>s+x.value,0);
+  const totalCost=h.reduce((s,x)=>s+(x.cost>0?x.cost:0),0);
+  const totalGain=h.reduce((s,x)=>s+(x.cost>0?x.value-x.cost:0),0);
+  const totalDiv=(data.holdings||[]).reduce((s,x)=>s+(x.annualDividend||0),0);
+  const gainColor=totalGain>=0?'var(--secondary)':'var(--danger)';
+  const gainSign=totalGain>=0?'+':'';
+  const divYield=totalVal>0?(totalDiv/totalVal*100).toFixed(2):0;
+  const sumEl=document.getElementById('portfolio-summary-bar');
+  if(sumEl) sumEl.innerHTML=[
+    {label:'銘柄数', val:`${h.length}件`},
+    {label:'評価額合計', val:fmtM(totalVal)},
+    {label:'取得額合計', val:totalCost>0?fmtM(totalCost):'—'},
+    {label:'含み損益', val:`<span style="color:${gainColor};font-weight:700">${gainSign}${fmtM(totalGain)}</span>`},
+    {label:'年間配当', val:totalDiv>0?fmtM(totalDiv)+'<span style="color:var(--text-muted);font-weight:400;font-size:11px"> (利回'+divYield+'%)</span>':'—'},
+  ].map(x=>`<div style="background:var(--bg);padding:8px 14px;border-radius:8px;border:1px solid var(--border)"><div style="color:var(--text-muted);margin-bottom:2px">${x.label}</div><div style="font-weight:700;font-size:14px">${x.val}</div></div>`).join('');
+
+  // ── 口座別 donut ──
+  const byAcc={};
+  h.forEach(x=>{const k=x.account||'不明';byAcc[k]=(byAcc[k]||0)+x.value;});
+  const accEntries=Object.entries(byAcc).sort((a,b)=>b[1]-a[1]);
+  destroyChart('portfolioAccount');
+  const accCanvas=document.getElementById('chart-portfolio-account');
+  if(accCanvas) charts.portfolioAccount=new Chart(accCanvas,{
+    type:'doughnut',
+    data:{labels:accEntries.map(e=>e[0]),datasets:[{data:accEntries.map(e=>e[1]),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:6}},tooltip:{callbacks:{label:ctx=>{const v=accEntries[ctx.dataIndex][1];return ` ${fmtM(v)} (${totalVal>0?Math.round(v/totalVal*100):0}%)`;}}}}},
+  });
+
+  // ── カテゴリ別 donut ──
+  const byCat={};
+  h.forEach(x=>{const k=HOLDING_CATS.find(c=>c.value===x.category)?.label||(x.category||'その他');byCat[k]=(byCat[k]||0)+x.value;});
+  const catEntries=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  destroyChart('portfolioCat');
+  const catCanvas=document.getElementById('chart-portfolio-cat');
+  if(catCanvas) charts.portfolioCat=new Chart(catCanvas,{
+    type:'doughnut',
+    data:{labels:catEntries.map(e=>e[0]),datasets:[{data:catEntries.map(e=>e[1]),backgroundColor:PALETTE.slice(3),borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:6}},tooltip:{callbacks:{label:ctx=>{const v=catEntries[ctx.dataIndex][1];return ` ${fmtM(v)} (${totalVal>0?Math.round(v/totalVal*100):0}%)`;}}}}},
+  });
+
+  // ── 含み損益 horizontal bar ──
+  const withCost=h.filter(x=>x.cost>0).sort((a,b)=>b.value-a.value).slice(0,15);
+  const gainWrap=document.getElementById('chart-portfolio-gain-wrap');
+  if(gainWrap&&withCost.length){
+    const gains=withCost.map(x=>x.value-x.cost);
+    const bgs=gains.map(g=>g>=0?'rgba(52,211,153,0.8)':'rgba(248,113,113,0.8)');
+    const hPx=Math.max(220,withCost.length*28);
+    gainWrap.innerHTML=`<div style="height:${hPx}px"><canvas id="chart-portfolio-gain"></canvas></div>`;
+    destroyChart('portfolioGain');
+    const gainCanvas=document.getElementById('chart-portfolio-gain');
+    if(gainCanvas) charts.portfolioGain=new Chart(gainCanvas,{
+      type:'bar',
+      data:{
+        labels:withCost.map(x=>x.name.length>20?x.name.slice(0,18)+'…':x.name),
+        datasets:[{label:'含み損益',data:gains,backgroundColor:bgs,borderWidth:0}]
+      },
+      options:{
+        indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const g=gains[ctx.dataIndex];const sign=g>=0?'+':'';return ` ${sign}${addCommas(Math.round(g))}円 (${g>=0?'+':''}${withCost[ctx.dataIndex].cost>0?Math.round((withCost[ctx.dataIndex].value-withCost[ctx.dataIndex].cost)/withCost[ctx.dataIndex].cost*100):0}%)`;} }}},
+        scales:{x:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{callback:v=>`${v>=0?'+':''}${(v/10000).toFixed(0)}万`}},y:{ticks:{font:{size:11}}}}
+      }
+    });
+  } else if(gainWrap){
+    gainWrap.innerHTML='<p style="font-size:12px;color:var(--text-muted);padding:8px 0">取得価額が入力されている銘柄がありません。</p>';
+  }
+}
+
 function renderAllocChart(){
   syncFromDOM();
   const a=data.assets;
@@ -1732,6 +1842,7 @@ const HOLDING_CATS=[
   {value:'stocks',   label:'株式・投信（NISA含む）',field:'stocks'},
   {value:'ideco',    label:'iDeCo・確定拠出年金',   field:'ideco'},
   {value:'insurance',label:'生命保険（解約返戻金）', field:'insurance'},
+  {value:'crypto',   label:'暗号資産',              field:'other'},
   {value:'other',    label:'その他資産',             field:'other'},
 ];
 
@@ -1799,6 +1910,7 @@ function renderHoldings(){
     <td></td>
   </tr></tfoot></table></div>`;
   container.innerHTML=html;
+  renderPortfolioCharts();
 }
 
 function openHoldingModal(editIdx){
@@ -2253,6 +2365,22 @@ function addFPSheetData(){
   renderExpenseSteps();
   updateMonthlySummary();
   showToast('✅ 最新データを反映しました');
+}
+
+function addCryptoHoldings(){
+  const CRYPTO=[
+    {account:'メルカリ',name:'ビットコイン (BTC)',category:'crypto',value:200000,cost:0},
+    {account:'メルカリ',name:'イーサリアム (ETH)',category:'crypto',value:70000,cost:0},
+  ];
+  if(!data.holdings) data.holdings=[];
+  const existingNames=new Set(data.holdings.map(h=>h.name));
+  const toAdd=CRYPTO.filter(h=>!existingNames.has(h.name));
+  if(!toAdd.length){showToast('ℹ️ 暗号資産はすでに追加済みです');return;}
+  if(!confirm(`以下の保有明細を追加します:\n\n${toAdd.map(h=>`・${h.name} ${addCommas(h.value)}円（${h.account}）`).join('\n')}\n\n続けますか？`)) return;
+  data.holdings.push(...toAdd);
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderHoldings();
+  showToast('✅ 暗号資産を追加しました');
 }
 
 function addEducationSteps(){
