@@ -10,16 +10,16 @@
     "investReturn":3.0,"inflation":1.5,"salaryGrowth":1.0
   },
   "income": {
-    "self":350000,"spouse":150000,"side":0,"investment":0,
-    "bonusSelf":1000000,"bonusSpouse":400000
+    "self":500000,"spouse":210000,"side":45000,"investment":0,
+    "bonusSelf":1000000,"bonusSpouse":280000
   },
   "expenses": {
-    "housing":80000,"food":60000,"utilities":25000,"insurance":30000,
-    "education":20000,"transport":20000,"medical":10000,
-    "entertainment":30000,"other":20000
+    "housing":80000,"food":55000,"utilities":22000,"insurance":57000,
+    "education":75000,"transport":25000,"medical":30000,
+    "entertainment":80000,"other":50000
   },
   "savings": {
-    "invest":50000,"deposit":30000,"pensionSelf":150000,"pensionSpouse":80000
+    "invest":200000,"deposit":30000,"pensionSelf":150000,"pensionSpouse":80000
   },
   "assets": {
     "cash":3000000,"fixedDeposit":2000000,"stocks":8882862,"ideco":500000,
@@ -88,7 +88,8 @@
         {"type":"expense-change","name":"第2子 大学 授業料",     "age":55,"amount":100000, "duration":4,"memo":"月+10万円 私立文系4年間 第2子18〜21歳"},
         {"type":"lump-expense",  "name":"家族海外旅行⑦",        "age":57,"amount":-2000000,"duration":1,"memo":"最後の家族旅行 第2子20歳"},
         {"type":"lump-expense",  "name":"第1子 結婚お祝い",      "age":61,"amount":-3000000,"duration":1,"memo":"第1子28歳 お祝い300万円"},
-        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"}
+        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"},
+        {"type":"lump-income",   "name":"退職金（本人）",         "age":65,"amount":15000000,"duration":1,"memo":"定年退職金目安1,500万円"}
       ]
     },
     {
@@ -112,7 +113,8 @@
         {"type":"sell-home",     "name":"住宅売却（半値）",      "age":58,"amount":35000000,"duration":1,"memo":"7,000万→3,500万(半値)で売却。残債~2,500万精算・純益~1,000万FA算入。ローン消滅"},
         {"type":"expense-change","name":"管理費→家賃 差額",      "age":58,"amount":20000,  "duration":40,"memo":"固定資産税・管理費8万→家賃10万へ 月+2万"},
         {"type":"lump-expense",  "name":"第1子 結婚お祝い",      "age":61,"amount":-3000000,"duration":1,"memo":"第1子28歳 お祝い300万円"},
-        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"}
+        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"},
+        {"type":"lump-income",   "name":"退職金（本人）",         "age":65,"amount":15000000,"duration":1,"memo":"定年退職金目安1,500万円"}
       ]
     },
     {
@@ -143,7 +145,8 @@
          "salePrice":44800000,"newPrice":35840000,"newLoan":7040000,"newMonthly":22000,
          "memo":"売却4,480万-残債→益2,880万を頭金/新ローン704万@1.5%35年=月2.2万"},
         {"type":"lump-expense",  "name":"第1子 結婚お祝い",      "age":61,"amount":-3000000,"duration":1,"memo":"第1子28歳 お祝い300万円"},
-        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"}
+        {"type":"lump-expense",  "name":"第2子 結婚お祝い",      "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"},
+        {"type":"lump-income",   "name":"退職金（本人）",         "age":65,"amount":15000000,"duration":1,"memo":"定年退職金目安1,500万円"}
       ]
     }
   ]
