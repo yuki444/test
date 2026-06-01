@@ -21,9 +21,10 @@ JP_TICKERS = [
     '9201.T', '9432.T', '9433.T', '9434.T', '9830.T',
 ]
 US_TICKERS = ['ACN', 'CXSE', 'DAL', 'MSFT', 'TDOC', 'TLT', 'VTRS']
+CRYPTO_TICKERS = ['BTC-JPY', 'ETH-JPY']
 FX_TICKER = 'USDJPY=X'
 
-all_tickers = JP_TICKERS + US_TICKERS + [FX_TICKER]
+all_tickers = JP_TICKERS + US_TICKERS + CRYPTO_TICKERS + [FX_TICKER]
 
 print(f"Fetching {len(all_tickers)} tickers...")
 prices = {}
@@ -43,6 +44,12 @@ for ticker in all_tickers:
         print(f"  ERROR {ticker}: {e}")
 
 fx_rate = prices.pop(FX_TICKER, 145.0)
+
+# Rename crypto keys: 'BTC-JPY' -> 'BTC', 'ETH-JPY' -> 'ETH'
+for crypto_ticker in CRYPTO_TICKERS:
+    short = crypto_ticker.replace('-JPY', '')
+    if crypto_ticker in prices:
+        prices[short] = prices.pop(crypto_ticker)
 
 output = {
     "updated": str(date.today()),

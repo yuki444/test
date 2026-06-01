@@ -2011,11 +2011,18 @@ async function refreshHoldingPrices(){
     const fx=pd.fxRate||145;
     let updated=0,skipped=0;
     data.holdings.forEach(h=>{
-      if(!h.shares) return skipped++;
       const ticker=extractTicker(h.name);
       if(!ticker||pd.prices[ticker]==null) return skipped++;
       const price=pd.prices[ticker];
-      h.value=Math.round(ticker.endsWith('.T')?h.shares*price:h.shares*price*fx);
+      if(h.category==='crypto'){
+        // 初回: sharesがなければ現在のvalue÷価格で数量を逆算して保存
+        if(!h.shares && h.value>0) h.shares=h.value/price;
+        if(!h.shares) return skipped++;
+        h.value=Math.round(h.shares*price);
+      } else {
+        if(!h.shares) return skipped++;
+        h.value=Math.round(ticker.endsWith('.T')?h.shares*price:h.shares*price*fx);
+      }
       updated++;
     });
     if(updated>0){
