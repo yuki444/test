@@ -499,12 +499,13 @@
       </div>
       <div class="card">
         <div class="card-title">📋 家計シートデータを反映</div>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">家計管理シートから読み取った収入・支出・積立の実績値を現在のデータに反映します。既存のデータは上書きされますが、他の項目は変更されません。</p>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">最新の収入・支出・積立データを現在のデータに反映します。既存データは上書きされますが、他の項目は変更されません。</p>
         <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;line-height:1.9">
-          <strong>収入</strong> — 本人月収50万・配偶者21万・副収入4.5万（住宅手当+児童手当）・配偶者ボーナス28万<br>
-          <strong>支出</strong> — 食費5.5万・光熱費等2.2万・保険5.7万・教育費7.5万（保育料+習い事）・交通費2.5万・医療費3万・娯楽費8万・その他5万<br>
-          <strong>積立</strong> — NISA合計20万（本人10万+配偶者10万）<br>
-          <strong>イベント</strong> — 退職金1,500万円（65歳）を全プランに追加
+          <strong>収入</strong> — 本人月収85万（1500万gross手取り）・ボーナス100万・配偶者月収32.5万（500万gross手取り）・ボーナス0<br>
+          <strong>支出</strong> — 食費5.5万・光熱費等2.2万・保険5.7万・教育費7.5万・交通費2.5万・医療費3万・娯楽費8万・その他5万<br>
+          <strong>積立</strong> — NISA20万＋追加積立10万（NISA外）<br>
+          <strong>年金見込み</strong> — 本人20万/月・配偶者14万/月（厚生年金+国民年金 推計）<br>
+          <strong>退職金</strong> — 企業型DC：年収5%×27年×運用3% ≈ 3,000万円（65歳・全プラン更新）
         </div>
         <button class="btn btn-primary" onclick="addFPSheetData()">📋 家計シートデータを現在のデータに反映</button>
       </div>
@@ -534,11 +535,13 @@ const DEFAULTS = {
     {id:4,name:'第2子', role:'child', age:1, gender:'female'}
   ],
   settings:{retireAge:65,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0},
-  income:{self:500000,spouse:210000,side:45000,investment:0,bonusSelf:1000000,bonusSpouse:280000},
+  // 手取り推計: 本人1500万gross→月85万, 配偶者500万gross→月32.5万（税・社保控除後）
+  income:{self:850000,spouse:325000,side:0,investment:0,bonusSelf:1000000,bonusSpouse:0},
   // housing=固定資産税・管理費・修繕（住宅ローンは別途 debts.mortgageMonthly で管理）
   expenses:{housing:80000,food:55000,utilities:22000,insurance:57000,education:75000,
     transport:25000,medical:30000,entertainment:80000,other:50000},
-  savings:{invest:200000,deposit:30000,pensionSelf:150000,pensionSpouse:80000},
+  // 年金見込み: 本人厚生年金+国民年金(65歳~)≈20万/月, 配偶者≈14万/月
+  savings:{invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000},
   // 3年前に7,000万円の家を購入（自宅評価額）
   assets:{cash:3000000,fixedDeposit:2000000,stocks:8882862,ideco:500000,home:70000000,realEstate:0,insurance:0,other:0},
   // 35年ローン・1.5%固定・月20万返済。3年経過後残高約6,000万
@@ -601,7 +604,7 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行 第2子20歳'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
-      {type:'lump-income',   name:'退職金（本人）',         age:65,amount:15000000,duration:1,memo:'定年退職金目安1,500万円'},
+      {type:'lump-income',   name:'企業型DC退職金（本人）',  age:65,amount:30000000,duration:1,memo:'年収5%×27年 運用3%推計 約3,000万（受取時課税あり）'},
     ]},
     // ── プラン2: 20年後（58歳）に半値売却→賃貸転居 ────────────────
     {id:2,name:'20年後売却→賃貸',color:'#10b981',events:[
@@ -623,7 +626,7 @@ const DEFAULTS = {
       {type:'expense-change',name:'管理費→家賃 差額',      age:58,amount:20000,  duration:40,memo:'固定資産税・管理費8万→家賃10万へ 月+2万'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
-      {type:'lump-income',   name:'退職金（本人）',         age:65,amount:15000000,duration:1,memo:'定年退職金目安1,500万円'},
+      {type:'lump-income',   name:'企業型DC退職金（本人）',  age:65,amount:30000000,duration:1,memo:'年収5%×27年 運用3%推計 約3,000万（受取時課税あり）'},
     ]},
     // ── プラン3: 8年ごとに新築へ住み替え（2割ずつ縮小） ───────────
     {id:3,name:'8年ごとに新築',color:'#f59e0b',events:[
@@ -654,7 +657,7 @@ const DEFAULTS = {
        memo:'売却4,480万-残債→益2,880万を頭金/新ローン704万@1.5%35年=月2.2万'},
       {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
-      {type:'lump-income',   name:'退職金（本人）',         age:65,amount:15000000,duration:1,memo:'定年退職金目安1,500万円'},
+      {type:'lump-income',   name:'企業型DC退職金（本人）',  age:65,amount:30000000,duration:1,memo:'年収5%×27年 運用3%推計 約3,000万（受取時課税あり）'},
     ]},
   ]
 };
@@ -1866,6 +1869,7 @@ function addHousingScenarios(){
     {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行'},
     {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳'},
     {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳'},
+    {type:'lump-income',   name:'企業型DC退職金（本人）',age:65,amount:30000000,duration:1,memo:'年収5%×27年 運用3%推計 約3,000万（受取時課税あり）'},
   ];
   if(!existingNames.includes('住み続ける（ローン完済）'))
     toAdd.push({name:'住み続ける（ローン完済）',color:'#3b82f6',events:[...commonEvents]});
@@ -1900,16 +1904,20 @@ function addHousingScenarios(){
 }
 
 function addFPSheetData(){
-  const NEW_INCOME={self:500000,spouse:210000,side:45000,bonusSpouse:280000};
+  // 手取り推計: 本人1500万gross→月85万, 配偶者500万gross→月32.5万 (税・社保控除後)
+  // 企業型DC: 年収5%×27年×運用3% ≈ 3,000万
+  const NEW_INCOME={self:850000,spouse:325000,side:0,bonusSelf:1000000,bonusSpouse:0};
   const NEW_EXPENSES={food:55000,utilities:22000,insurance:57000,education:75000,transport:25000,medical:30000,entertainment:80000,other:50000};
-  const NEW_SAVINGS={invest:200000};
-  const RETIRE_EVENT={type:'lump-income',name:'退職金（本人）',age:65,amount:15000000,duration:1,memo:'定年退職金目安1,500万円'};
+  const NEW_SAVINGS={invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000};
+  const DC_EVENT={type:'lump-income',name:'企業型DC退職金（本人）',age:65,amount:30000000,duration:1,memo:'年収5%×27年 運用3%推計 約3,000万（受取時課税あり）'};
+  const OLD_RETIRE_NAMES=['退職金（本人）','企業型DC退職金（本人）'];
 
   const changes=[];
-  if(data.income.self!==NEW_INCOME.self) changes.push(`月収（本人）: ${addCommas(data.income.self)}円 → ${addCommas(NEW_INCOME.self)}円`);
-  if(data.income.spouse!==NEW_INCOME.spouse) changes.push(`月収（配偶者）: ${addCommas(data.income.spouse)}円 → ${addCommas(NEW_INCOME.spouse)}円`);
-  if(data.income.side!==NEW_INCOME.side) changes.push(`副収入（住宅手当+児童手当）: ${addCommas(data.income.side)}円 → ${addCommas(NEW_INCOME.side)}円`);
-  if(data.income.bonusSpouse!==NEW_INCOME.bonusSpouse) changes.push(`ボーナス（配偶者）: ${addCommas(data.income.bonusSpouse)}円 → ${addCommas(NEW_INCOME.bonusSpouse)}円`);
+  if(data.income.self!==NEW_INCOME.self) changes.push(`月収（本人）: ${addCommas(data.income.self)}円 → ${addCommas(NEW_INCOME.self)}円（1500万gross税・社保控除後推計）`);
+  if(data.income.bonusSelf!==NEW_INCOME.bonusSelf) changes.push(`ボーナス（本人）: ${addCommas(data.income.bonusSelf)}円 → ${addCommas(NEW_INCOME.bonusSelf)}円（150万gross手取り推計）`);
+  if(data.income.spouse!==NEW_INCOME.spouse) changes.push(`月収（配偶者）: ${addCommas(data.income.spouse)}円 → ${addCommas(NEW_INCOME.spouse)}円（500万gross税・社保控除後推計）`);
+  if(data.income.bonusSpouse!==NEW_INCOME.bonusSpouse) changes.push(`ボーナス（配偶者）: ${addCommas(data.income.bonusSpouse)}円 → 0円`);
+  if(data.income.side!==NEW_INCOME.side) changes.push(`副収入: ${addCommas(data.income.side)}円 → 0円（住宅手当消滅）`);
   if(data.expenses.food!==NEW_EXPENSES.food) changes.push(`食費: ${addCommas(data.expenses.food)}円 → ${addCommas(NEW_EXPENSES.food)}円`);
   if(data.expenses.utilities!==NEW_EXPENSES.utilities) changes.push(`光熱費・通信: ${addCommas(data.expenses.utilities)}円 → ${addCommas(NEW_EXPENSES.utilities)}円`);
   if(data.expenses.insurance!==NEW_EXPENSES.insurance) changes.push(`保険料: ${addCommas(data.expenses.insurance)}円 → ${addCommas(NEW_EXPENSES.insurance)}円`);
@@ -1918,23 +1926,34 @@ function addFPSheetData(){
   if(data.expenses.medical!==NEW_EXPENSES.medical) changes.push(`医療費: ${addCommas(data.expenses.medical)}円 → ${addCommas(NEW_EXPENSES.medical)}円`);
   if(data.expenses.entertainment!==NEW_EXPENSES.entertainment) changes.push(`娯楽・交際費: ${addCommas(data.expenses.entertainment)}円 → ${addCommas(NEW_EXPENSES.entertainment)}円`);
   if(data.expenses.other!==NEW_EXPENSES.other) changes.push(`その他支出: ${addCommas(data.expenses.other)}円 → ${addCommas(NEW_EXPENSES.other)}円`);
-  if(data.savings.invest!==NEW_SAVINGS.invest) changes.push(`積立投資（NISA合計）: ${addCommas(data.savings.invest)}円 → ${addCommas(NEW_SAVINGS.invest)}円`);
+  if(data.savings.invest!==NEW_SAVINGS.invest) changes.push(`積立投資（NISA）: ${addCommas(data.savings.invest)}円 → ${addCommas(NEW_SAVINGS.invest)}円`);
+  if(data.savings.deposit!==NEW_SAVINGS.deposit) changes.push(`追加積立（NISA以外）: ${addCommas(data.savings.deposit)}円 → ${addCommas(NEW_SAVINGS.deposit)}円`);
+  if(data.savings.pensionSelf!==NEW_SAVINGS.pensionSelf) changes.push(`年金見込み（本人）: ${addCommas(data.savings.pensionSelf)}円 → ${addCommas(NEW_SAVINGS.pensionSelf)}円/月（厚生年金+国民年金 推計）`);
+  if(data.savings.pensionSpouse!==NEW_SAVINGS.pensionSpouse) changes.push(`年金見込み（配偶者）: ${addCommas(data.savings.pensionSpouse)}円 → ${addCommas(NEW_SAVINGS.pensionSpouse)}円/月（推計）`);
 
-  const plansNeedBonus=data.plans.filter(p=>!p.events.some(e=>e.name==='退職金（本人）'));
-  if(plansNeedBonus.length>0) changes.push(`退職金イベント（65歳・1,500万円）を${plansNeedBonus.length}プランに追加`);
+  // 旧退職金 → 企業型DC退職金 に置き換え
+  const plansToUpdate=data.plans.filter(p=>{
+    const hasOld=p.events.some(e=>OLD_RETIRE_NAMES.includes(e.name));
+    const hasNewCorrect=p.events.some(e=>e.name===DC_EVENT.name&&e.amount===DC_EVENT.amount);
+    return hasOld&&!hasNewCorrect||!hasOld;
+  });
+  if(plansToUpdate.length>0) changes.push(`退職金 → 企業型DC退職金（65歳・3,000万）に更新（${plansToUpdate.length}プラン）`);
 
-  if(changes.length===0){showToast('ℹ️ 家計シートのデータはすでに反映済みです');return;}
-  if(!confirm(`家計管理シートの内容を以下のとおり更新します:\n\n${changes.join('\n')}\n\n続けますか？`)) return;
+  if(changes.length===0){showToast('ℹ️ 最新データはすでに反映済みです');return;}
+  if(!confirm(`以下の内容を更新します:\n\n${changes.join('\n')}\n\n続けますか？`)) return;
 
   Object.assign(data.income, NEW_INCOME);
   Object.assign(data.expenses, NEW_EXPENSES);
   Object.assign(data.savings, NEW_SAVINGS);
-  plansNeedBonus.forEach(p=>p.events.push({...RETIRE_EVENT}));
+  data.plans.forEach(p=>{
+    p.events=p.events.filter(e=>!OLD_RETIRE_NAMES.includes(e.name));
+    p.events.push({...DC_EVENT});
+  });
 
   localStorage.setItem('fp-data',JSON.stringify(data));
   syncToDOM();
   updateMonthlySummary();
-  showToast('✅ 家計シートのデータを反映しました');
+  showToast('✅ 最新データを反映しました');
 }
 
 // ============================================================
@@ -1945,7 +1964,7 @@ function init(){
   // 旧バージョンからのマイグレーション：新フィールドの安全なデフォルト補完
   data.settings=Object.assign({retireAge:65,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0},data.settings);
   data.debts=Object.assign({mortgage:0,mortgageMonthly:0,car:0,education:0,consumer:0,other:0},data.debts);
-  data.savings=Object.assign({invest:50000,deposit:30000,pensionSelf:150000,pensionSpouse:80000},data.savings);
+  data.savings=Object.assign({invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000},data.savings);
   data.income=Object.assign({self:0,spouse:0,side:0,investment:0,bonusSelf:0,bonusSpouse:0},data.income);
   if(!data.holdings) data.holdings=[];
   initMoneyInputs();
