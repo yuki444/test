@@ -428,6 +428,7 @@ body{
   font-size:9px;color:rgba(255,255,255,0.45);
   letter-spacing:.5px;
 }
+.bamt.confirmed{color:#16a34a;font-weight:700;}
 </style>
 </head>
 <body>
@@ -640,14 +641,17 @@ body{
 <!-- ▌HOTEL BAR -->
 <div class="hotel-bar">
   <div class="hotel-label">🏨 STAY</div>
-  <div class="hotel-name">アパホテル〈札幌大通駅前南〉</div>
+  <div class="hotel-name">
+    <span style="font-size:13px;opacity:.7;font-weight:400;">1泊目</span> アパホテル〈札幌大通駅前南〉 <span style="font-size:12px;color:#38bdf8;margin-left:4px;">¥8,640/人</span>
+    <span style="margin:0 10px;opacity:.4;">｜</span>
+    <span style="font-size:13px;opacity:.7;font-weight:400;">2泊目</span> ラ・ジェント・ステイ札幌大通 <span style="font-size:12px;color:#38bdf8;margin-left:4px;">¥13,347/人</span>
+  </div>
   <div class="hotel-chips">
-    <div class="hchip good">♨️ 天然温泉 大浴場</div>
-    <div class="hchip good">🛏️ トリプルルーム（全8室）</div>
-    <div class="hchip">📍 大通駅1番出口 徒歩7分</div>
-    <div class="hchip">🍺 大通ビアガーデンへ徒歩7分</div>
-    <div class="hchip">🕐 大浴場 15:00〜翌1:00 / 6:00〜9:00</div>
-    <div class="hchip">🍽️ 素泊まりプランあり</div>
+    <div class="hchip good">♨️ 大浴場あり</div>
+    <div class="hchip good">🛏️ トリプルルーム</div>
+    <div class="hchip">📍 大通エリア徒歩圏</div>
+    <div class="hchip">🍺 ビアガーデンへ徒歩7分</div>
+    <div class="hchip">🍽️ 素泊まりプラン</div>
   </div>
 </div>
 
@@ -659,11 +663,13 @@ body{
     <div class="bot-title">💰 BUDGET　1人あたり目安</div>
     <div class="bdg-grid">
       <div class="brow"><span class="blbl">✈️ 航空券（往復）</span><span class="bamt">35,000〜50,000円</span></div>
-      <div class="brow"><span class="blbl">🥌 カーリング体験</span><span class="bamt">約 5,000円</span></div>
-      <div class="brow"><span class="blbl">🏨 ホテル（2泊）</span><span class="bamt">15,000〜25,000円</span></div>
+      <div class="brow"><span class="blbl">🏨 1泊目 アパホテル</span><span class="bamt confirmed">8,640円 ✓</span></div>
+      <div class="brow"><span class="blbl">🏨 2泊目 ラ・ジェント</span><span class="bamt confirmed">13,347円 ✓</span></div>
+      <div class="brow"><span class="blbl">⛳ ゴルフ① 札幌CC</span><span class="bamt confirmed">7,080円 ✓</span></div>
+      <div class="brow"><span class="blbl">⛳ ゴルフ② ニドム</span><span class="bamt confirmed">18,500円 ✓</span></div>
       <div class="brow"><span class="blbl">🦔 ウニ丼（支笏湖畔）</span><span class="bamt">4,000〜6,000円</span></div>
       <div class="brow"><span class="blbl">🛶 支笏湖カヤック</span><span class="bamt">約 8,000円</span></div>
-      <div class="brow"><span class="blbl">⛳ ゴルフ 2ラウンド</span><span class="bamt">25,000〜40,000円</span></div>
+      <div class="brow"><span class="blbl">🥌 カーリング体験</span><span class="bamt">約 5,000円</span></div>
       <div class="brow"><span class="blbl">⚾ エスコン観戦</span><span class="bamt">3,000〜8,000円</span></div>
       <div class="brow"><span class="blbl">🚗 レンタカー（3人割）</span><span class="bamt">10,000〜15,000円</span></div>
       <div class="brow"><span class="blbl">🍺 飲食・飲み代</span><span class="bamt">30,000〜50,000円</span></div>
@@ -671,8 +677,8 @@ body{
     <div class="bdg-total">
       <span class="bdg-total-lbl">合計目安（1名）</span>
       <div>
-        <div class="bdg-total-val">135,000 〜 207,000 円</div>
-        <div class="bdg-total-note">※ 航空券の早割取得で節約可</div>
+        <div class="bdg-total-val">145,000 〜 170,000 円</div>
+        <div class="bdg-total-note">※ 宿・ゴルフ確定済 / 航空券早割で節約可</div>
       </div>
     </div>
   </div>
@@ -719,8 +725,15 @@ body{
       <li class="cli">
         <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
         <div class="cl-body">
-          <div class="cl-name">🏨 アパホテル〈札幌大通駅前南〉</div>
-          <div class="cl-note">大通駅徒歩7分・天然温泉大浴場・トリプル　<span class="badge b-grn">決定済み</span></div>
+          <div class="cl-name">🏨 1泊目 アパホテル〈札幌大通駅前南〉</div>
+          <div class="cl-note">¥25,920 (3名合計) / 大通駅徒歩7分・天然温泉大浴場　<span class="badge b-grn">予約完了</span></div>
+        </div>
+      </li>
+      <li class="cli">
+        <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
+        <div class="cl-body">
+          <div class="cl-name">🏨 2泊目 ラ・ジェント・ステイ札幌大通</div>
+          <div class="cl-note">¥40,040 (3名合計) / 大通エリア・素泊まり　<span class="badge b-grn">予約完了</span></div>
         </div>
       </li>
     </ul>
