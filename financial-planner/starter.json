@@ -1,0 +1,55 @@
+{
+  "members": [
+    {"id":1,"name":"本人",  "role":"self",  "age":38,"gender":"male"},
+    {"id":2,"name":"配偶者","role":"spouse","age":36,"gender":"female"},
+    {"id":3,"name":"第1子", "role":"child", "age":5, "gender":"male"},
+    {"id":4,"name":"第2子", "role":"child", "age":1, "gender":"female"}
+  ],
+  "settings": {
+    "retireAge":65,"retireAgeSpouse":63,"endAge":90,
+    "investReturn":3.0,"inflation":1.5,"salaryGrowth":1.0
+  },
+  "income": {
+    "self":350000,"spouse":150000,"side":0,"investment":0,
+    "bonusSelf":1000000,"bonusSpouse":400000
+  },
+  "expenses": {
+    "housing":100000,"food":60000,"utilities":25000,"insurance":30000,
+    "education":20000,"transport":20000,"medical":10000,
+    "entertainment":30000,"other":20000
+  },
+  "savings": {
+    "invest":50000,"deposit":30000,"pensionSelf":150000,"pensionSpouse":80000
+  },
+  "assets": {
+    "cash":3000000,"fixedDeposit":2000000,"stocks":1500000,"ideco":500000,
+    "home":0,"realEstate":0,"insurance":0,"other":0
+  },
+  "debts": {
+    "mortgage":0,"mortgageMonthly":0,"car":0,"education":0,"consumer":0,"other":0
+  },
+  "plans": [
+    {
+      "id": 1,
+      "name": "ベースライン",
+      "color": "#3b82f6",
+      "events": [
+        {"type":"lump-expense",  "name":"家族海外旅行①",       "age":39,"amount":-2000000,"duration":1,"memo":"第1子6歳・第2子2歳"},
+        {"type":"lump-expense",  "name":"家族海外旅行②",       "age":42,"amount":-2000000,"duration":1,"memo":"第1子9歳・第2子5歳"},
+        {"type":"lump-expense",  "name":"家族海外旅行③",       "age":45,"amount":-2000000,"duration":1,"memo":"第1子12歳・第2子8歳"},
+        {"type":"lump-expense",  "name":"家族海外旅行④",       "age":48,"amount":-2000000,"duration":1,"memo":"第1子15歳・第2子11歳"},
+        {"type":"expense-change","name":"第1子 私立高校 授業料","age":48,"amount":80000,  "duration":3,"memo":"月+8万円 公立差額 第1子15〜17歳"},
+        {"type":"lump-expense",  "name":"家族海外旅行⑤",       "age":51,"amount":-2000000,"duration":1,"memo":"第1子18歳・第2子14歳"},
+        {"type":"education-fee", "name":"第1子 大学入学費用",   "age":51,"amount":-1500000,"duration":1,"memo":"入学金+初年度諸費用 私立大 第1子18歳"},
+        {"type":"expense-change","name":"第1子 大学 授業料",    "age":51,"amount":100000, "duration":4,"memo":"月+10万円 私立文系4年間 第1子18〜21歳"},
+        {"type":"expense-change","name":"第2子 私立高校 授業料","age":52,"amount":80000,  "duration":3,"memo":"月+8万円 公立差額 第2子15〜17歳"},
+        {"type":"lump-expense",  "name":"家族海外旅行⑥",       "age":54,"amount":-2000000,"duration":1,"memo":"第1子21歳・第2子17歳"},
+        {"type":"education-fee", "name":"第2子 大学入学費用",   "age":55,"amount":-1500000,"duration":1,"memo":"入学金+初年度諸費用 私立大 第2子18歳"},
+        {"type":"expense-change","name":"第2子 大学 授業料",    "age":55,"amount":100000, "duration":4,"memo":"月+10万円 私立文系4年間 第2子18〜21歳"},
+        {"type":"lump-expense",  "name":"家族海外旅行⑦",       "age":57,"amount":-2000000,"duration":1,"memo":"最後の家族旅行 第2子20歳"},
+        {"type":"lump-expense",  "name":"第1子 結婚お祝い",     "age":61,"amount":-3000000,"duration":1,"memo":"第1子28歳 お祝い300万円"},
+        {"type":"lump-expense",  "name":"第2子 結婚お祝い",     "age":65,"amount":-3000000,"duration":1,"memo":"第2子28歳 お祝い300万円"}
+      ]
+    }
+  ]
+}
