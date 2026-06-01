@@ -1,9 +1,9 @@
 {
   "members": [
-    {"id":1,"name":"本人",  "role":"self",  "age":38,"gender":"male"},
-    {"id":2,"name":"配偶者","role":"spouse","age":36,"gender":"female"},
-    {"id":3,"name":"第1子", "role":"child", "age":5, "gender":"male"},
-    {"id":4,"name":"第2子", "role":"child", "age":1, "gender":"female"}
+    {"id":1,"name":"本人",  "role":"self",  "age":38,"birthdate":"1988-01-01","gender":"male"},
+    {"id":2,"name":"配偶者","role":"spouse","age":36,"birthdate":"1990-01-01","gender":"female"},
+    {"id":3,"name":"第1子", "role":"child", "age":5, "birthdate":"2021-01-01","gender":"male"},
+    {"id":4,"name":"第2子", "role":"child", "age":1, "birthdate":"2025-01-01","gender":"female"}
   ],
   "settings": {
     "retireAge":55,"retireAgeSpouse":63,"endAge":90,
