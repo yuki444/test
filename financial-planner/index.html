@@ -175,6 +175,14 @@
       display:flex;gap:20px;flex-wrap:wrap;align-items:center}
     .inline-summary .item .lbl{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase}
     .inline-summary .item .val{font-size:16px;font-weight:800;margin-top:2px}
+    .steps-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:2px}
+    .steps-tbl th{background:var(--bg);font-size:11px;font-weight:700;color:var(--text-muted);
+      padding:7px 10px;border-bottom:2px solid var(--border);text-align:left;white-space:nowrap}
+    .steps-tbl td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+    .steps-tbl tr:last-child td{border-bottom:none}
+    .step-input{width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;
+      font-size:13px;background:white;min-width:0;box-sizing:border-box}
+    .step-input:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px rgba(26,86,219,.1)}
     .toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:white;padding:11px 18px;
       border-radius:10px;font-size:13px;font-weight:700;z-index:1000;transform:translateY(80px);
       opacity:0;transition:all .3s;box-shadow:var(--shadow-md)}
@@ -327,6 +335,15 @@
         </div>
         <hr class="divider">
         <div id="monthly-summary" class="inline-summary"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📅 年齢別 生活費スケジュール</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px">
+          年齢に応じた月額支出の増減を全シナリオ共通で設定します。インフレ連動で自動調整されます。<br>
+          <span style="font-size:12px">例）40歳から <strong>+13,000円</strong>（子育て増加）、56歳から <strong>−30,000円</strong>（子供独立後）</span>
+        </p>
+        <div id="expense-steps-wrap"></div>
+        <button class="btn btn-secondary" onclick="addExpenseStep()" style="margin-top:10px">＋ ステップを追加</button>
       </div>
       <div class="card">
         <div class="card-title">💰 積立・貯蓄・年金</div>
@@ -543,6 +560,8 @@ const DEFAULTS = {
     transport:25000,medical:30000,entertainment:80000,other:50000},
   // 年金見込み: 本人厚生年金+国民年金(65歳~)≈20万/月, 配偶者≈14万/月
   savings:{invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000},
+  // 年齢別生活費スケジュール（全シナリオ共通）
+  expenseSteps:[],
   // 3年前に7,000万円の家を購入（自宅評価額）
   assets:{cash:3000000,fixedDeposit:2000000,stocks:8882862,ideco:500000,home:70000000,realEstate:0,insurance:0,other:0},
   // 35年ローン・1.5%固定・月20万返済。3年経過後残高約6,000万
@@ -854,7 +873,7 @@ function showPage(id){
   document.getElementById('nav-'+id).classList.add('active');
   if(id==='page-simulation'){syncFromDOM();renderSimulation();}
   if(id==='page-advice'){syncFromDOM();renderAdvice();}
-  if(id==='page-income'){updateMonthlySummary();}
+  if(id==='page-income'){updateMonthlySummary();renderExpenseSteps();}
   if(id==='page-assets'){updateNetWorthSummary();renderAllocChart();renderHoldings();}
   if(id==='page-settings'){updatePinStatus();}
 }
@@ -1187,6 +1206,11 @@ function simulate(plan){
     // Expenses (mortgage payment only when balance remains)
     let expenses=Object.values(data.expenses).reduce((a,b)=>a+b,0)*12*inflF;
     if(mortgageMonthly>0 && mortgageBalance>0) expenses+=mortgageMonthly*12;
+    // Global age-based expense steps (cumulative deltas, inflation-adjusted)
+    if(data.expenseSteps?.length){
+      const stepDelta=data.expenseSteps.filter(s=>age>=s.fromAge).reduce((sum,s)=>sum+s.delta,0);
+      if(stepDelta) expenses+=stepDelta*12*inflF;
+    }
     if(retired) expenses*=0.85;
 
     // Events
@@ -1793,6 +1817,76 @@ async function refreshHoldingPrices(){
   }
 }
 
+// ============================================================
+// EXPENSE STEPS
+// ============================================================
+function renderExpenseSteps(){
+  const wrap=document.getElementById('expense-steps-wrap');
+  if(!wrap) return;
+  if(!data.expenseSteps) data.expenseSteps=[];
+  data.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
+  if(!data.expenseSteps.length){
+    wrap.innerHTML='<p style="font-size:13px;color:var(--text-muted);padding:4px 0 2px">まだ設定されていません。「＋ ステップを追加」で行を追加してください。</p>';
+    return;
+  }
+  let cum=0;
+  let html=`<div style="overflow-x:auto"><table class="steps-tbl">
+    <thead><tr>
+      <th style="width:90px">年齢から</th>
+      <th style="width:140px">月額変化（円）</th>
+      <th style="width:110px">累計変化</th>
+      <th>メモ</th>
+      <th style="width:44px"></th>
+    </tr></thead><tbody>`;
+  data.expenseSteps.forEach((s,i)=>{
+    cum+=s.delta;
+    const dc=s.delta>0?'var(--danger)':s.delta<0?'var(--secondary)':'var(--text-muted)';
+    const cc=cum>0?'var(--danger)':cum<0?'var(--secondary)':'var(--text-muted)';
+    const sign=s.delta>0?'+':'';
+    const csign=cum>0?'+':'';
+    html+=`<tr>
+      <td><input class="step-input" type="number" value="${s.fromAge}" min="18" max="99"
+          onchange="updateStep(${i},'fromAge',+this.value)" style="width:70px"></td>
+      <td><input class="step-input" type="number" value="${s.delta}" step="1000"
+          onchange="updateStep(${i},'delta',+this.value)"
+          style="width:120px;color:${dc};font-weight:600"></td>
+      <td style="color:${cc};font-weight:700;white-space:nowrap">${csign}${addCommas(cum)}円</td>
+      <td><input class="step-input" type="text" value="${s.memo||''}" placeholder="例: 子育て増加期"
+          onchange="updateStep(${i},'memo',this.value)"></td>
+      <td><button class="btn-tool" onclick="deleteStep(${i})"
+          style="padding:3px 8px;font-size:12px;color:var(--danger);min-width:32px">✕</button></td>
+    </tr>`;
+  });
+  html+='</tbody></table></div>';
+  wrap.innerHTML=html;
+}
+
+function addExpenseStep(){
+  if(!data.expenseSteps) data.expenseSteps=[];
+  const ages=data.expenseSteps.map(s=>s.fromAge);
+  const nextAge=ages.length?Math.min(Math.max(...ages)+5,99):40;
+  data.expenseSteps.push({fromAge:nextAge,delta:0,memo:''});
+  _saveSteps();
+}
+
+function updateStep(i,key,val){
+  if(!data.expenseSteps?.[i]) return;
+  data.expenseSteps[i][key]=val;
+  _saveSteps();
+}
+
+function deleteStep(i){
+  if(!data.expenseSteps) return;
+  data.expenseSteps.splice(i,1);
+  _saveSteps();
+}
+
+function _saveSteps(){
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderExpenseSteps();
+  markDirty();
+}
+
 function addDefaultHoldings(){
   const DEFAULT_HOLDINGS=[
     {account:'楽天証券（国内）',name:'NFJ-REITインデックス (1343)',category:'stocks',shares:100,value:192450,cost:178950},
@@ -1975,9 +2069,11 @@ function init(){
   data.savings=Object.assign({invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000},data.savings);
   data.income=Object.assign({self:0,spouse:0,side:0,investment:0,bonusSelf:0,bonusSpouse:0},data.income);
   if(!data.holdings) data.holdings=[];
+  if(!data.expenseSteps) data.expenseSteps=[];
   initMoneyInputs();
   renderMembers();
   syncToDOM();
+  renderExpenseSteps();
   renderPlans();
   updateMonthlySummary();
   updateNetWorthSummary();

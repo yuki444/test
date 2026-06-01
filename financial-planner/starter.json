@@ -21,6 +21,7 @@
   "savings": {
     "invest":200000,"deposit":100000,"pensionSelf":200000,"pensionSpouse":140000
   },
+  "expenseSteps": [],
   "assets": {
     "cash":3000000,"fixedDeposit":2000000,"stocks":8882862,"ideco":500000,
     "home":70000000,"realEstate":0,"insurance":0,"other":0
