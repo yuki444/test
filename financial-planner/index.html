@@ -814,8 +814,9 @@
           <strong>住宅ローン控除</strong> — 38歳〜 −30,000円/月（0.7%×残債 年約36万）／51歳で終了<br>
           <strong>加齢による医療費増加</strong> — 55歳 +10,000 / 65歳 +20,000 / 75歳 +20,000円/月<br>
           <strong>家電・設備買い替え</strong> — 48/58/68/78歳 各 −100万円（全プランに追加）<br>
-          <strong>ESPP保有銘柄</strong> — アクセンチュア ESPP（46株 推計200万円）追加<br>
-          <strong>ESPP副収入</strong> — 副収入 +15,000円/月（15%割引ベネフィット）<br>
+          <strong>ESPP保有銘柄</strong> — ACN ESPP 49株（コスト153万 / 評価133万 <span style="color:var(--danger)">▼-20万円含み損</span>）<br>
+          <strong>ESPP第4期積立中</strong> — 2026年4月〜 8.5万×3ヶ月 = 25.5万円積立中（未取得）<br>
+          <strong>ESPP副収入</strong> — 副収入 +15,000円/月（15%割引ベネフィット換算）<br>
         </div>
         <button class="btn btn-primary" onclick="addFPUpdates()">🏦 FPアップデートを現在のデータに反映</button>
       </div>
@@ -980,7 +981,8 @@ const DEFAULTS = {
     {account:'SBI証券（特定）',          name:'Joshin (8173)',                  category:'stocks',shares:1,      value:3060,    cost:2319},
     {account:'SBI証券（特定・投信）',    name:'eMAXIS Slim 米国株式(S&P500)',   category:'stocks',shares:212554, value:940764,  cost:750018},
     {account:'SBI証券（特定・投信）',    name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:251077, value:947489,  cost:750017},
-    {account:'アクセンチュア ESPP',      name:'アクセンチュア ESPP (ACN)',        category:'stocks',shares:46,      value:2000000, cost:1700000}
+    {account:'アクセンチュア ESPP',      name:'アクセンチュア ESPP (ACN)',        category:'stocks',shares:49,      value:1329000, cost:1530000},
+    {account:'アクセンチュア ESPP',      name:'ACN ESPP 積立中（第4期）',         category:'other', shares:0,       value:255000,  cost:255000}
   ],
   plans:[
     // ── プラン1: ローン完済・住み続ける ─────────────────────────────
@@ -1097,6 +1099,27 @@ let data = JSON.parse(localStorage.getItem('fp-data') || JSON.stringify(DEFAULTS
         if(ev.type==='income-change' && ev.name==='投資取り崩し（月50万）'){ev.type='drawdown';dirty=true;}
       });
     });
+  }
+  // ESPP保有株を推計値(46株/200万)から実績計算値へ更新
+  // 計算根拠: 2024/10入社、月8.5万積立、15%割引で3期分購入済み
+  //   第1期(24/10-25/3) $355→51,475円×0.85=43,754円/株 → 11.65株
+  //   第2期(25/4-25/9)  $265→38,425円×0.85=32,661円/株 → 15.62株
+  //   第3期(25/10-26/3) $192→27,840円×0.85=23,664円/株 → 21.55株
+  //   合計49株 コスト153万 現在値$187×145=27,125円/株
+  if(data.holdings){
+    const ei=data.holdings.findIndex(h=>h.name==='アクセンチュア ESPP (ACN)');
+    if(ei>=0 && data.holdings[ei].shares===46){
+      data.holdings[ei].shares=49;
+      data.holdings[ei].value=1329000;
+      data.holdings[ei].cost=1530000;
+      dirty=true;
+    }
+    // 第4期積立中（2026/4〜 3ヶ月分=255,000円、未取得）
+    if(!data.holdings.some(h=>h.name==='ACN ESPP 積立中（第4期）')){
+      data.holdings.push({account:'アクセンチュア ESPP',name:'ACN ESPP 積立中（第4期）',
+        category:'other',shares:0,value:255000,cost:255000});
+      dirty=true;
+    }
   }
   if(dirty) localStorage.setItem('fp-data',JSON.stringify(data));
 })();
@@ -3303,7 +3326,8 @@ function addFPUpdates(){
     {type:'lump-expense',name:'家電・設備買い替え③',age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
     {type:'lump-expense',name:'家電・設備買い替え④',age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
   ];
-  const ESPP_HOLDING={account:'アクセンチュア ESPP',name:'アクセンチュア ESPP (ACN)',category:'stocks',shares:46,value:2000000,cost:1700000};
+  const ESPP_HOLDING={account:'アクセンチュア ESPP',name:'アクセンチュア ESPP (ACN)',category:'stocks',shares:49,value:1329000,cost:1530000};
+  const ESPP_CASH={account:'アクセンチュア ESPP',name:'ACN ESPP 積立中（第4期）',category:'other',shares:0,value:255000,cost:255000};
 
   if(!data.expenseDetails) data.expenseDetails={entertainment:[],other:[]};
   if(!data.expenseDetails.other) data.expenseDetails.other=[];
@@ -3321,7 +3345,8 @@ function addFPUpdates(){
     const plans=data.plans.filter(p=>!p.events.some(e=>e.name===ev.name));
     if(plans.length) changes.push(`イベント追加: ${ev.name}（${ev.age}歳 ${addCommas(ev.amount)}円）×${plans.length}プラン`);
   });
-  if(!existingHoldings.has(ESPP_HOLDING.name)) changes.push(`保有銘柄: ${ESPP_HOLDING.name} 追加（${addCommas(ESPP_HOLDING.value)}円）`);
+  if(!existingHoldings.has(ESPP_HOLDING.name)) changes.push(`保有銘柄: ${ESPP_HOLDING.name} 追加（49株・コスト153万・評価133万 ▼-20万）`);
+  if(!existingHoldings.has(ESPP_CASH.name)) changes.push(`保有銘柄: ${ESPP_CASH.name} 追加（第4期積立中 25.5万円）`);
   if(data.income.side<15000) changes.push(`副収入: ${addCommas(data.income.side)} → 15,000円/月（ESPP割引ベネフィット）`);
 
   if(!changes.length){showToast('ℹ️ FPアップデートはすでに反映済みです');return;}
@@ -3334,6 +3359,7 @@ function addFPUpdates(){
     data.plans.forEach(p=>{if(!p.events.some(e=>e.name===ev.name)) p.events.push({...ev});});
   });
   if(!existingHoldings.has(ESPP_HOLDING.name)) data.holdings.push({...ESPP_HOLDING});
+  if(!existingHoldings.has(ESPP_CASH.name)) data.holdings.push({...ESPP_CASH});
   if(data.income.side<15000) data.income.side=15000;
 
   // 固定資産税でother合計を再計算
