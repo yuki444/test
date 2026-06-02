@@ -1006,7 +1006,7 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'家電・設備買い替え①',   age:48,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
-      {type:'lump-expense',  name:'大規模リフォーム①',     age:58,amount:-7000000,duration:1,memo:'築20年 外壁・屋根・設備 大規模リフォーム概算700万円'},
+      {type:'lump-expense',  name:'大規模リフォーム①',     age:58,amount:-10000000,duration:1,memo:'築20年 外壁・屋根・設備 大規模リフォーム概算1,000万円'},
       {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-15000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金概算'},
       {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:500000, duration:15,memo:'夫婦2人分 月50万円（1人25万×2）食事・居住・介護含む。自宅売却・通常生活費置換'},
@@ -1792,7 +1792,7 @@ function simulate(plan){
           if(!nhEv){expenses+=ev.amount*12; dEventExp+=ev.amount*12;} break;
         case 'nursing-home':
           if(age===ev.age&&homeOwned){
-            const hv=initialHomeValue*Math.max(0.5,1-0.05*Math.max(0,age-homeAcquiredAge));
+            const hv=initialHomeValue*Math.max(0.3,1-0.02*Math.max(0,age-homeAcquiredAge));
             const net=hv-mortgageBalance;
             lump+=net; dLumpNet+=net;
             mortgageBalance=0; mortgageMonthly=0; homeOwned=false; initialHomeValue=0;
@@ -1818,7 +1818,7 @@ function simulate(plan){
       }
     });
 
-    const homeValue=homeOwned?initialHomeValue*Math.max(0.5,1-0.05*Math.max(0,age-homeAcquiredAge)):0;
+    const homeValue=homeOwned?initialHomeValue*Math.max(0.3,1-0.02*Math.max(0,age-homeAcquiredAge)):0;
     if(mortgageMonthly>0&&mortgageBalance>0){
       const ai=mortgageBalance*mortgageRate;
       mortgageBalance=Math.max(0,mortgageBalance-Math.max(0,mortgageMonthly*12-ai));
@@ -3061,7 +3061,7 @@ function addHousingScenarios(){
   ];
   if(!existingNames.includes('住み続ける（ローン完済）'))
     toAdd.push({name:'住み続ける（ローン完済）',color:'#3b82f6',events:[...commonEvents,
-      {type:'lump-expense',name:'大規模リフォーム①',age:58,amount:-7000000,duration:1,memo:'築20年 外壁・屋根・設備 大規模リフォーム概算700万円'},
+      {type:'lump-expense',name:'大規模リフォーム①',age:58,amount:-10000000,duration:1,memo:'築20年 外壁・屋根・設備 大規模リフォーム概算1,000万円'},
     ].sort((a,b)=>a.age-b.age)});
   if(!existingNames.includes('20年後売却→賃貸'))
     toAdd.push({name:'20年後売却→賃貸',color:'#10b981',events:[...commonEvents,
