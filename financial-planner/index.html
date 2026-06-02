@@ -546,7 +546,8 @@
           <div class="card-title" style="margin:0">📋 口座・保有資産明細</div>
           <div style="display:flex;gap:8px">
             <button class="btn btn-secondary btn-sm" onclick="syncHoldingsToAssets()" title="明細合計を上の資産欄に反映">⬆ 合計を反映</button>
-            <button class="btn btn-secondary btn-sm" onclick="refreshHoldingPrices()" title="Yahoo Finance終値で価格を一括更新">📈 価格を更新</button>
+            <span id="prices-updated-badge" style="font-size:10px;color:var(--text-muted);align-self:center"></span>
+            <button class="btn btn-secondary btn-sm" onclick="refreshHoldingPrices()" title="Yahoo Finance終値・配当を一括更新">📈 価格・配当を更新</button>
             <button class="btn btn-primary btn-sm" onclick="openHoldingModal()">＋ 追加</button>
           </div>
         </div>
@@ -2790,40 +2791,57 @@ function extractTicker(name){
   return null;
 }
 
-async function refreshHoldingPrices(){
-  if(!data.holdings?.length){showToast('❌ 明細がありません');return;}
-  showToast('⏳ 価格を取得中...');
+async function refreshHoldingPrices(silent=false){
+  if(!data.holdings?.length){if(!silent)showToast('❌ 明細がありません');return;}
+  if(!silent) showToast('⏳ 価格・配当を取得中...');
   try{
     const res=await fetch('./prices.json?_='+Date.now());
     if(!res.ok) throw new Error('prices.json not found');
     const pd=await res.json();
     const fx=pd.fxRate||145;
-    let updated=0,skipped=0;
+    let updatedVal=0,updatedDiv=0,skipped=0;
     data.holdings.forEach(h=>{
       const ticker=extractTicker(h.name);
       if(!ticker||pd.prices[ticker]==null) return skipped++;
-      const price=pd.prices[ticker];
+      const raw=pd.prices[ticker];
+      // 旧フォーマット互換: number or {p,d}
+      const price=typeof raw==='number'?raw:(raw.p||raw.price||0);
+      const divPerShare=typeof raw==='number'?0:(raw.d||raw.divPerShare||0);
+      const isUSD=!ticker.endsWith('.T')&&ticker!=='BTC'&&ticker!=='ETH';
+
       if(h.category==='crypto'){
-        // 初回: sharesがなければ現在のvalue÷価格で数量を逆算して保存
-        if(!h.shares && h.value>0) h.shares=h.value/price;
+        if(!h.shares&&h.value>0) h.shares=h.value/price;
         if(!h.shares) return skipped++;
         h.value=Math.round(h.shares*price);
+        updatedVal++;
       } else {
         if(!h.shares) return skipped++;
-        h.value=Math.round(ticker.endsWith('.T')?h.shares*price:h.shares*price*fx);
+        h.value=Math.round(isUSD?h.shares*price*fx:h.shares*price);
+        updatedVal++;
+        if(divPerShare>0){
+          h.annualDividend=Math.round(isUSD?h.shares*divPerShare*fx:h.shares*divPerShare);
+          updatedDiv++;
+        }
       }
-      updated++;
     });
-    if(updated>0){
+    if(updatedVal>0||updatedDiv>0){
+      // 株式合計を保有明細から再計算
+      const stockTotal=(data.holdings).filter(h=>h.category==='stocks').reduce((s,h)=>s+(h.value||0),0);
+      if(stockTotal>0) data.assets.stocks=stockTotal;
+      syncDividendToIncome();
       localStorage.setItem('fp-data',JSON.stringify(data));
       renderHoldings();renderAllocChart();
-      showToast(`✅ ${updated}件を更新（${pd.updated}）${skipped?` / ${skipped}件スキップ`:''}`);
+      syncToDOM();
+      // 最終更新日を表示
+      const badge=document.getElementById('prices-updated-badge');
+      if(badge) badge.textContent='株価: '+pd.updated+' 更新';
+      if(!silent) showToast(`✅ 株価${updatedVal}件・配当${updatedDiv}件を更新（${pd.updated}）`);
     } else {
-      showToast(`ℹ️ 更新対象なし（保有数量が未設定 or ティッカー未対応）`);
+      if(!silent) showToast(`ℹ️ 更新対象なし（保有数量が未設定 or ティッカー未対応）`);
     }
   }catch(e){
-    showToast('❌ 価格取得失敗。prices.jsonが見つかりません');
-    console.error(e);
+    if(!silent) showToast('❌ 価格取得失敗。prices.jsonが見つかりません');
+    console.log('prices.json load skipped:', e.message);
   }
 }
 
@@ -3543,6 +3561,8 @@ function init(){
   updateNetWorthSummary();
   // バッジを少し遅延させてDOM確実反映後に実行
   setTimeout(renderUpdateBadge, 100);
+  // prices.json から株価・配当を自動ロード（サイレント: 更新あり時のみトースト）
+  setTimeout(()=>refreshHoldingPrices(true), 500);
 
   // Live recalculation listeners
   const incomeIds=['income-self','income-spouse','income-side','income-investment','bonus-self','bonus-spouse',
