@@ -598,6 +598,10 @@
     <!-- ===== シミュレーション ===== -->
     <div class="page" id="page-simulation">
       <div class="page-header"><h2>📊 シミュレーション結果</h2><p>ライフプランに基づいた将来資産推移の予測です。</p></div>
+      <div style="margin-bottom:16px;background:linear-gradient(135deg,var(--primary) 0%,#1d4ed8 100%);padding:12px 16px;border-radius:10px;display:flex;align-items:center;gap:12px">
+        <span style="font-size:13px;font-weight:700;color:white;white-space:nowrap">📊 シナリオ：</span>
+        <select id="sim-global-scenario" onchange="renderSimulation()" style="flex:1;padding:7px 12px;border:none;border-radius:6px;font-size:13px;font-weight:700;background:white;color:var(--primary);cursor:pointer"></select>
+      </div>
       <div class="summary-grid" id="sim-summary"></div>
       <div class="card">
         <div class="card-title">📈 純資産推移（全シナリオ比較）</div>
@@ -616,10 +620,7 @@
       </div>
       <div class="card">
         <div class="card-title">📋 年次キャッシュフロー詳細 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">（金額はすべて万円単位）</span></div>
-        <div style="margin-bottom:10px;display:flex;align-items:center;gap:10px">
-          <label style="font-size:12px;font-weight:700;color:var(--text-muted)">シナリオ：</label>
-          <select id="table-scenario-select" onchange="renderTable()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px"></select>
-        </div>
+        <select id="table-scenario-select" style="display:none"></select>
         <div class="table-wrap">
           <table>
             <thead><tr>
@@ -633,10 +634,7 @@
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
           <div class="card-title" style="margin:0">🔍 収支内訳テーブル <span style="font-size:11px;font-weight:400;color:var(--text-muted)">（金額はすべて万円単位）</span></div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <label style="font-size:12px;font-weight:700;color:var(--text-muted)">シナリオ：</label>
-            <select id="detail-scenario-select" onchange="renderDetailTable()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px"></select>
-          </div>
+          <select id="detail-scenario-select" style="display:none"></select>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
           <span style="font-size:11px;font-weight:700;color:var(--text-muted)">表示グループ：</span>
@@ -877,9 +875,9 @@ const DEFAULTS = {
     {id:4,name:'第2子', role:'child', age:1, birthdate:'2025-01-01',gender:'female'}
   ],
   settings:{retireAge:55,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0,retireExpenseRatio:1.1},
-  // 手取り推計: 本人1500万gross→月85万, 配偶者500万gross→月32.5万（税・社保控除後）
-  income:{self:850000,spouse:325000,side:15000,investment:0,bonusSelf:1000000,bonusSpouse:0},
-  // ↑ side:15000 = ACN ESPP 15%割引ベネフィット（毎月8.5万で購入→市場価値10万、差額1.5万/月）
+  // 手取り推計: 本人1100万gross→月85万（2026年以降昇給見込）, 配偶者500万gross→月32.5万
+  income:{self:850000,spouse:325000,side:16200,investment:0,bonusSelf:1000000,bonusSpouse:0},
+  // ↑ side:16200 = ACN ESPP 15%割引ベネフィット（月9.17万積立×15%割引 差額1.62万/月）
   // housing=固定資産税・管理費・修繕（住宅ローンは別途 debts.mortgageMonthly で管理）
   expenses:{housing:80000,food:55000,utilities:22000,insurance:65000,education:75000,
     transport:25000,medical:30000,entertainment:197000,other:128000},
@@ -981,8 +979,8 @@ const DEFAULTS = {
     {account:'SBI証券（特定）',          name:'Joshin (8173)',                  category:'stocks',shares:1,      value:3060,    cost:2319},
     {account:'SBI証券（特定・投信）',    name:'eMAXIS Slim 米国株式(S&P500)',   category:'stocks',shares:212554, value:940764,  cost:750018},
     {account:'SBI証券（特定・投信）',    name:'eMAXIS Slim 全世界株式(オルカン)',category:'stocks',shares:251077, value:947489,  cost:750017},
-    {account:'アクセンチュア ESPP',      name:'アクセンチュア ESPP (ACN)',        category:'stocks',shares:49,      value:1329000, cost:1530000},
-    {account:'アクセンチュア ESPP',      name:'ACN ESPP 積立中（第4期）',         category:'other', shares:0,       value:255000,  cost:255000}
+    {account:'アクセンチュア ESPP',      name:'アクセンチュア ESPP (ACN)',        category:'stocks',shares:53,      value:1438000, cost:1650000},
+    {account:'アクセンチュア ESPP',      name:'ACN ESPP 積立中（第4期）',         category:'other', shares:0,       value:275000,  cost:275000}
   ],
   plans:[
     // ── プラン1: ローン完済・住み続ける ─────────────────────────────
@@ -1008,8 +1006,10 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'家電・設備買い替え①',   age:48,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'大規模リフォーム①',     age:58,amount:-7000000,duration:1,memo:'築20年 外壁・屋根・設備 大規模リフォーム概算700万円'},
       {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
-      {type:'lump-expense',  name:'家電・設備買い替え④',   age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-15000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金概算'},
+      {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:500000, duration:15,memo:'夫婦2人分 月50万円（1人25万×2）食事・居住・介護含む。自宅売却・通常生活費置換'},
       {type:'drawdown', name:'投資取り崩し（月50万）',  age:55,amount:500000, duration:35,memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'},
     ]},
     // ── プラン2: 20年後（58歳）に半値売却→賃貸転居 ────────────────
@@ -1039,7 +1039,8 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'家電・設備買い替え①',   age:48,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
-      {type:'lump-expense',  name:'家電・設備買い替え④',   age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-15000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金概算'},
+      {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:500000, duration:15,memo:'夫婦2人分 月50万円（1人25万×2）食事・居住・介護含む。通常生活費置換'},
       {type:'drawdown', name:'投資取り崩し（月50万）',  age:55,amount:500000, duration:35,memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'},
     ]},
     // ── プラン3: 8年ごとに新築へ住み替え（2割ずつ縮小） ───────────
@@ -1078,7 +1079,8 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'家電・設備買い替え①',   age:48,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
-      {type:'lump-expense',  name:'家電・設備買い替え④',   age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-15000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金概算'},
+      {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:500000, duration:15,memo:'夫婦2人分 月50万円（1人25万×2）食事・居住・介護含む。自宅売却・通常生活費置換'},
       {type:'drawdown', name:'投資取り崩し（月50万）',  age:55,amount:500000, duration:35,memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'},
     ]},
   ]
@@ -1100,24 +1102,44 @@ let data = JSON.parse(localStorage.getItem('fp-data') || JSON.stringify(DEFAULTS
       });
     });
   }
-  // ESPP保有株を推計値(46株/200万)から実績計算値へ更新
-  // 計算根拠: 2024/10入社、月8.5万積立、15%割引で3期分購入済み
-  //   第1期(24/10-25/3) $355→51,475円×0.85=43,754円/株 → 11.65株
-  //   第2期(25/4-25/9)  $265→38,425円×0.85=32,661円/株 → 15.62株
-  //   第3期(25/10-26/3) $192→27,840円×0.85=23,664円/株 → 21.55株
-  //   合計49株 コスト153万 現在値$187×145=27,125円/株
+  // ESPP保有株: 1100万給与・月9.17万積立・15%割引 3期分
+  //   第1期(24/10-25/3) $355→43,754円/株 → 12.57株
+  //   第2期(25/4-25/9)  $265→32,661円/株 → 16.84株
+  //   第3期(25/10-26/3) $192→23,664円/株 → 23.24株
+  //   合計53株 コスト165万 現在値$187×145=27,125円/株
   if(data.holdings){
     const ei=data.holdings.findIndex(h=>h.name==='アクセンチュア ESPP (ACN)');
-    if(ei>=0 && data.holdings[ei].shares===46){
-      data.holdings[ei].shares=49;
-      data.holdings[ei].value=1329000;
-      data.holdings[ei].cost=1530000;
+    if(ei>=0 && data.holdings[ei].shares<53){
+      data.holdings[ei].shares=53;
+      data.holdings[ei].value=1438000;
+      data.holdings[ei].cost=1650000;
       dirty=true;
     }
-    // 第4期積立中（2026/4〜 3ヶ月分=255,000円、未取得）
+    // 第4期積立中（2026/4〜 3ヶ月分=275,000円）
+    const pi=data.holdings.findIndex(h=>h.name==='ACN ESPP 積立中（第4期）');
+    if(pi>=0 && data.holdings[pi].value<275000){
+      data.holdings[pi].value=275000;
+      data.holdings[pi].cost=275000;
+      dirty=true;
+    }
     if(!data.holdings.some(h=>h.name==='ACN ESPP 積立中（第4期）')){
       data.holdings.push({account:'アクセンチュア ESPP',name:'ACN ESPP 積立中（第4期）',
-        category:'other',shares:0,value:255000,cost:255000});
+        category:'other',shares:0,value:275000,cost:275000});
+      dirty=true;
+    }
+  }
+  // ESPP副収入ベネフィット更新
+  if(data.income && data.income.side<16200){data.income.side=16200;dirty=true;}
+  // 住み続けるシナリオ: 重複解消（旧データで別プランとして存在する場合はplan[0]に統合）
+  if(data.plans && data.plans.length>1){
+    const hIdx=data.plans.findIndex((p,i)=>i>0&&p.name==='住み続ける（ローン完済）');
+    if(hIdx>0){
+      const hp=data.plans[hIdx];
+      const baseNames=new Set(data.plans[0].events.map(e=>e.name));
+      hp.events.forEach(ev=>{if(!baseNames.has(ev.name))data.plans[0].events.push({...ev});});
+      data.plans[0].name='住み続ける（ローン完済）';
+      data.plans[0].color='#3b82f6';
+      data.plans.splice(hIdx,1);
       dirty=true;
     }
   }
@@ -1140,6 +1162,7 @@ const EVENT_TYPES = [
   {value:'education-fee',label:'教育費一括（入学金・大学等）',  tag:'expense', amtLabel:'一括教育費',  amtHint:'例: -2000000（支払額をマイナスで入力）',defaultAmt:-2000000,defaultDur:1},
   {value:'sell-home',    label:'住宅売却（賃貸転居）',          tag:'asset',   amtLabel:'売却価格',    amtHint:'例: 35000000（売却額をプラスで入力）。ローン残高を差引いた純益がFAに加算',defaultAmt:35000000,defaultDur:1},
   {value:'move-home',    label:'住み替え（新築へ買替）',        tag:'asset',   amtLabel:'旧宅売却価格',amtHint:'例: 70000000（売却額）。newPrice/newLoan/newMonthlyをイベントに設定',defaultAmt:70000000,defaultDur:1},
+  {value:'nursing-home', label:'老人ホーム入居（自宅売却+生活費置換）',tag:'expense',amtLabel:'月額費用（夫婦合計）',amtHint:'例: 500000（月50万）。自宅は現在価値で自動売却。通常生活費を置換',defaultAmt:500000,defaultDur:15},
 ];
 
 const PRESETS = [
@@ -1735,12 +1758,14 @@ function simulate(plan){
     };
 
     // --- Expenses (simulation totals: same logic as before) ---
+    const nhEv=plan.events.find(ev=>ev.type==='nursing-home'&&age>=ev.age);
     let baseExpenses=Object.values(data.expenses).reduce((a,b)=>a+b,0)*12*inflF;
     if(retired) baseExpenses*=retireExpenseRatio;
     const stepDeltaVal=data.expenseSteps?.length?data.expenseSteps.filter(s=>age>=s.fromAge).reduce((sum,s)=>sum+s.delta,0):0;
     if(stepDeltaVal) baseExpenses+=stepDeltaVal*12;
+    if(nhEv) baseExpenses=nhEv.amount*12*inflF; // nursing home: replace all living costs
     let expenses=baseExpenses;
-    if(mortgageMonthly>0&&mortgageBalance>0) expenses+=mortgageMonthly*12;
+    if(!nhEv&&mortgageMonthly>0&&mortgageBalance>0) expenses+=mortgageMonthly*12;
 
     // Expense breakdown (display only, per-category rounded)
     const dEbase={};
@@ -1764,7 +1789,14 @@ function simulate(plan){
         case 'income-change':
           income+=ev.amount*12; dI.eventInc+=ev.amount*12; break;
         case 'expense-change': case 'child-born':
-          expenses+=ev.amount*12; dEventExp+=ev.amount*12; break;
+          if(!nhEv){expenses+=ev.amount*12; dEventExp+=ev.amount*12;} break;
+        case 'nursing-home':
+          if(age===ev.age&&homeOwned){
+            const hv=initialHomeValue*Math.max(0.5,1-0.05*Math.max(0,age-homeAcquiredAge));
+            const net=hv-mortgageBalance;
+            lump+=net; dLumpNet+=net;
+            mortgageBalance=0; mortgageMonthly=0; homeOwned=false; initialHomeValue=0;
+          } break;
         case 'loan-start':
           if(age===ev.age) otherDebt+=ev.amount;
           if(age>=ev.age&&age<ev.age+ev.duration) otherDebt=Math.max(0,otherDebt-(ev.amount/ev.duration));
@@ -1820,10 +1852,24 @@ function simulate(plan){
 const charts={};
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 
+function getSelectedPlanId(){
+  const el=document.getElementById('sim-global-scenario');
+  if(el&&el.value){const v=+el.value;if(data.plans.some(p=>p.id===v))return v;}
+  return data.plans[0]?.id||1;
+}
+
 function renderSimulation(){
   syncFromDOM();
+  // Populate global scenario selector (preserve current selection)
+  const globalSel=document.getElementById('sim-global-scenario');
+  const savedId=globalSel?.value?+globalSel.value:(data.plans[0]?.id||1);
+  if(globalSel){
+    globalSel.innerHTML=data.plans.map(p=>`<option value="${p.id}"${p.id===savedId?' selected':''}>${p.name}</option>`).join('');
+  }
   const allSims=data.plans.map(p=>({plan:p,rows:simulate(p)}));
-  const base=allSims[0].rows;
+  const selPlanId=getSelectedPlanId();
+  const selSim=allSims.find(s=>s.plan.id===selPlanId)||allSims[0];
+  const base=selSim.rows;
   const self=data.members.find(m=>m.role==='self');
   const startAge=self?.age||35;
   const totalA=Object.values(data.assets).reduce((a,b)=>a+b,0);
@@ -1853,11 +1899,15 @@ function renderSimulation(){
   const retireIdx=base.findIndex(r=>r.isRetired);
   charts.networth=new Chart(document.getElementById('chart-networth'),{
     type:'line',
-    data:{labels,datasets:allSims.map(s=>({
-      label:s.plan.name,data:s.rows.map(r=>Math.round(r.netWorth/10000)),
-      borderColor:s.plan.color,backgroundColor:s.plan.color+'15',fill:true,
-      tension:.35,pointRadius:0,pointHoverRadius:4,borderWidth:2.5
-    }))},
+    data:{labels,datasets:allSims.map(s=>{
+      const isSel=s.plan.id===selPlanId;
+      return {
+        label:s.plan.name,data:s.rows.map(r=>Math.round(r.netWorth/10000)),
+        borderColor:s.plan.color,backgroundColor:isSel?s.plan.color+'20':'transparent',
+        fill:isSel,borderDash:isSel?[]:[5,3],
+        tension:.35,pointRadius:0,pointHoverRadius:4,borderWidth:isSel?2.5:1.5
+      };
+    })},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}万円`}},
         annotation:retireIdx>=0?{annotations:{retire:{type:'line',xMin:retireIdx,xMax:retireIdx,
@@ -1898,21 +1948,17 @@ function renderSimulation(){
     });
   }
 
-  // Table scenario select
-  const sel=document.getElementById('table-scenario-select');
-  sel.innerHTML=data.plans.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
-  renderTable();
-
-  // Detail table scenario select
+  // Sync hidden selectors and render tables
+  const tsel=document.getElementById('table-scenario-select');
+  if(tsel) tsel.value=selPlanId;
   const dsel=document.getElementById('detail-scenario-select');
-  if(dsel){
-    dsel.innerHTML=data.plans.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
-    renderDetailTable();
-  }
+  if(dsel) dsel.value=selPlanId;
+  renderTable();
+  renderDetailTable();
 }
 
 function renderTable(){
-  const planId=+document.getElementById('table-scenario-select')?.value||data.plans[0].id;
+  const planId=getSelectedPlanId();
   const plan=data.plans.find(p=>p.id===planId);
   if(!plan) return;
   const rows=simulate(plan);
@@ -1932,7 +1978,7 @@ function renderTable(){
 }
 
 function renderDetailTable(){
-  const planId=+document.getElementById('detail-scenario-select')?.value||data.plans[0]?.id;
+  const planId=getSelectedPlanId();
   const plan=data.plans.find(p=>p.id===planId);
   if(!plan) return;
   const rows=simulate(plan);
@@ -3010,9 +3056,13 @@ function addHousingScenarios(){
     {type:'lump-expense',  name:'第1子 結婚お祝い',      age:61,amount:-3000000,duration:1,memo:'第1子28歳'},
     {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳'},
     {type:'lump-income',   name:'企業型DC退職金（本人）',age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
+    {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-15000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金概算'},
+    {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:500000, duration:15,memo:'夫婦2人分 月50万円（1人25万×2）食事・居住・介護含む。自宅売却・通常生活費置換'},
   ];
   if(!existingNames.includes('住み続ける（ローン完済）'))
-    toAdd.push({name:'住み続ける（ローン完済）',color:'#3b82f6',events:[...commonEvents]});
+    toAdd.push({name:'住み続ける（ローン完済）',color:'#3b82f6',events:[...commonEvents,
+      {type:'lump-expense',name:'大規模リフォーム①',age:58,amount:-7000000,duration:1,memo:'築20年 外壁・屋根・設備 大規模リフォーム概算700万円'},
+    ].sort((a,b)=>a.age-b.age)});
   if(!existingNames.includes('20年後売却→賃貸'))
     toAdd.push({name:'20年後売却→賃貸',color:'#10b981',events:[...commonEvents,
       {type:'sell-home',     name:'住宅売却（半値）',   age:58,amount:35000000,duration:1,memo:'残債精算・ローン消滅'},
@@ -3326,8 +3376,8 @@ function addFPUpdates(){
     {type:'lump-expense',name:'家電・設備買い替え③',age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
     {type:'lump-expense',name:'家電・設備買い替え④',age:78,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
   ];
-  const ESPP_HOLDING={account:'アクセンチュア ESPP',name:'アクセンチュア ESPP (ACN)',category:'stocks',shares:49,value:1329000,cost:1530000};
-  const ESPP_CASH={account:'アクセンチュア ESPP',name:'ACN ESPP 積立中（第4期）',category:'other',shares:0,value:255000,cost:255000};
+  const ESPP_HOLDING={account:'アクセンチュア ESPP',name:'アクセンチュア ESPP (ACN)',category:'stocks',shares:53,value:1438000,cost:1650000};
+  const ESPP_CASH={account:'アクセンチュア ESPP',name:'ACN ESPP 積立中（第4期）',category:'other',shares:0,value:275000,cost:275000};
 
   if(!data.expenseDetails) data.expenseDetails={entertainment:[],other:[]};
   if(!data.expenseDetails.other) data.expenseDetails.other=[];
@@ -3345,9 +3395,9 @@ function addFPUpdates(){
     const plans=data.plans.filter(p=>!p.events.some(e=>e.name===ev.name));
     if(plans.length) changes.push(`イベント追加: ${ev.name}（${ev.age}歳 ${addCommas(ev.amount)}円）×${plans.length}プラン`);
   });
-  if(!existingHoldings.has(ESPP_HOLDING.name)) changes.push(`保有銘柄: ${ESPP_HOLDING.name} 追加（49株・コスト153万・評価133万 ▼-20万）`);
-  if(!existingHoldings.has(ESPP_CASH.name)) changes.push(`保有銘柄: ${ESPP_CASH.name} 追加（第4期積立中 25.5万円）`);
-  if(data.income.side<15000) changes.push(`副収入: ${addCommas(data.income.side)} → 15,000円/月（ESPP割引ベネフィット）`);
+  if(!existingHoldings.has(ESPP_HOLDING.name)) changes.push(`保有銘柄: ${ESPP_HOLDING.name} 追加（53株・コスト165万・評価144万 ▼-21万）`);
+  if(!existingHoldings.has(ESPP_CASH.name)) changes.push(`保有銘柄: ${ESPP_CASH.name} 追加（第4期積立中 27.5万円）`);
+  if(data.income.side<16200) changes.push(`副収入: ${addCommas(data.income.side)} → 16,200円/月（ESPP割引ベネフィット 月9.17万積立）`);
 
   if(!changes.length){showToast('ℹ️ FPアップデートはすでに反映済みです');return;}
   if(!confirm(`以下のFP観点データを追加します:\n\n${changes.join('\n')}\n\n続けますか？`)) return;
@@ -3360,7 +3410,7 @@ function addFPUpdates(){
   });
   if(!existingHoldings.has(ESPP_HOLDING.name)) data.holdings.push({...ESPP_HOLDING});
   if(!existingHoldings.has(ESPP_CASH.name)) data.holdings.push({...ESPP_CASH});
-  if(data.income.side<15000) data.income.side=15000;
+  if(data.income.side<16200) data.income.side=16200;
 
   // 固定資産税でother合計を再計算
   data.expenses.other=(data.expenseDetails.other||[]).reduce((s,x)=>s+(+x.amount||0),0);
@@ -3372,7 +3422,7 @@ function addFPUpdates(){
   renderPlans();
   renderHoldings();
   updateMonthlySummary();
-  showToast('✅ FPアップデートを反映しました（固定資産税・住宅ローン控除・医療費増加・家電買い替え・ESPP）');
+  showToast('✅ FPアップデートを反映しました（固定資産税・住宅ローン控除・医療費増加・家電買い替え・ESPP 53株）');
 }
 
 function addDrawdownIncome(){
