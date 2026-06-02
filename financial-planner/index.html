@@ -1048,29 +1048,38 @@ const DEFAULTS = {
     {id:3,name:'8年ごとに新築',color:'#f59e0b',events:[
       {type:'lump-expense',  name:'家族海外旅行①',        age:39,amount:-2000000,duration:1,memo:'第1子6歳・第2子2歳'},
       {type:'lump-expense',  name:'家族海外旅行②',        age:42,amount:-2000000,duration:1,memo:'第1子9歳・第2子5歳'},
-      // 43歳：7,000万→5,600万(2割減)の新築へ。売却益~1,800万を頭金、新ローン3,800万・月11.6万
-      {type:'move-home',     name:'新築①へ住替（43歳）',  age:43,amount:0,duration:1,
-       salePrice:70000000,newPrice:56000000,newLoan:38000000,newMonthly:116000,
-       memo:'売却7,000万-残債→益1,800万を頭金/新ローン3,800万@1.5%35年=月11.6万'},
+      // 46歳（8年後）：旧家6,300万売却(7,000万×0.9)→新築6,500万。引越費用100万
+      {type:'move-home',     name:'新築①へ住替（46歳）',  age:46,amount:0,duration:1,
+       salePrice:63000000,newPrice:65000000,newLoan:49350000,newMonthly:151000,
+       memo:'旧家6,300万売却(7,000万×0.9)・新築6,500万。新ローン4,935万@1.5%35年≈月15.1万'},
+      {type:'lump-expense',  name:'引越費用①',            age:46,amount:-1000000,duration:1,memo:'新築①住み替え 引越し諸費用'},
+      // 51歳：旧家の住宅控除終了するが第2住宅の控除継続（0.7%×4,935万≈月2.9万、51〜58歳）
+      {type:'expense-change',name:'住宅控除②継続（第2住宅）',age:51,amount:-29000,duration:8,memo:'0.7%×4,935万/12≈2.9万/月。住み替えにより控除13年リセット'},
       {type:'lump-expense',  name:'家族海外旅行③',        age:45,amount:-2000000,duration:1,memo:'第1子12歳・第2子8歳'},
       {type:'lump-expense',  name:'家族海外旅行④',        age:48,amount:-2000000,duration:1,memo:'第1子15歳・第2子11歳'},
       {type:'expense-change',name:'第1子 私立高校 授業料', age:48,amount:80000,  duration:3,memo:'月+8万円 公立差額 第1子15〜17歳'},
       {type:'lump-expense',  name:'家族海外旅行⑤',        age:51,amount:-2000000,duration:1,memo:'第1子18歳・第2子14歳'},
       {type:'education-fee', name:'第1子 大学入学費用',    age:51,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第1子18歳'},
       {type:'expense-change',name:'第1子 大学 授業料',     age:51,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第1子18〜21歳'},
-      // 51歳：5,600万→4,480万(2割減)の新築へ。売却益~2,500万を頭金、新ローン1,980万・月6.1万
-      {type:'move-home',     name:'新築②へ住替（51歳）',  age:51,amount:0,duration:1,
-       salePrice:56000000,newPrice:44800000,newLoan:19800000,newMonthly:61000,
-       memo:'売却5,600万-残債→益2,500万を頭金/新ローン1,980万@1.5%35年=月6.1万'},
+      // 54歳（次の8年）：旧家5,850万売却(6,500万×0.9)→新築6,500万。引越費用100万
+      {type:'move-home',     name:'新築②へ住替（54歳）',  age:54,amount:0,duration:1,
+       salePrice:58500000,newPrice:65000000,newLoan:46800000,newMonthly:143000,
+       memo:'旧家5,850万売却(6,500万×0.9)・新築6,500万。新ローン4,680万@1.5%35年≈月14.3万'},
+      {type:'lump-expense',  name:'引越費用②',            age:54,amount:-1000000,duration:1,memo:'新築②住み替え 引越し諸費用'},
+      // 59歳：第3住宅の控除継続（0.7%×4,680万≈月2.7万、59〜66歳）
+      {type:'expense-change',name:'住宅控除③継続（第3住宅）',age:59,amount:-27000,duration:8,memo:'0.7%×4,680万/12≈2.7万/月。住み替えにより控除13年リセット'},
       {type:'expense-change',name:'第2子 私立高校 授業料', age:52,amount:80000,  duration:3,memo:'月+8万円 公立差額 第2子15〜17歳'},
       {type:'lump-expense',  name:'家族海外旅行⑥',        age:54,amount:-2000000,duration:1,memo:'第1子21歳・第2子17歳'},
       {type:'education-fee', name:'第2子 大学入学費用',    age:55,amount:-1500000,duration:1,memo:'入学金+初年度諸費用 私立大 第2子18歳'},
       {type:'expense-change',name:'第2子 大学 授業料',     age:55,amount:100000, duration:4,memo:'月+10万円 私立文系4年間 第2子18〜21歳'},
       {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行 第2子20歳'},
-      // 59歳：4,480万→3,584万(2割減)の新築へ。売却益~2,880万を頭金、新ローン704万・月2.2万
-      {type:'move-home',     name:'新築③へ住替（59歳）',  age:59,amount:0,duration:1,
-       salePrice:44800000,newPrice:35840000,newLoan:7040000,newMonthly:22000,
-       memo:'売却4,480万-残債→益2,880万を頭金/新ローン704万@1.5%35年=月2.2万'},
+      // 62歳（次の8年）：旧家5,850万売却(6,500万×0.9)→新築6,500万。引越費用100万
+      {type:'move-home',     name:'新築③へ住替（62歳）',  age:62,amount:0,duration:1,
+       salePrice:58500000,newPrice:65000000,newLoan:44800000,newMonthly:137000,
+       memo:'旧家5,850万売却(6,500万×0.9)・新築6,500万。新ローン4,480万@1.5%35年≈月13.7万'},
+      {type:'lump-expense',  name:'引越費用③',            age:62,amount:-1000000,duration:1,memo:'新築③住み替え 引越し諸費用'},
+      // 67歳：第4住宅の控除継続（0.7%×4,480万≈月2.6万、67〜74歳）
+      {type:'expense-change',name:'住宅控除④継続（第4住宅）',age:67,amount:-26000,duration:8,memo:'0.7%×4,480万/12≈2.6万/月。住み替えにより控除13年リセット'},
       {type:'lump-income',   name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
       {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:7000000,duration:1,memo:'一時払USD建終身保険 払戻700万円（元金300万入金済み）受取時課税あり'},
       {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
@@ -1142,6 +1151,47 @@ let data = JSON.parse(localStorage.getItem('fp-data') || JSON.stringify(DEFAULTS
       data.plans[0].color='#3b82f6';
       data.plans.splice(hIdx,1);
       dirty=true;
+    }
+  }
+  // 教育費ステップ: 大学「卒業後」→「入学時」削減に変更（全シナリオ共通）
+  if(data.expenseSteps){
+    const oldEduMemos=['第1子 独立・教育費半減（-2.5万）','第2子 大学卒業・教育費終了（-2.5万→累計0）'];
+    const newEduSteps=[
+      {fromAge:51,delta:-37500,memo:'第1子 大学入学・塾等終了（教育費半減）'},
+      {fromAge:55,delta:-37500,memo:'第2子 大学入学・塾等終了（教育費0）'},
+    ];
+    let eduChanged=false;
+    oldEduMemos.forEach(m=>{
+      const i=data.expenseSteps.findIndex(s=>s.memo===m);
+      if(i>=0){data.expenseSteps.splice(i,1);eduChanged=true;}
+    });
+    newEduSteps.forEach(ns=>{
+      if(!data.expenseSteps.some(s=>s.memo===ns.memo)){data.expenseSteps.push(ns);eduChanged=true;}
+    });
+    if(eduChanged){data.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);dirty=true;}
+  }
+  // Plan3 住み替え: 2割縮小→同額6,500万・1割引売却・引越費用100万・住宅控除リセット
+  if(data.plans){
+    const p3=data.plans.find(p=>p.id===3||(p.name&&p.name.includes('8年')));
+    if(p3){
+      const oldMoveNames=['新築①へ住替（43歳）','新築②へ住替（51歳）','新築③へ住替（59歳）'];
+      const hasOldMove=p3.events.some(e=>oldMoveNames.includes(e.name));
+      if(hasOldMove){
+        p3.events=p3.events.filter(e=>!oldMoveNames.includes(e.name));
+        const newMoves=[
+          {type:'move-home',     name:'新築①へ住替（46歳）',           age:46,amount:0,duration:1,salePrice:63000000,newPrice:65000000,newLoan:49350000,newMonthly:151000,memo:'旧家6,300万売却(7,000万×0.9)・新築6,500万。新ローン4,935万@1.5%35年≈月15.1万'},
+          {type:'lump-expense',  name:'引越費用①',                      age:46,amount:-1000000,duration:1,memo:'新築①住み替え 引越し諸費用'},
+          {type:'expense-change',name:'住宅控除②継続（第2住宅）',       age:51,amount:-29000,duration:8,memo:'0.7%×4,935万/12≈2.9万/月。住み替えにより控除13年リセット'},
+          {type:'move-home',     name:'新築②へ住替（54歳）',           age:54,amount:0,duration:1,salePrice:58500000,newPrice:65000000,newLoan:46800000,newMonthly:143000,memo:'旧家5,850万売却(6,500万×0.9)・新築6,500万。新ローン4,680万@1.5%35年≈月14.3万'},
+          {type:'lump-expense',  name:'引越費用②',                      age:54,amount:-1000000,duration:1,memo:'新築②住み替え 引越し諸費用'},
+          {type:'expense-change',name:'住宅控除③継続（第3住宅）',       age:59,amount:-27000,duration:8,memo:'0.7%×4,680万/12≈2.7万/月。住み替えにより控除13年リセット'},
+          {type:'move-home',     name:'新築③へ住替（62歳）',           age:62,amount:0,duration:1,salePrice:58500000,newPrice:65000000,newLoan:44800000,newMonthly:137000,memo:'旧家5,850万売却(6,500万×0.9)・新築6,500万。新ローン4,480万@1.5%35年≈月13.7万'},
+          {type:'lump-expense',  name:'引越費用③',                      age:62,amount:-1000000,duration:1,memo:'新築③住み替え 引越し諸費用'},
+          {type:'expense-change',name:'住宅控除④継続（第4住宅）',       age:67,amount:-26000,duration:8,memo:'0.7%×4,480万/12≈2.6万/月。住み替えにより控除13年リセット'},
+        ];
+        newMoves.forEach(ev=>{if(!p3.events.some(e=>e.name===ev.name))p3.events.push(ev);});
+        dirty=true;
+      }
     }
   }
   if(dirty) localStorage.setItem('fp-data',JSON.stringify(data));
@@ -3247,8 +3297,8 @@ function addEducationSteps(){
   const EDU_STEPS=[
     {fromAge:39,delta:-10000,memo:'第1子 小学校入学・保育料終了（-3.5万→塾等+2.5万）'},
     {fromAge:43,delta:-15000,memo:'第2子 小学校入学・保育料終了（-4万→塾等+2.5万）'},
-    {fromAge:55,delta:-25000,memo:'第1子 独立・教育費半減（-2.5万）'},
-    {fromAge:59,delta:-25000,memo:'第2子 大学卒業・教育費終了（-2.5万→累計0）'},
+    {fromAge:51,delta:-37500,memo:'第1子 大学入学・塾等終了（教育費半減）'},
+    {fromAge:55,delta:-37500,memo:'第2子 大学入学・塾等終了（教育費0）'},
   ];
   if(!data.expenseSteps) data.expenseSteps=[];
   const existingMemos=new Set(data.expenseSteps.map(s=>s.memo));
