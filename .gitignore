@@ -1,0 +1,11 @@
+# Generated media — large binaries, regenerated each run. Metadata lives in results.json.
+output/**/media/
+*.mp4
+*.mp3
+*.png
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

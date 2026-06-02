@@ -1,6 +1,18 @@
 # Suno AI Lyrics Integration
 
-毎日歌詞を整理し、Suno AIで5つのスタイルの曲を自動生成するシステム。
+毎日歌詞を整理し、Suno AIで5つのスタイルの曲を自動生成し、
+カバー画像付き動画にしてYouTubeへ自動投稿するシステム。
+
+## パイプライン全体像
+
+```
+① 作詞       歌詞ファイル作成（手動 or Routine）
+② 作曲       generate_music.py → Suno API（5スタイル、4-5分）
+③ 動画化     make_videos.py → Pollinations画像 + ffmpeg（無料）
+④ YouTube投稿 upload_youtube.py → YouTube Data API（無料）
+```
+
+各工程の結果はすべて `output/YYYY-MM-DD/results.json` に追記される。
 
 ## セットアップ
 
@@ -110,10 +122,42 @@ config/
   styles.json       ← 5スタイルの設定
 
 scripts/
-  generate_music.py ← メイン生成スクリプト
-  suno_client.py    ← Suno APIクライアント
-  list_results.py   ← 結果一覧表示
+  generate_music.py   ← ②作曲（Suno API）
+  suno_client.py      ← Suno APIクライアント
+  make_videos.py      ← ③画像生成(Pollinations)＋動画化(ffmpeg)
+  upload_youtube.py   ← ④YouTube投稿
+  youtube_client.py   ← YouTube APIクライアント
+  get_youtube_token.py← 初回トークン取得ヘルパー
+  list_results.py     ← 結果一覧表示
+
+docs/
+  youtube_setup.md    ← YouTube連携の初回設定手順
 
 .github/workflows/
-  daily_generate.yml ← 毎日自動実行
+  daily_generate.yml  ← 毎日自動実行（②→③→④）
 ```
+
+## YouTube連携
+
+初回のみOAuth設定が必要（約10分）。詳細は `docs/youtube_setup.md` を参照。
+
+必要な GitHub Secrets:
+
+| Secret | 用途 |
+|--------|------|
+| `YOUTUBE_CLIENT_ID` | OAuth クライアントID |
+| `YOUTUBE_CLIENT_SECRET` | OAuth クライアントシークレット |
+| `YOUTUBE_REFRESH_TOKEN` | リフレッシュトークン |
+
+投稿の公開範囲は `upload_youtube.py --privacy {public,unlisted,private}` で指定。
+デフォルトは `unlisted`（限定公開）。
+
+## コスト
+
+| 工程 | サービス | コスト |
+|------|---------|--------|
+| 作詞 | Claude Routine | 無料（Proに含む） |
+| 作曲 | Suno API + 自己ホスト | サーバー代のみ |
+| 画像生成 | Pollinations AI | 無料 |
+| 動画化 | ffmpeg | 無料 |
+| YouTube投稿 | YouTube Data API | 無料（1日100本まで） |

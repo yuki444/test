@@ -2,26 +2,31 @@
   {
     "name": "electronic_ambient",
     "label": "Electronic / Ambient",
-    "tags": "electronic, ambient, atmospheric, synthesizer, ethereal, dreamy, cinematic"
+    "tags": "electronic, ambient, atmospheric, synthesizer, ethereal, dreamy, cinematic",
+    "image_prompt": "ethereal abstract digital landscape, glowing neon gradients, soft ambient light, dreamy atmosphere, cinematic, 16:9"
   },
   {
     "name": "dance_edm",
     "label": "Dance / EDM",
-    "tags": "dance, EDM, high energy, upbeat, four-on-the-floor, bass drop, synth, club, euphoric"
+    "tags": "dance, EDM, high energy, upbeat, four-on-the-floor, bass drop, synth, club, euphoric",
+    "image_prompt": "vibrant nightclub scene, laser lights, energetic crowd silhouettes, electric colors, high energy festival stage, 16:9"
   },
   {
     "name": "rock_alternative",
     "label": "Rock / Alternative",
-    "tags": "rock, alternative rock, electric guitar, energetic, indie, powerful drums"
+    "tags": "rock, alternative rock, electric guitar, energetic, indie, powerful drums",
+    "image_prompt": "gritty rock concert stage, electric guitar, dramatic spotlight, raw energy, moody industrial backdrop, 16:9"
   },
   {
     "name": "acoustic_fingerpicking",
     "label": "Acoustic Guitar / Singer-Songwriter",
-    "tags": "acoustic guitar, singer-songwriter, fingerpicking, intimate, folk, heartfelt, unplugged"
+    "tags": "acoustic guitar, singer-songwriter, fingerpicking, intimate, folk, heartfelt, unplugged",
+    "image_prompt": "warm intimate room with acoustic guitar, soft golden hour light, cozy wooden interior, folk aesthetic, 16:9"
   },
   {
     "name": "ballad",
     "label": "Ballad",
-    "tags": "ballad, emotional, piano, orchestral, heartfelt, strings, cinematic"
+    "tags": "ballad, emotional, piano, orchestral, heartfelt, strings, cinematic",
+    "image_prompt": "emotional cinematic scene, grand piano, soft dramatic lighting, orchestral mood, tender atmosphere, 16:9"
   }
 ]
