@@ -118,6 +118,7 @@ output = {
 }
 
 out_path = os.path.join(os.path.dirname(__file__), '..', 'financial-planner', 'prices.json')
+os.makedirs(os.path.dirname(out_path), exist_ok=True)
 with open(out_path, 'w', encoding='utf-8') as f:
     json.dump(output, f, indent=2, ensure_ascii=False)
 
