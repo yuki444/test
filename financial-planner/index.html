@@ -1165,6 +1165,48 @@ let data = JSON.parse(localStorage.getItem('fp-data') || JSON.stringify(DEFAULTS
     {id:1000206,date:"2026-03-27",type:"sell",account:"楽天証券（一般）",name:"ピクセラ",ticker:"6731",qty:1,price:0,fee:0,realizedGain:0,memo:"出庫"},
     {id:1000207,date:"2026-04-27",type:"buy",account:"楽天証券（特定）",name:"くら寿司",ticker:"2695",qty:100,price:0,fee:0,realizedGain:0,memo:"株式分割2:1 入庫"}
   ];data.tradeLog.push(..._sp);data.tradeLog.sort((a,b)=>a.date.localeCompare(b.date));dirty=true;}
+  if(!data.tradeLog.some(t=>t.id>=1001000&&t.id<1002000)){const _sbi=[
+    // SBI 現物売却
+    {id:1001000,date:"2024-03-28",type:"sell",account:"SBI証券（特定）",name:"ＲＩＺＡＰグループ",ticker:"2928",qty:200,price:377,fee:0,realizedGain:-1200,memo:"現物売却"},
+    // SBI 信用取引確定分（price=0：建玉開始記録なし、元本計算に影響させない）
+    {id:1001001,date:"2024-03-28",type:"sell",account:"SBI証券（特定）",name:"レイズネクスト",ticker:"6379",qty:100,price:0,fee:0,realizedGain:17887,memo:"信用返済買（空売決済）"},
+    {id:1001002,date:"2024-03-28",type:"sell",account:"SBI証券（特定）",name:"レイズネクスト",ticker:"6379",qty:100,price:0,fee:0,realizedGain:17877,memo:"信用返済買（空売決済）"},
+    {id:1001003,date:"2024-07-26",type:"sell",account:"SBI証券（特定）",name:"リクルートホールディングス",ticker:"6098",qty:100,price:0,fee:0,realizedGain:6436,memo:"信用返済買（空売決済）"},
+    {id:1001004,date:"2024-08-01",type:"sell",account:"SBI証券（特定）",name:"エターナルホスピタリティグループ",ticker:"3193",qty:100,price:0,fee:0,realizedGain:-191,memo:"信用返済買（空売決済）"},
+    {id:1001005,date:"2024-09-04",type:"sell",account:"SBI証券（特定）",name:"アドバンテスト",ticker:"6857",qty:100,price:0,fee:0,realizedGain:11054,memo:"信用返済売（ロング決済）"},
+    {id:1001006,date:"2024-09-13",type:"sell",account:"SBI証券（特定）",name:"リクルートホールディングス",ticker:"6098",qty:100,price:0,fee:0,realizedGain:10344,memo:"信用返済売（ロング決済）"},
+    {id:1001007,date:"2024-09-24",type:"sell",account:"SBI証券（特定）",name:"アドバンテスト",ticker:"6857",qty:100,price:0,fee:0,realizedGain:12802,memo:"信用返済売（ロング決済）"},
+    {id:1001008,date:"2024-10-25",type:"sell",account:"SBI証券（特定）",name:"リクルートホールディングス",ticker:"6098",qty:100,price:0,fee:0,realizedGain:42969,memo:"信用返済買（空売決済）"},
+    {id:1001009,date:"2024-10-25",type:"sell",account:"SBI証券（特定）",name:"リクルートホールディングス",ticker:"6098",qty:100,price:0,fee:0,realizedGain:5550,memo:"信用返済買（空売決済）"},
+    {id:1001010,date:"2024-10-30",type:"sell",account:"SBI証券（特定）",name:"リクルートホールディングス",ticker:"6098",qty:100,price:0,fee:0,realizedGain:14457,memo:"信用返済売（ロング決済）"},
+    {id:1001011,date:"2024-10-30",type:"sell",account:"SBI証券（特定）",name:"泉州電業",ticker:"9824",qty:100,price:0,fee:0,realizedGain:9868,memo:"信用返済売（ロング決済）"},
+    {id:1001012,date:"2024-11-19",type:"sell",account:"SBI証券（特定）",name:"アドバンテスト",ticker:"6857",qty:100,price:0,fee:0,realizedGain:69055,memo:"信用返済売（ロング決済）"},
+    {id:1001013,date:"2024-12-12",type:"sell",account:"SBI証券（特定）",name:"リクルートホールディングス",ticker:"6098",qty:100,price:0,fee:0,realizedGain:1465,memo:"信用返済買（空売決済）"},
+    {id:1001014,date:"2024-12-20",type:"sell",account:"SBI証券（特定）",name:"泉州電業",ticker:"9824",qty:100,price:0,fee:0,realizedGain:-3325,memo:"信用返済買（空売決済）"},
+    {id:1001015,date:"2024-12-30",type:"sell",account:"SBI証券（特定）",name:"泉州電業",ticker:"9824",qty:100,price:0,fee:0,realizedGain:-29603,memo:"信用返済買（空売決済）"},
+    {id:1001016,date:"2025-01-09",type:"sell",account:"SBI証券（特定）",name:"アドバンテスト",ticker:"6857",qty:100,price:0,fee:0,realizedGain:20970,memo:"信用返済買（空売決済）"},
+    {id:1001017,date:"2025-01-14",type:"sell",account:"SBI証券（特定）",name:"アドバンテスト",ticker:"6857",qty:100,price:0,fee:0,realizedGain:19210,memo:"信用返済買（空売決済）"},
+    {id:1001018,date:"2025-02-14",type:"sell",account:"SBI証券（特定）",name:"アドバンテスト",ticker:"6857",qty:100,price:0,fee:0,realizedGain:10506,memo:"信用返済売（ロング決済）"},
+    {id:1001019,date:"2025-02-20",type:"sell",account:"SBI証券（特定）",name:"アドバンテスト",ticker:"6857",qty:100,price:0,fee:0,realizedGain:153312,memo:"信用返済売（ロング決済）"},
+    {id:1001020,date:"2025-04-03",type:"sell",account:"SBI証券（特定）",name:"日産自動車",ticker:"7201",qty:500,price:0,fee:0,realizedGain:29056,memo:"信用返済買（空売決済）"},
+    {id:1001021,date:"2025-04-07",type:"sell",account:"SBI証券（特定）",name:"任天堂",ticker:"7974",qty:100,price:0,fee:0,realizedGain:127656,memo:"信用返済買（空売決済）"},
+    {id:1001022,date:"2025-07-18",type:"sell",account:"SBI証券（特定）",name:"フジ・メディア・ホールディングス",ticker:"4676",qty:300,price:0,fee:0,realizedGain:-643733,memo:"信用返済買（空売決済）"},
+    {id:1001023,date:"2025-08-27",type:"sell",account:"SBI証券（特定）",name:"リクルートホールディングス",ticker:"6098",qty:100,price:0,fee:0,realizedGain:-57124,memo:"信用返済売（ロング決済）"},
+    {id:1001024,date:"2025-12-03",type:"sell",account:"SBI証券（特定）",name:"リクルートホールディングス",ticker:"6098",qty:100,price:0,fee:0,realizedGain:-53175,memo:"信用返済売（ロング決済）"},
+    {id:1001025,date:"2026-04-08",type:"sell",account:"SBI証券（特定）",name:"日経ダブルインバース",ticker:"1357",qty:100,price:0,fee:0,realizedGain:-255236,memo:"信用返済売（ロング決済）"},
+    // SBI 現保有株式（残高データから逆算・購入日不明）
+    {id:1001030,date:"2022-01-01",type:"buy",account:"SBI証券（特定）",name:"ＲＩＺＡＰグループ",ticker:"2928",qty:200,price:383,fee:0,realizedGain:0,memo:"SBI残高推定 購入日不明"},
+    {id:1001031,date:"2022-01-01",type:"buy",account:"SBI証券（特定）",name:"Ａ－ＲＩＺＡＰ Ｇ",ticker:"2928",qty:100,price:280,fee:0,realizedGain:0,memo:"SBI残高推定 購入日不明"},
+    {id:1001032,date:"2022-01-01",type:"buy",account:"SBI証券（特定）",name:"ヤマハ発動機",ticker:"7272",qty:300,price:1080,fee:0,realizedGain:0,memo:"SBI残高推定 購入日不明"},
+    {id:1001033,date:"2022-01-01",type:"buy",account:"SBI証券（特定）",name:"Joshin",ticker:"8173",qty:1,price:2319,fee:0,realizedGain:0,memo:"SBI残高推定 購入日不明"},
+    // SBI 投資信託 売却（価格は円/口で記録）
+    {id:1001100,date:"2024-04-15",type:"sell",account:"SBI証券（特定・投信）",name:"eMAXIS Slim 米国株式(S&P500)",ticker:"",qty:595547,price:2.8238,fee:0,realizedGain:431653,memo:"投信解約（価格円/口）"},
+    {id:1001101,date:"2025-02-26",type:"sell",account:"SBI証券（特定・投信）",name:"eMAXIS Slim 全世界株式(オルカン)",ticker:"",qty:173249,price:2.6595,fee:0,realizedGain:10742,memo:"投信解約（価格円/口）"},
+    {id:1001102,date:"2025-02-26",type:"sell",account:"SBI証券（特定・投信）",name:"eMAXIS Slim 米国株式(S&P500)",ticker:"",qty:197289,price:3.2147,fee:0,realizedGain:34210,memo:"投信解約（価格円/口）"},
+    // SBI 投資信託 残高推定買（現在保有＋売却分の合算、積立総量）
+    {id:1001110,date:"2022-01-01",type:"buy",account:"SBI証券（特定・投信）",name:"eMAXIS Slim 米国株式(S&P500)",ticker:"",qty:1005390,price:2.5865,fee:0,realizedGain:0,memo:"SBI残高推定 積立総量（購入日不明）"},
+    {id:1001111,date:"2022-01-01",type:"buy",account:"SBI証券（特定・投信）",name:"eMAXIS Slim 全世界株式(オルカン)",ticker:"",qty:424326,price:2.8274,fee:0,realizedGain:0,memo:"SBI残高推定 積立総量（購入日不明）"}
+  ];data.tradeLog.push(..._sbi);data.tradeLog.sort((a,b)=>a.date.localeCompare(b.date));dirty=true;}
   if(data.debts && data.debts.mortgageRate==null){data.debts.mortgageRate=1.5;dirty=true;}
   // retireExpenseRatio: 1.0 = no change in retirement (replaces hardcoded 0.85 assumption)
   if(data.settings && (data.settings.retireExpenseRatio==null||data.settings.retireExpenseRatio===1.0)){data.settings.retireExpenseRatio=1.1;dirty=true;}
