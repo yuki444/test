@@ -14,12 +14,42 @@
 
 各工程の結果はすべて `output/YYYY-MM-DD/results.json` に追記される。
 
+---
+
+## Claude への作業指針（やり取りを減らすための設定）
+
+### 基本方針
+- **確認なしで進める**: ファイル編集・新規作成・スクリプト修正はユーザーの承認なしに実施する。明らかに破壊的な操作（ブランチ削除、force push等）のみ事前確認する。
+- **日本語で回答**: 応答はすべて日本語で行う。コードのコメントは不要（書く場合も最小限の英語）。
+- **実装してから報告**: 「〜しましょうか？」と聞かず、まず実装して結果を報告する。
+- **変更後は即コミット&プッシュ**: 作業完了後はコミットしてブランチへプッシュまで行う（PR作成はユーザーが明示的に依頼した場合のみ）。
+
+### コーディングスタイル
+- コメントは書かない（コード自体が自明な場合）。WHYが非自明な場合のみ1行。
+- 型ヒントは積極的に使う（Python 3.12+）。
+- エラー処理は境界（外部API呼び出し）のみに限定する。
+- 新機能追加時は既存スクリプトのパターン（argparse + results.json更新）に合わせる。
+
+### このプロジェクト固有のルール
+- スタイル変更は `config/styles.json` を直接編集する（スクリプト改修不要）。
+- 新スタイル追加時は `name`, `label`, `tags`, `image_prompt` の4フィールド必須。
+- メディアファイル（.mp4/.mp3/.png）は `.gitignore` で除外済み。`results.json` のみをコミット対象とする。
+- GitHub Actions のワークフロー（`daily_generate.yml`）を変更するときは、`env.SKIP` の分岐パターンを維持する。
+- デフォルトのYouTubeプライバシーは `unlisted`（限定公開）。`public` に変える場合はユーザーの明示的な指示が必要。
+- スクリプトは冪等性を保つ（再実行で既処理をスキップ）。`youtube_url` が既にあれば再アップロードしない。
+
+### 過去の変更履歴から学んだ傾向
+- スタイルは実際に試しながら入れ替える（jpop_citypop → dance_edm、jazz_bossanova → acoustic_fingerpicking など）。スタイル名変更の依頼が来たら `config/styles.json` だけ更新すれば済む。
+- コストゼロ優先: 外部サービスは無料枠（Pollinations AI、YouTube Data API無料枠）を使う。有料サービスを追加提案しない。
+- 自動化優先: 手動操作が必要なものは GitHub Actions へ組み込む方向で検討する。
+
+---
+
 ## セットアップ
 
 ### 1. gcui-art/suno-api を自己ホスト
 
 ```bash
-# Dockerでローカルに立ち上げる場合
 git clone https://github.com/gcui-art/suno-api.git
 cd suno-api
 cp .env.example .env
@@ -74,7 +104,7 @@ python scripts/generate_music.py
 python scripts/generate_music.py --date 2026-05-24
 
 # 特定スタイルだけ
-python scripts/generate_music.py --styles electronic_ambient jpop_citypop
+python scripts/generate_music.py --styles electronic_ambient dance_edm
 ```
 
 ### 3. 結果を確認
@@ -86,17 +116,17 @@ python scripts/list_results.py --date 2026-05-24  # 特定日
 
 結果は `output/YYYY-MM-DD/results.json` に保存される。
 
-## 5つのスタイル
+## 現在の5スタイル
 
 | スタイル名 | ジャンル |
 |-----------|---------|
 | `electronic_ambient` | Electronic / Ambient |
-| `jpop_citypop` | J-Pop / City Pop |
+| `dance_edm` | Dance / EDM |
 | `rock_alternative` | Rock / Alternative |
-| `jazz_bossanova` | Jazz / Bossa Nova |
+| `acoustic_fingerpicking` | Acoustic Guitar / Singer-Songwriter |
 | `ballad` | Ballad |
 
-スタイルの設定は `config/styles.json` で変更可能。
+スタイルの追加・変更は `config/styles.json` を直接編集するだけ。スクリプト変更不要。
 
 ## 自動実行
 
@@ -117,9 +147,10 @@ lyrics/
 output/
   YYYY-MM-DD/
     results.json    ← 生成された曲のURL・情報
+    media/          ← .mp4/.mp3/.png（gitignore済み、再生成可能）
 
 config/
-  styles.json       ← 5スタイルの設定
+  styles.json       ← 5スタイルの設定（ここだけ変えればスタイル変更完了）
 
 scripts/
   generate_music.py   ← ②作曲（Suno API）
@@ -149,8 +180,8 @@ docs/
 | `YOUTUBE_CLIENT_SECRET` | OAuth クライアントシークレット |
 | `YOUTUBE_REFRESH_TOKEN` | リフレッシュトークン |
 
-投稿の公開範囲は `upload_youtube.py --privacy {public,unlisted,private}` で指定。
-デフォルトは `unlisted`（限定公開）。
+投稿の公開範囲は `upload_youtube.py --privacy {public,unlisted,private}` で指定。  
+デフォルトは `unlisted`（限定公開）。`public` へ変更するにはユーザーの明示的な指示が必要。
 
 ## コスト
 
