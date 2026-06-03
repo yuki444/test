@@ -3216,7 +3216,8 @@ function addFPSheetData(){
   // 手取り推計: 本人1500万gross→月85万, 配偶者500万gross→月32.5万 (税・社保控除後)
   // 企業型DC: 年収5%×19年(2024/10入社・55歳退職)×運用3% ≈ 1,900万
   const NEW_SETTINGS={retireAge:55};
-  const NEW_INCOME={self:850000,spouse:325000,side:0,bonusSelf:1000000,bonusSpouse:0};
+  const NEW_INCOME={self:850000,spouse:325000,bonusSelf:1000000,bonusSpouse:0};
+  // ↑ side は addFPUpdates で ESPP値(16200)管理のため除外
   const NEW_EXPENSES={food:55000,utilities:22000,insurance:65000,education:75000,transport:25000,medical:30000};
   // entertainment/other are managed via expenseDetails
   const NEW_SAVINGS={invest:200000,deposit:100000,pensionSelf:200000,pensionSpouse:140000};
@@ -3229,7 +3230,6 @@ function addFPSheetData(){
   if(data.income.bonusSelf!==NEW_INCOME.bonusSelf) changes.push(`ボーナス（本人）: ${addCommas(data.income.bonusSelf)}円 → ${addCommas(NEW_INCOME.bonusSelf)}円（150万gross手取り推計）`);
   if(data.income.spouse!==NEW_INCOME.spouse) changes.push(`月収（配偶者）: ${addCommas(data.income.spouse)}円 → ${addCommas(NEW_INCOME.spouse)}円（500万gross税・社保控除後推計）`);
   if(data.income.bonusSpouse!==NEW_INCOME.bonusSpouse) changes.push(`ボーナス（配偶者）: ${addCommas(data.income.bonusSpouse)}円 → 0円`);
-  if(data.income.side!==NEW_INCOME.side) changes.push(`副収入: ${addCommas(data.income.side)}円 → 0円（住宅手当消滅）`);
   if(data.expenses.food!==NEW_EXPENSES.food) changes.push(`食費: ${addCommas(data.expenses.food)}円 → ${addCommas(NEW_EXPENSES.food)}円`);
   if(data.expenses.utilities!==NEW_EXPENSES.utilities) changes.push(`光熱費・通信: ${addCommas(data.expenses.utilities)}円 → ${addCommas(NEW_EXPENSES.utilities)}円`);
   if(data.expenses.insurance!==NEW_EXPENSES.insurance) changes.push(`保険料: ${addCommas(data.expenses.insurance)}円 → ${addCommas(NEW_EXPENSES.insurance)}円`);
