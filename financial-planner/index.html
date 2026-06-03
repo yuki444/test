@@ -671,7 +671,11 @@
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
           <div class="card-title" style="margin:0">取引一覧</div>
-          <button class="btn btn-primary btn-sm" onclick="openTradeModal(null)">＋ 記録を追加</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="recalcRealizedGains()" title="売却記録の確定損益を移動平均法で再計算">♻ 損益再計算</button>
+            <button class="btn btn-secondary btn-sm" onclick="autoCalcDividends()" title="保有期間×年間配当から配当推計を自動追加">📊 配当自動計算</button>
+            <button class="btn btn-primary btn-sm" onclick="openTradeModal(null)">＋ 記録を追加</button>
+          </div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
           <select id="trade-filter-type" onchange="renderTradeLog()" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px">
@@ -3884,6 +3888,138 @@ function deleteTrade(id){
   localStorage.setItem('fp-data',JSON.stringify(data));
   renderTradeLog();
   showToast('🗑 取引を削除しました');
+}
+
+// 確定損益 再計算（移動平均法）
+function recalcRealizedGains(){
+  if(!data.tradeLog||data.tradeLog.length===0){showToast('取引記録がありません');return;}
+  const sorted=[...data.tradeLog]
+    .filter(t=>t.type==='buy'||t.type==='sell')
+    .sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id);
+
+  const cb={}; // ticker -> {shares, totalCost}
+  let updated=0;
+  sorted.forEach(t=>{
+    const key=String(t.ticker||t.name);
+    if(!cb[key]) cb[key]={shares:0,totalCost:0};
+    const c=cb[key];
+    if(t.type==='buy'){
+      c.totalCost+=t.qty*t.price+(t.fee||0);
+      c.shares+=t.qty;
+    } else {
+      const avgCost=c.shares>0?c.totalCost/c.shares:0;
+      const gain=Math.round(t.qty*t.price-(t.fee||0)-avgCost*t.qty);
+      const idx=data.tradeLog.findIndex(tr=>tr.id===t.id);
+      if(idx>=0&&data.tradeLog[idx].realizedGain!==gain){
+        data.tradeLog[idx].realizedGain=gain;
+        updated++;
+      }
+      c.totalCost=Math.max(0,c.totalCost-avgCost*t.qty);
+      c.shares=Math.max(0,c.shares-t.qty);
+    }
+  });
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderTradeLog();
+  showToast(`✅ 確定損益を再計算しました（移動平均法・${updated}件更新）`);
+}
+
+// 配当 自動計算
+// 保有期間中の3/31・9/30時点の株数 × 年間配当/2 を配当記録として追加
+async function autoCalcDividends(){
+  if(!data.tradeLog||data.tradeLog.length===0){showToast('取引記録がありません');return;}
+
+  let prices;
+  try{
+    const r=await fetch('./prices.json');
+    prices=(await r.json()).prices;
+  }catch(e){showToast('❌ prices.json の読み込みに失敗しました');return;}
+
+  // Build per-ticker event history {events:[{date,delta}], account, name}
+  const hist={};
+  [...data.tradeLog]
+    .filter(t=>t.type==='buy'||t.type==='sell')
+    .sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id)
+    .forEach(t=>{
+      const key=String(t.ticker||t.name);
+      if(!hist[key]) hist[key]={events:[],account:t.account,name:t.name,ticker:t.ticker||key};
+      hist[key].events.push({date:t.date,delta:t.type==='buy'?t.qty:-t.qty});
+    });
+
+  const todayStr=new Date().toISOString().slice(0,10);
+  const currentYear=new Date().getFullYear();
+
+  // Existing auto-calc dividend keys to avoid duplicates
+  const existingKeys=new Set(
+    data.tradeLog.filter(t=>t.type==='dividend'&&t.id>=2000000).map(t=>`${t.ticker}::${t.date}`)
+  );
+
+  const newDivs=[];
+  let baseId=2000000+Math.floor(Date.now()/1000)%1000000;
+
+  Object.entries(hist).forEach(([ticker,info])=>{
+    // Look up dividend rate in prices.json
+    const jpKey=/^\d{4}$/.test(ticker)?ticker+'.T':ticker;
+    const pi=prices[jpKey]||prices[ticker];
+    if(!pi||!pi.d||pi.d<=0) return;
+    const annualDiv=pi.d;
+
+    // Check dividend at 2 dates per year: March 31 (→June pay) and Sept 30 (→Dec pay)
+    const firstYear=parseInt(info.events[0].date.slice(0,4));
+    for(let year=firstYear;year<=currentYear;year++){
+      ['-03-31','-09-30'].forEach(mmdd=>{
+        const checkDate=`${year}${mmdd}`;
+        if(checkDate>todayStr) return; // future
+
+        // Calculate shares at checkDate
+        let shares=0;
+        for(const ev of info.events){
+          if(ev.date<=checkDate) shares+=ev.delta;
+          else break;
+        }
+        if(shares<=0) return;
+
+        // Payment date ≈ 3 months after record date
+        const payMonthOffset=mmdd==='-03-31'?'-06-28':`-${year}-12-28`;
+        const payDate=mmdd==='-03-31'?`${year}-06-28`:`${year}-12-28`;
+        if(payDate>todayStr) return; // not yet paid
+
+        const divKey=`${ticker}::${payDate}`;
+        if(existingKeys.has(divKey)) return;
+
+        const divAmount=Math.round(shares*annualDiv/2);
+        if(divAmount<=0) return;
+
+        newDivs.push({
+          id:baseId++,
+          date:payDate,
+          type:'dividend',
+          account:info.account||'楽天証券',
+          name:info.name||ticker,
+          ticker:ticker,
+          qty:shares,
+          price:0,
+          fee:0,
+          realizedGain:divAmount,
+          memo:`自動推計 ${Math.round(annualDiv/2)}円/株×${shares}株`
+        });
+        existingKeys.add(divKey);
+      });
+    }
+  });
+
+  if(newDivs.length===0){
+    showToast('ℹ️ 追加する配当推計はありません（計算済みか配当なし）');
+    return;
+  }
+
+  const totalDiv=newDivs.reduce((s,d)=>s+d.realizedGain,0);
+  if(!confirm(`${newDivs.length}件の配当推計を追加します\n（合計 ${addCommas(totalDiv)}円）\n\nprices.jsonの現在の年間配当額をもとに3/31・9/30基準で推計。実際と異なる場合は手動で削除・修正してください。\n\n続けますか？`)) return;
+
+  data.tradeLog.push(...newDivs);
+  data.tradeLog.sort((a,b)=>a.date.localeCompare(b.date));
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderTradeLog();
+  showToast(`✅ ${newDivs.length}件の配当推計を追加しました（合計 ${addCommas(totalDiv)}円）`);
 }
 </script>
 </body>
