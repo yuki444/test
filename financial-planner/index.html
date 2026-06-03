@@ -3720,7 +3720,9 @@ function renderTradeLog(){
     return true;
   }).sort((a,b)=>b.date.localeCompare(a.date));
 
-  const totalBuy=data.tradeLog.filter(t=>t.type==='buy').reduce((s,t)=>s+t.qty*t.price+t.fee,0);
+  const totalBuy=data.tradeLog.filter(t=>t.type==='buy').reduce((s,t)=>s+t.qty*t.price+(t.fee||0),0);
+  const totalSell=data.tradeLog.filter(t=>t.type==='sell').reduce((s,t)=>s+t.qty*t.price-(t.fee||0),0);
+  const netInvested=totalBuy-totalSell;
   const totalRealizedGain=data.tradeLog.filter(t=>t.type==='sell').reduce((s,t)=>s+t.realizedGain,0);
   const totalDividend=data.tradeLog.filter(t=>t.type==='dividend').reduce((s,t)=>s+t.realizedGain,0);
   const totalFee=data.tradeLog.reduce((s,t)=>s+(t.fee||0),0);
@@ -3728,7 +3730,7 @@ function renderTradeLog(){
   const sumEl=document.getElementById('trade-summary');
   if(sumEl){
     sumEl.innerHTML=`
-      <div class="summary-card"><div class="label">累積投資額</div><div class="value value-neutral">${fmtM(totalBuy)}</div><div class="sub">手数料含む</div></div>
+      <div class="summary-card"><div class="label">現在の投下元本</div><div class="value value-neutral">${fmtM(netInvested)}</div><div class="sub">買付合計 − 売却回収額</div></div>
       <div class="summary-card"><div class="label">確定損益（売却）</div><div class="value ${totalRealizedGain>=0?'value-positive':'value-negative'}">${totalRealizedGain>=0?'+':''}${fmtM(totalRealizedGain)}</div><div class="sub">税引前</div></div>
       <div class="summary-card"><div class="label">受取配当累計</div><div class="value value-positive">${fmtM(totalDividend)}</div><div class="sub">税引前</div></div>
       <div class="summary-card"><div class="label">支払手数料合計</div><div class="value value-negative">${fmtM(totalFee)}</div><div class="sub">全取引</div></div>
@@ -3785,6 +3787,7 @@ function _renderTradeChart(){
   let sBuy=0,sDiv=0;
   sorted.forEach(t=>{
     if(t.type==='buy') sBuy+=t.qty*t.price+(t.fee||0);
+    if(t.type==='sell') sBuy-=t.qty*t.price-(t.fee||0);
     if(t.type==='dividend') sDiv+=t.realizedGain||0;
     labels.push(t.date);
     cumBuy.push(Math.round(sBuy));
@@ -3794,7 +3797,7 @@ function _renderTradeChart(){
   _tradeChart=new Chart(canvas,{
     type:'line',
     data:{labels,datasets:[
-      {label:'累積投資額',data:cumBuy,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.08)',tension:0.3,pointRadius:3,fill:true},
+      {label:'投下元本（純額）',data:cumBuy,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.08)',tension:0.3,pointRadius:3,fill:true},
       {label:'累積配当',data:cumDiv,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.08)',tension:0.3,pointRadius:3,fill:true}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
