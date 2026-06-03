@@ -394,6 +394,7 @@
       <div class="nav-section">分析</div>
       <div class="nav-item" onclick="showPage('page-simulation')" id="nav-page-simulation"><span class="icon">📊</span> シミュレーション</div>
       <div class="nav-item" onclick="showPage('page-advice')" id="nav-page-advice"><span class="icon">💡</span> アドバイス</div>
+      <div class="nav-item" onclick="showPage('page-trades')" id="nav-page-trades"><span class="icon">📈</span> 取引記録</div>
       <div class="nav-divider"></div>
       <div class="nav-section">設定・ツール</div>
       <div class="nav-item" onclick="showPage('page-settings')" id="nav-page-settings"><span class="icon">⚙️</span> 設定・プライバシー</div>
@@ -659,6 +660,50 @@
       <div id="advice-content"></div>
     </div>
 
+    <!-- ===== 取引記録 ===== -->
+    <div class="page" id="page-trades">
+      <div class="page-header"><h2>📈 取引記録</h2><p>購入・売却・配当の履歴と確定損益を管理します。</p></div>
+      <div class="summary-grid" id="trade-summary"></div>
+      <div class="card">
+        <div class="card-title">累積投資額・配当累計の推移</div>
+        <div class="chart-container chart-sm"><canvas id="trade-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div class="card-title" style="margin:0">取引一覧</div>
+          <button class="btn btn-primary btn-sm" onclick="openTradeModal(null)">＋ 記録を追加</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <select id="trade-filter-type" onchange="renderTradeLog()" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px">
+            <option value="">全種別</option>
+            <option value="buy">買い</option>
+            <option value="sell">売り</option>
+            <option value="dividend">配当</option>
+          </select>
+          <input id="trade-filter-name" type="text" placeholder="銘柄名で絞り込み…" oninput="renderTradeLog()" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;flex:1;min-width:120px">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th style="text-align:left">日付</th>
+              <th style="text-align:left">種別</th>
+              <th style="text-align:left">口座</th>
+              <th style="text-align:left">銘柄</th>
+              <th>数量</th>
+              <th>単価(円)</th>
+              <th>手数料</th>
+              <th>確定損益</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="trade-tbody"></tbody>
+          </table>
+        </div>
+        <div id="trade-empty" style="text-align:center;color:var(--text-muted);padding:32px;font-size:14px;display:none">
+          取引記録がありません。「＋ 記録を追加」から入力してください。
+        </div>
+      </div>
+    </div>
+
     <!-- ===== 設定 ===== -->
     <div class="page" id="page-settings">
       <div class="page-header"><h2>⚙️ 設定・プライバシー</h2></div>
@@ -857,6 +902,9 @@
   </button>
   <button class="mob-tab" id="mobnav-page-simulation" onclick="showPage('page-simulation')">
     <span class="mob-tab-icon">📊</span><span class="mob-tab-label">シミュ</span>
+  </button>
+  <button class="mob-tab" id="mobnav-page-trades" onclick="showPage('page-trades')">
+    <span class="mob-tab-icon">📈</span><span class="mob-tab-label">取引</span>
   </button>
 </nav>
 </div><!-- /#app -->
@@ -1093,13 +1141,15 @@ const DEFAULTS = {
       {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:500000, duration:15,memo:'夫婦2人分 月50万円（1人25万×2）食事・居住・介護含む。自宅売却・通常生活費置換'},
       {type:'drawdown', name:'投資取り崩し（月50万）',  age:55,amount:500000, duration:35,memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'},
     ]},
-  ]
+  ],
+  tradeLog:[]
 };
 
 let data = JSON.parse(localStorage.getItem('fp-data') || JSON.stringify(DEFAULTS));
 // Startup migrations: fix data shape from older versions
 (()=>{
   let dirty=false;
+  if(!data.tradeLog){data.tradeLog=[];dirty=true;}
   if(data.debts && data.debts.mortgageRate==null){data.debts.mortgageRate=1.5;dirty=true;}
   // retireExpenseRatio: 1.0 = no change in retirement (replaces hardcoded 0.85 assumption)
   if(data.settings && (data.settings.retireExpenseRatio==null||data.settings.retireExpenseRatio===1.0)){data.settings.retireExpenseRatio=1.1;dirty=true;}
@@ -1384,7 +1434,7 @@ function updatePinStatus(){
 const PAGE_TITLES={
   'page-family':'家族構成','page-income':'収入・支出','page-assets':'資産・負債',
   'page-plans':'イベント計画','page-simulation':'シミュレーション',
-  'page-advice':'アドバイス','page-settings':'設定'
+  'page-advice':'アドバイス','page-trades':'取引記録','page-settings':'設定'
 };
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1399,6 +1449,7 @@ function showPage(id){
   if(titleEl) titleEl.textContent=PAGE_TITLES[id]||'ファイナンシャルプランナー';
   if(id==='page-simulation'){syncFromDOM();renderSimulation();}
   if(id==='page-advice'){syncFromDOM();renderAdvice();}
+  if(id==='page-trades'){renderTradeLog();}
   if(id==='page-income'){updateMonthlySummary();renderExpenseSteps();renderExpenseDetails();}
   if(id==='page-assets'){updateNetWorthSummary();renderAllocChart();renderHoldings();renderPortfolioCharts();}
   if(id==='page-settings'){updatePinStatus();renderUpdateBadge();}
@@ -3637,6 +3688,202 @@ function init(){
 }
 
 init();
+
+// ============================================================
+// 取引記録
+// ============================================================
+let _tradeChart=null;
+
+function renderTradeLog(){
+  if(!data.tradeLog) data.tradeLog=[];
+  const typeFilter=document.getElementById('trade-filter-type')?.value||'';
+  const nameFilter=(document.getElementById('trade-filter-name')?.value||'').trim().toLowerCase();
+
+  const filtered=data.tradeLog.filter(t=>{
+    if(typeFilter && t.type!==typeFilter) return false;
+    if(nameFilter && !t.name.toLowerCase().includes(nameFilter)) return false;
+    return true;
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+
+  const totalBuy=data.tradeLog.filter(t=>t.type==='buy').reduce((s,t)=>s+t.qty*t.price+t.fee,0);
+  const totalRealizedGain=data.tradeLog.filter(t=>t.type==='sell').reduce((s,t)=>s+t.realizedGain,0);
+  const totalDividend=data.tradeLog.filter(t=>t.type==='dividend').reduce((s,t)=>s+t.realizedGain,0);
+  const totalFee=data.tradeLog.reduce((s,t)=>s+(t.fee||0),0);
+
+  const sumEl=document.getElementById('trade-summary');
+  if(sumEl){
+    sumEl.innerHTML=`
+      <div class="summary-card"><div class="label">累積投資額</div><div class="value value-neutral">${fmtM(totalBuy)}</div><div class="sub">手数料含む</div></div>
+      <div class="summary-card"><div class="label">確定損益（売却）</div><div class="value ${totalRealizedGain>=0?'value-positive':'value-negative'}">${totalRealizedGain>=0?'+':''}${fmtM(totalRealizedGain)}</div><div class="sub">税引前</div></div>
+      <div class="summary-card"><div class="label">受取配当累計</div><div class="value value-positive">${fmtM(totalDividend)}</div><div class="sub">税引前</div></div>
+      <div class="summary-card"><div class="label">支払手数料合計</div><div class="value value-negative">${fmtM(totalFee)}</div><div class="sub">全取引</div></div>
+    `;
+  }
+
+  _renderTradeChart();
+
+  const tbody=document.getElementById('trade-tbody');
+  const empty=document.getElementById('trade-empty');
+  if(!tbody) return;
+
+  if(filtered.length===0){
+    tbody.innerHTML='';
+    if(empty) empty.style.display='block';
+    return;
+  }
+  if(empty) empty.style.display='none';
+
+  const typeLabel={buy:'買い',sell:'売り',dividend:'配当'};
+  const typeCls={buy:'tag-asset',sell:'tag-expense',dividend:'tag-income'};
+
+  tbody.innerHTML=filtered.map(t=>{
+    const gainHtml=(t.type==='sell'||t.type==='dividend')
+      ?`<span class="${t.realizedGain>=0?'positive':'negative'}">${t.realizedGain>=0?'+':''}${addCommas(Math.round(t.realizedGain))}</span>`
+      :'-';
+    return `<tr>
+      <td>${t.date}</td>
+      <td style="text-align:left"><span class="event-tag ${typeCls[t.type]||''}">${typeLabel[t.type]||t.type}</span></td>
+      <td style="text-align:left">${t.account||'-'}</td>
+      <td style="text-align:left;max-width:180px;overflow:hidden;text-overflow:ellipsis">${t.name||'-'}${t.ticker?` <span style="color:var(--text-muted);font-size:10px">(${t.ticker})</span>`:''}</td>
+      <td>${t.qty?addCommas(t.qty):'-'}</td>
+      <td>${t.price?addCommas(Math.round(t.price)):'-'}</td>
+      <td>${t.fee?addCommas(t.fee):'-'}</td>
+      <td>${gainHtml}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn btn-secondary btn-sm" onclick="openTradeModal(${t.id})" style="margin-right:4px">編集</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTrade(${t.id})">削除</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function _renderTradeChart(){
+  const canvas=document.getElementById('trade-chart');
+  if(!canvas) return;
+  if(!data.tradeLog||data.tradeLog.length===0){
+    if(_tradeChart){_tradeChart.destroy();_tradeChart=null;}
+    canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+    return;
+  }
+  const sorted=[...data.tradeLog].sort((a,b)=>a.date.localeCompare(b.date));
+  const labels=[],cumBuy=[],cumDiv=[];
+  let sBuy=0,sDiv=0;
+  sorted.forEach(t=>{
+    if(t.type==='buy') sBuy+=t.qty*t.price+(t.fee||0);
+    if(t.type==='dividend') sDiv+=t.realizedGain||0;
+    labels.push(t.date);
+    cumBuy.push(Math.round(sBuy));
+    cumDiv.push(Math.round(sDiv));
+  });
+  if(_tradeChart){_tradeChart.destroy();}
+  _tradeChart=new Chart(canvas,{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'累積投資額',data:cumBuy,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.08)',tension:0.3,pointRadius:3,fill:true},
+      {label:'累積配当',data:cumDiv,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.08)',tension:0.3,pointRadius:3,fill:true}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{y:{ticks:{callback:v=>fmtM(v)},grid:{color:'#f1f5f9'}},x:{ticks:{maxTicksLimit:8,maxRotation:0}}},
+      plugins:{legend:{position:'top'},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmtM(ctx.raw)}`}}}
+    }
+  });
+}
+
+function openTradeModal(id){
+  const existing=id!=null?data.tradeLog.find(t=>t.id===id):null;
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.innerHTML=`<div class="modal-box" style="max-width:480px">
+    <h3>${existing?'📝 取引を編集':'＋ 取引を記録'}</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="field"><label>種別</label>
+        <select id="tm-type" onchange="tradeTypeChange()">
+          <option value="buy" ${!existing||existing.type==='buy'?'selected':''}>買い</option>
+          <option value="sell" ${existing?.type==='sell'?'selected':''}>売り</option>
+          <option value="dividend" ${existing?.type==='dividend'?'selected':''}>配当</option>
+        </select></div>
+      <div class="field"><label>日付</label><input type="date" id="tm-date" value="${existing?.date||new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>口座</label><input type="text" id="tm-account" value="${existing?.account||''}" placeholder="例：楽天証券（国内）"></div>
+      <div class="field"><label>銘柄名</label><input type="text" id="tm-name" value="${existing?.name||''}" placeholder="例：トヨタ自動車"></div>
+      <div class="field"><label>ティッカー（任意）</label><input type="text" id="tm-ticker" value="${existing?.ticker||''}" placeholder="例：7203.T"></div>
+      <div id="tm-qty-row" class="field"><label>数量</label><input type="number" id="tm-qty" value="${existing?.qty||0}" min="0" step="any"></div>
+      <div id="tm-price-row" class="field"><label>単価（円）</label><input type="text" inputmode="numeric" data-money="1" id="tm-price" value="${addCommas(existing?.price||0)}" style="text-align:right"></div>
+      <div id="tm-fee-row" class="field"><label>手数料（円）</label><input type="text" inputmode="numeric" data-money="1" id="tm-fee" value="${addCommas(existing?.fee||0)}" style="text-align:right"></div>
+      <div id="tm-gain-row" class="field"><label id="tm-gain-label">確定損益（円）</label><input type="text" inputmode="numeric" data-money="1" id="tm-gain" value="${addCommas(existing?.realizedGain||0)}" style="text-align:right"><span class="hint">税引前。売値合計 - 取得原価 - 手数料</span></div>
+      <div class="field"><label>メモ</label><input type="text" id="tm-memo" value="${existing?.memo||''}" placeholder="備考"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveTrade(${id!=null?id:'null'})">${existing?'保存':'追加する'}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+  initMoneyInputs(overlay);
+  tradeTypeChange();
+}
+
+function tradeTypeChange(){
+  const type=document.getElementById('tm-type')?.value;
+  if(!type) return;
+  const gainRow=document.getElementById('tm-gain-row');
+  const gainLabel=document.getElementById('tm-gain-label');
+  const qtyRow=document.getElementById('tm-qty-row');
+  const priceRow=document.getElementById('tm-price-row');
+  if(type==='dividend'){
+    if(qtyRow) qtyRow.style.display='none';
+    if(priceRow) priceRow.style.display='none';
+    if(gainRow) gainRow.style.display='';
+    if(gainLabel) gainLabel.textContent='配当受取額（円）';
+  } else if(type==='buy'){
+    if(qtyRow) qtyRow.style.display='';
+    if(priceRow) priceRow.style.display='';
+    if(gainRow) gainRow.style.display='none';
+  } else {
+    if(qtyRow) qtyRow.style.display='';
+    if(priceRow) priceRow.style.display='';
+    if(gainRow) gainRow.style.display='';
+    if(gainLabel) gainLabel.textContent='確定損益（円）';
+  }
+}
+
+function saveTrade(id){
+  if(!data.tradeLog) data.tradeLog=[];
+  const type=document.getElementById('tm-type').value;
+  if(!document.getElementById('tm-name').value.trim()){showToast('銘柄名を入力してください');return;}
+  if(!document.getElementById('tm-date').value){showToast('日付を入力してください');return;}
+  const rec={
+    id:id!=null?id:Date.now(),
+    date:document.getElementById('tm-date').value,
+    type,
+    account:document.getElementById('tm-account').value.trim(),
+    name:document.getElementById('tm-name').value.trim(),
+    ticker:document.getElementById('tm-ticker').value.trim(),
+    qty:type==='dividend'?0:Math.abs(+document.getElementById('tm-qty').value||0),
+    price:type==='dividend'?0:stripCommas(document.getElementById('tm-price').value)||0,
+    fee:stripCommas(document.getElementById('tm-fee').value)||0,
+    realizedGain:type==='buy'?0:stripCommas(document.getElementById('tm-gain').value)||0,
+    memo:document.getElementById('tm-memo').value.trim()
+  };
+  if(id!=null){
+    const i=data.tradeLog.findIndex(t=>t.id===id);
+    if(i>=0) data.tradeLog[i]=rec; else data.tradeLog.push(rec);
+  } else {
+    data.tradeLog.push(rec);
+  }
+  document.querySelector('.modal-overlay')?.remove();
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderTradeLog();
+  showToast('✅ 取引を保存しました');
+}
+
+function deleteTrade(id){
+  if(!confirm('この取引記録を削除しますか？')) return;
+  data.tradeLog=(data.tradeLog||[]).filter(t=>t.id!==id);
+  localStorage.setItem('fp-data',JSON.stringify(data));
+  renderTradeLog();
+  showToast('🗑 取引を削除しました');
+}
 </script>
 </body>
 </html>
