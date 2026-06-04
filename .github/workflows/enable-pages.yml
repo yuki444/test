@@ -32,6 +32,9 @@ jobs:
           print('source branch:', d.get('source',{}).get('branch','none'))
           print('build_type:', d.get('build_type','none'))
           print('status:', d.get('status','none'))
+          print('custom_domain:', d.get('custom_domain','(none)'))
+          print('html_url:', d.get('html_url','none'))
+          print('FULL JSON:', json.dumps(d, indent=2))
           " 2>/dev/null || echo "Pages未設定"
 
           echo "=== build_type=legacy でgh-pagesブランチに切替 ==="
