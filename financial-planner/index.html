@@ -2925,6 +2925,8 @@ const GH_REPO='yuki444/test';
 const GH_PATH='financial-planner/user-data.json';
 const GH_API='https://api.github.com';
 const GH_CLIENT_ID='Ov23liS7V5Kyv6F0uPDL';
+// github.com/login/* does not allow CORS from browsers; proxy adds the required headers
+const GH_OAUTH_PROXY='https://corsproxy.io/?url=';
 let _ghSha=null;
 let _ghDevicePolling=false;
 
@@ -3047,7 +3049,7 @@ async function ghStartDeviceAuth(){
   _ghDevicePolling=true;
 
   try{
-    const r=await fetch('https://github.com/login/device/code',{
+    const r=await fetch(GH_OAUTH_PROXY+encodeURIComponent('https://github.com/login/device/code'),{
       method:'POST',
       headers:{'Accept':'application/json','Content-Type':'application/json'},
       body:JSON.stringify({client_id:GH_CLIENT_ID,scope:'repo'})
@@ -3075,7 +3077,7 @@ async function ghStartDeviceAuth(){
       const poll=async()=>{
         if(!_ghDevicePolling){clearInterval(timerTick);return;}
         try{
-          const tr=await fetch('https://github.com/login/oauth/access_token',{
+          const tr=await fetch(GH_OAUTH_PROXY+encodeURIComponent('https://github.com/login/oauth/access_token'),{
             method:'POST',
             headers:{'Accept':'application/json','Content-Type':'application/json'},
             body:JSON.stringify({client_id:GH_CLIENT_ID,device_code,grant_type:'urn:ietf:params:oauth:grant-type:device_code'})
