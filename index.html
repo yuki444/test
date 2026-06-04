@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ぽかぽかガーデン">
+  <meta name="theme-color" content="#ffb74d">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <title>ぽかぽかガーデン</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    :root {
+      --sky: #b3e5fc;
+      --ground: #a5d6a7;
+      --soil: #8d6e63;
+      --pastel1: #f8bbd9;
+      --pastel2: #fff9c4;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--sky);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* ========== SCREENS ========== */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: opacity 0.4s ease;
+    }
+    .screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ========== TITLE SCREEN ========== */
+    #title-screen {
+      background: linear-gradient(180deg, #ffe0f0 0%, #fff9c4 60%, #c8e6c9 100%);
+      justify-content: center;
+      gap: 24px;
+    }
+    .title-logo {
+      font-size: 56px;
+      line-height: 1;
+    }
+    .title-text {
+      font-size: 32px;
+      font-weight: bold;
+      color: #5d4037;
+      text-shadow: 2px 2px 0 #fff;
+      text-align: center;
+    }
+    .title-sub {
+      font-size: 18px;
+      color: #795548;
+    }
+    .btn-start {
+      margin-top: 16px;
+      background: #ffb74d;
+      color: #fff;
+      font-size: 28px;
+      font-weight: bold;
+      border: none;
+      border-radius: 50px;
+      padding: 20px 60px;
+      box-shadow: 0 6px 0 #e65100;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .btn-start:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #e65100;
+    }
+    .flowers-deco {
+      font-size: 36px;
+      letter-spacing: 8px;
+    }
+
+    /* ========== MAIN GAME SCREEN ========== */
+    #game-screen {
+      background: linear-gradient(180deg, #b3e5fc 0%, #e1f5fe 50%, #a5d6a7 50%, #81c784 100%);
+    }
+
+    /* Top bar */
+    .top-bar {
+      width: 100%;
+      padding: 12px 16px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: max(12px, env(safe-area-inset-top));
+    }
+    .btn-garden {
+      background: #66bb6a;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 18px;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #388e3c;
+      transition: transform 0.1s;
+    }
+    .btn-garden:active { transform: translateY(3px); box-shadow: 0 1px 0 #388e3c; }
+    .progress-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .drop {
+      font-size: 26px;
+      transition: transform 0.2s;
+    }
+    .drop.filled { transform: scale(1.15); }
+
+    /* Plant area */
+    .plant-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 20px;
+      position: relative;
+    }
+    .plant-emoji {
+      font-size: 100px;
+      line-height: 1;
+      transition: transform 0.15s ease;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+    }
+    .plant-emoji.pop {
+      animation: pop-anim 0.3s ease;
+    }
+    @keyframes pop-anim {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.35); }
+      100% { transform: scale(1); }
+    }
+    .soil-patch {
+      width: 160px;
+      height: 40px;
+      background: radial-gradient(ellipse, #8d6e63 60%, #6d4c41);
+      border-radius: 50%;
+      margin-top: -8px;
+    }
+    .color-label {
+      margin-top: 12px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #5d4037;
+      background: rgba(255,255,255,0.7);
+      padding: 4px 18px;
+      border-radius: 20px;
+    }
+
+    /* Watering can */
+    .can-area {
+      padding: 16px 0 max(24px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .count-text {
+      font-size: 20px;
+      color: #5d4037;
+      font-weight: bold;
+      min-height: 28px;
+    }
+    .watering-can-btn {
+      width: 120px;
+      height: 120px;
+      border: none;
+      background: none;
+      font-size: 90px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: transform 0.1s;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+    }
+    .watering-can-btn:active {
+      transform: scale(0.9) rotate(-15deg);
+    }
+
+    /* Canvas overlay for particles */
+    #particle-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* ========== GARDEN SCREEN ========== */
+    #garden-screen {
+      background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
+    }
+    .garden-header {
+      width: 100%;
+      padding: 12px 16px;
+      padding-top: max(12px, env(safe-area-inset-top));
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-back {
+      background: #ef9a9a;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 18px;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #c62828;
+    }
+    .btn-back:active { transform: translateY(3px); box-shadow: 0 1px 0 #c62828; }
+    .garden-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    .garden-grid {
+      width: 100%;
+      padding: 12px 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      overflow-y: auto;
+    }
+    .garden-slot {
+      aspect-ratio: 1;
+      background: rgba(255,255,255,0.5);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .garden-slot.bloomed {
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .garden-slot.bloomed:active { transform: scale(0.95); }
+    .slot-flower { font-size: 44px; }
+    .slot-label { font-size: 12px; font-weight: bold; color: #5d4037; }
+    .slot-empty { font-size: 36px; opacity: 0.3; }
+
+    /* ========== CELEBRATION OVERLAY ========== */
+    #celebration {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.0);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #celebration.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .celeb-text {
+      font-size: 64px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 3px 3px 0 #f57f17, 6px 6px 0 #e65100;
+      text-align: center;
+      animation: bounce-in 0.4s ease;
+    }
+    .celeb-flower {
+      font-size: 96px;
+      animation: spin-grow 0.6s ease;
+    }
+    @keyframes bounce-in {
+      0%   { transform: scale(0); }
+      70%  { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    @keyframes spin-grow {
+      0%   { transform: rotate(-180deg) scale(0); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    /* ========== RAINBOW SPECIAL ========== */
+    #rainbow-screen {
+      background: linear-gradient(135deg, #ff8a80, #ffb74d, #fff176, #a5d6a7, #80d8ff, #ea80fc);
+      justify-content: center;
+      gap: 20px;
+    }
+    .rainbow-title { font-size: 36px; font-weight: bold; color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); text-align: center; }
+    .rainbow-flower { font-size: 120px; animation: pulse 1s infinite alternate; }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+    .btn-rainbow-back {
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: 50px;
+      padding: 16px 40px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #7b1fa2;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    /* Ripple effect on tap */
+    .ripple {
+      position: fixed;
+      border-radius: 50%;
+      background: rgba(100, 181, 246, 0.5);
+      transform: scale(0);
+      pointer-events: none;
+      z-index: 50;
+      animation: ripple-anim 0.5s ease-out forwards;
+    }
+    @keyframes ripple-anim {
+      to { transform: scale(4); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<!-- Title Screen -->
+<div id="title-screen" class="screen">
+  <div class="flowers-deco">🌸🌼🌷🌻🌺</div>
+  <div class="title-logo">🪴</div>
+  <div class="title-text">ぽかぽか<br>ガーデン</div>
+  <div class="title-sub">おはなをそだてよう！</div>
+  <button class="btn-start" id="btn-start">はじめる ▶</button>
+  <div class="flowers-deco">🌺🌻🌷🌼🌸</div>
+</div>
+
+<!-- Game Screen -->
+<div id="game-screen" class="screen hidden">
+  <div class="top-bar">
+    <button class="btn-garden" id="btn-garden">🌻 にわ</button>
+    <div class="progress-row" id="progress-drops"></div>
+  </div>
+  <div class="plant-stage">
+    <div class="plant-emoji" id="plant-display">🌱</div>
+    <div class="soil-patch"></div>
+    <div class="color-label" id="color-label">あか</div>
+  </div>
+  <div class="can-area">
+    <div class="count-text" id="count-text">みずをあげてね！</div>
+    <button class="watering-can-btn" id="can-btn">🪣</button>
+  </div>
+</div>
+
+<!-- Garden Screen -->
+<div id="garden-screen" class="screen hidden">
+  <div class="garden-header">
+    <button class="btn-back" id="btn-back">← もどる</button>
+    <div class="garden-title">🌿 わたしのにわ</div>
+  </div>
+  <div class="garden-grid" id="garden-grid"></div>
+</div>
+
+<!-- Rainbow Special Screen -->
+<div id="rainbow-screen" class="screen hidden">
+  <div class="rainbow-title">🎉 すごい！！<br>にじのはなが さいたよ！</div>
+  <div class="rainbow-flower">🌈🌸</div>
+  <div style="font-size:28px; color:#fff; text-align:center;">6しょくぜんぶ<br>あつめたね！</div>
+  <button class="btn-rainbow-back" id="btn-rainbow-back">もう一度あそぶ</button>
+</div>
+
+<!-- Celebration Overlay -->
+<div id="celebration">
+  <div class="celeb-flower" id="celeb-flower">🌸</div>
+  <div class="celeb-text">さいた！！</div>
+</div>
+
+<script>
+// ===================== AUDIO ENGINE =====================
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let ctx;
+function getCtx() {
+  if (!ctx) ctx = new AudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  return ctx;
+}
+
+function playTone(freq, type = 'sine', dur = 0.15, vol = 0.3) {
+  const ac = getCtx();
+  const osc = ac.createOscillator();
+  const gain = ac.createGain();
+  osc.connect(gain);
+  gain.connect(ac.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ac.currentTime);
+  gain.gain.setValueAtTime(vol, ac.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+  osc.start();
+  osc.stop(ac.currentTime + dur);
+}
+
+function playWaterSound() {
+  const ac = getCtx();
+  const buf = ac.createBuffer(1, ac.sampleRate * 0.2, ac.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.max(0, 1 - i / data.length);
+  }
+  const src = ac.createBufferSource();
+  const gain = ac.createGain();
+  const filter = ac.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 800;
+  filter.Q.value = 0.5;
+  src.buffer = buf;
+  src.connect(filter);
+  filter.connect(gain);
+  gain.connect(ac.destination);
+  gain.gain.value = 0.2;
+  src.start();
+}
+
+function playCountSound(n) {
+  const notes = [523, 587, 659, 698, 784];
+  playTone(notes[n - 1], 'triangle', 0.2, 0.35);
+}
+
+function playCelebSound() {
+  const ac = getCtx();
+  [523, 659, 784, 1047].forEach((f, i) => {
+    setTimeout(() => playTone(f, 'triangle', 0.3, 0.4), i * 80);
+  });
+}
+
+function playRainbowSound() {
+  [523, 587, 659, 784, 880, 1047, 1175].forEach((f, i) => {
+    setTimeout(() => playTone(f, 'sine', 0.4, 0.35), i * 100);
+  });
+}
+
+// ===================== PARTICLE ENGINE =====================
+const canvas = document.getElementById('particle-canvas');
+const pctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function spawnParticles(x, y, colors, count = 30) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 3 + Math.random() * 6;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 4,
+      size: 8 + Math.random() * 12,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: 1,
+      emoji: ['⭐','✨','💫','🌟'][Math.floor(Math.random() * 4)],
+      life: 1,
+    });
+  }
+}
+
+function animParticles() {
+  pctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => p.alpha > 0.02);
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.3;
+    p.alpha -= 0.022;
+    pctx.globalAlpha = p.alpha;
+    pctx.font = `${p.size}px serif`;
+    pctx.fillText(p.emoji, p.x, p.y);
+  });
+  pctx.globalAlpha = 1;
+  requestAnimationFrame(animParticles);
+}
+animParticles();
+
+// ===================== RIPPLE =====================
+function createRipple(x, y) {
+  const r = document.createElement('div');
+  r.className = 'ripple';
+  const size = 60;
+  r.style.cssText = `width:${size}px;height:${size}px;left:${x - size/2}px;top:${y - size/2}px`;
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 600);
+}
+
+// ===================== GAME STATE =====================
+const PLANTS = [
+  { name: 'あか',  stages: ['🌱','🌿','🌷'], bloom: '🌷', color: '#f48fb1' },
+  { name: 'きいろ',stages: ['🌱','🌿','🌻'], bloom: '🌻', color: '#fff176' },
+  { name: 'ピンク',stages: ['🌱','🌿','🌸'], bloom: '🌸', color: '#f8bbd9' },
+  { name: 'しろ',  stages: ['🌱','🌿','🌼'], bloom: '🌼', color: '#e0e0e0' },
+  { name: 'オレンジ',stages:['🌱','🌿','🌺'], bloom: '🌺', color: '#ffcc80' },
+  { name: 'むらさき',stages:['🌱','🌿','💜'], bloom: '💐', color: '#ce93d8' },
+];
+
+let garden = JSON.parse(localStorage.getItem('ppg_garden') || '[]');
+let currentPlantIdx = 0;
+let waterCount = 0;
+const WATER_TO_BLOOM = 5;
+
+function saveGarden() {
+  localStorage.setItem('ppg_garden', JSON.stringify(garden));
+}
+
+function nextUnbloomed() {
+  for (let i = 0; i < PLANTS.length; i++) {
+    if (!garden.includes(i)) return i;
+  }
+  return -1;
+}
+
+// ===================== UI HELPERS =====================
+function getScreen(id) { return document.getElementById(id); }
+
+function showScreen(id) {
+  ['title-screen','game-screen','garden-screen','rainbow-screen'].forEach(s => {
+    getScreen(s).classList.toggle('hidden', s !== id);
+  });
+}
+
+function updatePlantDisplay() {
+  const plant = PLANTS[currentPlantIdx];
+  const el = document.getElementById('plant-display');
+  const stage = waterCount < 2 ? 0 : waterCount < 4 ? 1 : 1;
+  el.textContent = plant.stages[stage];
+  document.getElementById('color-label').textContent = plant.name;
+  updateDrops();
+
+  const msgs = [
+    'みずをあげてね！',
+    'もう1かい！',
+    'いい感じ！',
+    'もうすぐ！',
+    'あと1かい！',
+  ];
+  document.getElementById('count-text').textContent = msgs[waterCount] || '';
+}
+
+function updateDrops() {
+  const row = document.getElementById('progress-drops');
+  row.innerHTML = '';
+  for (let i = 0; i < WATER_TO_BLOOM; i++) {
+    const d = document.createElement('span');
+    d.className = 'drop' + (i < waterCount ? ' filled' : '');
+    d.textContent = i < waterCount ? '💧' : '🩶';
+    row.appendChild(d);
+  }
+}
+
+function renderGarden() {
+  const grid = document.getElementById('garden-grid');
+  grid.innerHTML = '';
+  PLANTS.forEach((p, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'garden-slot' + (garden.includes(i) ? ' bloomed' : '');
+    if (garden.includes(i)) {
+      slot.innerHTML = `<span class="slot-flower">${p.bloom}</span><span class="slot-label">${p.name}</span>`;
+    } else {
+      slot.innerHTML = `<span class="slot-empty">🌱</span>`;
+    }
+    grid.appendChild(slot);
+  });
+}
+
+// ===================== CELEBRATION =====================
+function showCelebration(flowerEmoji, colorArr) {
+  const celeb = document.getElementById('celebration');
+  document.getElementById('celeb-flower').textContent = flowerEmoji;
+  celeb.classList.add('show');
+
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  spawnParticles(cx, cy, colorArr, 50);
+  playCelebSound();
+
+  setTimeout(() => {
+    celeb.classList.remove('show');
+  }, 1800);
+}
+
+// ===================== WATER ACTION =====================
+function waterPlant(evt) {
+  const x = evt ? (evt.changedTouches ? evt.changedTouches[0].clientX : evt.clientX) : window.innerWidth / 2;
+  const y = evt ? (evt.changedTouches ? evt.changedTouches[0].clientY : evt.clientY) : window.innerHeight / 2;
+
+  createRipple(x, y);
+  spawnParticles(x, y - 60, ['💧','🩵','🌊'], 12);
+  playWaterSound();
+
+  waterCount++;
+  playCountSound(waterCount);
+
+  const plantEl = document.getElementById('plant-display');
+  plantEl.classList.remove('pop');
+  void plantEl.offsetWidth;
+  plantEl.classList.add('pop');
+  setTimeout(() => plantEl.classList.remove('pop'), 300);
+
+  if (waterCount >= WATER_TO_BLOOM) {
+    const plant = PLANTS[currentPlantIdx];
+    plantEl.textContent = plant.bloom;
+
+    setTimeout(() => {
+      showCelebration(plant.bloom, ['⭐','✨','💫','🌟','🎉']);
+      garden.push(currentPlantIdx);
+      saveGarden();
+
+      setTimeout(() => {
+        if (garden.length >= PLANTS.length) {
+          playRainbowSound();
+          showScreen('rainbow-screen');
+        } else {
+          waterCount = 0;
+          currentPlantIdx = nextUnbloomed();
+          updatePlantDisplay();
+        }
+      }, 2000);
+    }, 400);
+  } else {
+    updatePlantDisplay();
+  }
+}
+
+// ===================== EVENT LISTENERS =====================
+document.getElementById('btn-start').addEventListener('click', (e) => {
+  playTone(659, 'triangle', 0.2, 0.4);
+  waterCount = 0;
+  currentPlantIdx = nextUnbloomed();
+  if (currentPlantIdx === -1) {
+    garden = [];
+    saveGarden();
+    currentPlantIdx = 0;
+  }
+  updatePlantDisplay();
+  showScreen('game-screen');
+});
+
+document.getElementById('can-btn').addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  waterPlant(e);
+}, { passive: false });
+document.getElementById('can-btn').addEventListener('click', (e) => {
+  waterPlant(e);
+});
+
+document.getElementById('btn-garden').addEventListener('click', () => {
+  playTone(523, 'triangle', 0.15, 0.3);
+  renderGarden();
+  showScreen('garden-screen');
+});
+
+document.getElementById('btn-back').addEventListener('click', () => {
+  playTone(440, 'triangle', 0.15, 0.3);
+  showScreen('game-screen');
+});
+
+document.getElementById('btn-rainbow-back').addEventListener('click', () => {
+  garden = [];
+  saveGarden();
+  waterCount = 0;
+  currentPlantIdx = 0;
+  updatePlantDisplay();
+  showScreen('game-screen');
+});
+
+// Prevent zoom on double-tap
+document.addEventListener('dblclick', e => e.preventDefault());
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
+// PWA Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+</script>
+</body>
+</html>

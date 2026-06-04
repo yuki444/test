@@ -1,0 +1,17 @@
+{
+  "appId": "com.pokaporka.garden",
+  "appName": "ぽかぽかガーデン",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "ios": {
+    "preferredContentMode": "mobile",
+    "backgroundColor": "#b3e5fc"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1000,
+      "backgroundColor": "#ffe0f0",
+      "showSpinner": false
+    }
+  }
+}
