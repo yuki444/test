@@ -18,44 +18,52 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
         run: |
-          # 現在のPages設定を取得してソースブランチを確認
+          echo "=== 現在のPages設定 ==="
           CURRENT=$(curl -s \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/$REPO/pages)
-
-          SOURCE=$(echo "$CURRENT" | python3 -c "
+          echo "$CURRENT" | python3 -c "
           import sys,json
           d=json.load(sys.stdin)
-          print(d.get('source',{}).get('branch','none'))
-          " 2>/dev/null || echo "none")
+          print('source branch:', d.get('source',{}).get('branch','none'))
+          print('build_type:', d.get('build_type','none'))
+          print('status:', d.get('status','none'))
+          " 2>/dev/null || echo "Pages未設定"
 
-          echo "Current Pages source branch: $SOURCE"
+          echo "=== build_type=legacy でgh-pagesブランチに切替 ==="
+          RESULT=$(curl -s -w "\n%{http_code}" -X PUT \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/$REPO/pages \
+            -d '{"build_type":"legacy","source":{"branch":"gh-pages","path":"/"}}')
+          BODY=$(echo "$RESULT" | head -1)
+          CODE=$(echo "$RESULT" | tail -1)
+          echo "HTTP: $CODE / Body: $BODY"
 
-          if [ "$SOURCE" = "gh-pages" ]; then
-            echo "Already correctly configured."
-            echo "URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-          else
-            # Pages未設定 → 新規作成を試みる
-            echo "Setting Pages source to gh-pages branch..."
-            RESULT=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+          if [ "$CODE" != "204" ] && [ "$CODE" != "200" ]; then
+            echo "PUT失敗。POSTを試みます..."
+            curl -s -w "\nHTTP: %{http_code}" -X POST \
               -H "Authorization: Bearer $GH_TOKEN" \
               -H "Accept: application/vnd.github+json" \
               -H "Content-Type: application/json" \
               https://api.github.com/repos/$REPO/pages \
-              -d '{"source":{"branch":"gh-pages","path":"/"}}')
-
-            if [ "$RESULT" = "409" ]; then
-              # 既に存在するが別ソース設定 → PUTで上書き更新
-              echo "Pages exists with different source. Updating via PUT..."
-              curl -s -X PUT \
-                -H "Authorization: Bearer $GH_TOKEN" \
-                -H "Accept: application/vnd.github+json" \
-                -H "Content-Type: application/json" \
-                https://api.github.com/repos/$REPO/pages \
-                -d '{"source":{"branch":"gh-pages","path":"/"}}'
-            fi
-            echo "Done."
-            echo "URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+              -d '{"build_type":"legacy","source":{"branch":"gh-pages","path":"/"}}'
           fi
+
+          echo "=== 更新後の設定 ==="
+          curl -s \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/$REPO/pages | python3 -c "
+          import sys,json
+          d=json.load(sys.stdin)
+          print('source branch:', d.get('source',{}).get('branch','none'))
+          print('build_type:', d.get('build_type','none'))
+          print('url:', d.get('html_url','none'))
+          " 2>/dev/null
+          echo "URL: https://$OWNER.github.io/$REPO_NAME/"
