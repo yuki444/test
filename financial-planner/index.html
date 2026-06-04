@@ -2969,13 +2969,15 @@ async function ghFetch(){
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const j=await res.json();
     _ghSha=j.sha;
-    const parsed=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
+    const decoded=new TextDecoder().decode(Uint8Array.from(atob(j.content.replace(/\n/g,'')),c=>c.charCodeAt(0)));
+    const parsed=JSON.parse(decoded);
     if(!parsed?.members||!parsed?.income) throw new Error('invalid data');
     Object.assign(data,parsed);
     localStorage.setItem('fp-data',JSON.stringify(data));
     activePlanId=data.plans?.[0]?.id||1;
     syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();
     renderPlans(); updateMonthlySummary(); updateNetWorthSummary();
+    syncDividendToIncome(); renderAllocChart();
     updateGhBadge('synced');
     return true;
   }catch(e){
@@ -2989,7 +2991,8 @@ async function ghSave(){
   const pat=ghPAT(); if(!pat) return false;
   updateGhBadge('syncing');
   try{
-    const content=btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))));
+    const bytes=new TextEncoder().encode(JSON.stringify(data));
+    const content=btoa(String.fromCharCode(...bytes));
     const body={message:'update financial planner data',content};
     if(_ghSha) body.sha=_ghSha;
     let res=await fetch(`${GH_API}/repos/${GH_REPO}/contents/${GH_PATH}`,{
@@ -2997,7 +3000,7 @@ async function ghSave(){
       headers:{'Authorization':`token ${pat}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
       body:JSON.stringify(body)
     });
-    if(res.status===409){
+    if(res.status===409||res.status===422){
       const cur=await fetch(`${GH_API}/repos/${GH_REPO}/contents/${GH_PATH}`,{
         headers:{'Authorization':`token ${pat}`,'Accept':'application/vnd.github.v3+json'}
       });
@@ -4494,6 +4497,7 @@ function _applySync(compressed){
     activePlanId=data.plans?.[0]?.id||1;
     syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();
     renderPlans(); updateMonthlySummary(); updateNetWorthSummary();
+    syncDividendToIncome();
     closeSyncModal();
     history.replaceState(null,'',location.pathname+location.search);
     showToast('✅ データをインポートしました');
