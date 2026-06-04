@@ -479,7 +479,7 @@
           <p>あなた専属の家計管理ツール</p>
         </div>
       </div>
-      <div class="privacy-badge">🔒 データはこの端末のみに保存</div>
+      <div class="privacy-badge" id="gh-sync-badge">🔒 ローカル保存のみ</div>
     </div>
     <div class="nav">
       <div class="nav-section">基本情報</div>
@@ -821,29 +821,57 @@
           <span id="update-badge" style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:white;background:var(--secondary)">確認中…</span>
         </div>
       </div>
-      <div class="card" style="border:2px solid var(--secondary);background:linear-gradient(135deg,var(--secondary-light) 0%,#ffffff 60%)">
-        <div class="card-title" style="font-size:16px;color:var(--secondary)">📲 スマホ・PC間でデータを同期</div>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:6px;line-height:1.7">
-          データはこの端末のみに保存されるため、スマホとPCで異なるデータになります。<br>
-          同期URLをコピーしてLINEやメールで自分宛に送ると、スマホ側で同じデータを使えます。
+      <!-- GitHub自動同期カード -->
+      <div class="card" style="border:2px solid #24292f;background:linear-gradient(135deg,#f6f8fa 0%,#ffffff 60%)">
+        <div class="card-title" style="font-size:16px;color:#24292f">☁️ GitHub自動同期（推奨）</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px;line-height:1.7">
+          GitHubリポジトリをデータ置き場にすることで、PCとスマホが常に同じデータを参照します。<br>
+          一度設定すれば、保存のたびに自動でGitHubへ書き込み・読み込みします。
         </p>
-        <div style="font-size:12px;color:var(--text-muted);background:white;border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.9;border:1px solid var(--border)">
-          ① 「同期URLを生成・コピー」→ ② LINEで自分に送信 → ③ スマホでURLを開く → ④「インポート」をタップ
+        <div id="gh-connected-block" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 14px;margin-bottom:14px">
+          <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:6px">✅ GitHub同期が有効です</div>
+          <div style="font-size:12px;color:#166534;margin-bottom:10px">トークン：<code id="gh-pat-display" style="font-size:11px;background:#dcfce7;padding:2px 6px;border-radius:4px"></code></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="ghFetch().then(ok=>ok&&showToast('✅ GitHubからデータを読み込みました'))">🔄 今すぐ読み込み</button>
+            <button class="btn btn-secondary btn-sm" onclick="clearGhPAT()">🔓 同期を解除</button>
+          </div>
         </div>
-        <button class="btn btn-success" style="font-size:14px;padding:11px 24px;font-weight:800" onclick="openSyncModal()">📲 同期URLを生成・コピー / データを受け取る</button>
+        <div id="gh-setup-block">
+          <div style="background:#f6f8fa;border:1px solid #d0d7de;border-radius:8px;padding:10px 14px;font-size:12px;color:#57606a;line-height:1.9;margin-bottom:12px">
+            <strong style="color:#24292f">📋 GitHub PAT発行手順（初回のみ・5分）</strong><br>
+            ① GitHub.com → 右上アイコン → <strong>Settings</strong><br>
+            ② 左下 <strong>Developer settings</strong> → <strong>Personal access tokens</strong> → <strong>Fine-grained tokens</strong><br>
+            ③ <strong>Generate new token</strong> → Repository access: <code>yuki444/test</code> のみ<br>
+            ④ Permissions → Repository permissions → <strong>Contents: Read and write</strong><br>
+            ⑤ 生成されたトークン（<code>github_pat_...</code>）を下に貼り付け
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="gh-pat-input" type="password" placeholder="github_pat_XXXXXXXXXXXX..."
+              style="flex:1;padding:9px 12px;border:1.5px solid #d0d7de;border-radius:8px;font-size:13px;font-family:monospace;min-width:0">
+            <button class="btn btn-primary" onclick="saveGhPAT()" style="white-space:nowrap;font-weight:800">接続する</button>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--text-muted)">
+          ※ トークンはこの端末のlocalStorageにのみ保存。GitHub APIリクエスト以外には送信されません。
+        </div>
+      </div>
+      <!-- URLシンク（サブ手段） -->
+      <div class="card" style="border:1px solid var(--border)">
+        <div class="card-title" style="font-size:13px;color:var(--text-muted)">📲 URLシンク（GitHub未設定時の代替手段）</div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;line-height:1.7">
+          同期URLをコピーしてLINEで自分宛に送り、スマホで開いてインポートする手動同期方法です。
+        </p>
+        <button class="btn btn-secondary btn-sm" onclick="openSyncModal()">📲 URLシンクを使う</button>
       </div>
       <div class="card">
         <div class="card-title">🔒 プライバシーについて</div>
         <div style="background:var(--secondary-light);border-radius:10px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.8">
           <strong>✅ データの保存先</strong><br>
-          入力したすべてのデータは、<strong>このデバイスのブラウザ（localStorage）にのみ保存</strong>されます。<br>
-          GitHubや外部サーバーには一切送信されません。<br><br>
-          <strong>✅ 他の人からは見えません</strong><br>
-          同じデバイスの同じブラウザでしかアクセスできません。<br>
-          別のデバイスや別のブラウザからは表示されません。<br><br>
+          データは<strong>このデバイスのlocalStorage</strong>に保存されます。GitHub同期を有効にした場合は、<strong>あなた自身のGitHubリポジトリ</strong>にも保存されます（第三者のサーバーには送信されません）。<br><br>
+          <strong>✅ GitHub同期を使う場合</strong><br>
+          PCとスマホ両方でPATを設定すると、保存のたびに自動でGitHubへ書き込み、ページを開くたびに自動で読み込みます。<br><br>
           <strong>✅ アクセス方法</strong><br>
-          このHTMLファイルをダウンロードしてブックマークすれば、いつでもアクセスできます。<br>
-          複数デバイスで使う場合は「エクスポート」でバックアップを取り、別デバイスで「インポート」してください。
+          GitHub PagesのURLをブックマークすれば、いつでもどのデバイスからもアクセスできます。
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-secondary" onclick="exportData()">⬇ JSONでエクスポート（バックアップ）</button>
@@ -2869,11 +2897,127 @@ function clearDirty(){
   const btn=document.getElementById('btn-save-all');
   if(btn) btn.textContent='💾 データを保存';
 }
+// ============================================================
+// GITHUB AUTO SYNC
+// ============================================================
+const GH_REPO='yuki444/test';
+const GH_PATH='financial-planner/user-data.json';
+const GH_API='https://api.github.com';
+let _ghSha=null;
+
+function ghPAT(){ return localStorage.getItem('fp-github-pat')||''; }
+
+function updateGhBadge(state,msg){
+  const badge=document.getElementById('gh-sync-badge');
+  if(!badge) return;
+  const S={
+    none:   {icon:'🔒',text:'ローカル保存のみ',  bg:'rgba(255,255,255,.1)'},
+    syncing:{icon:'🔄',text:'GitHubと同期中…',   bg:'rgba(59,130,246,.3)'},
+    synced: {icon:'☁️',text:'GitHubと同期済み',  bg:'rgba(16,185,129,.25)'},
+    error:  {icon:'❌',text:msg||'同期エラー',    bg:'rgba(239,68,68,.25)'},
+  };
+  const s=S[state]||S.none;
+  badge.textContent=s.icon+' '+s.text;
+  badge.style.background=s.bg;
+}
+
+async function ghFetch(){
+  const pat=ghPAT(); if(!pat) return false;
+  updateGhBadge('syncing');
+  try{
+    const res=await fetch(`${GH_API}/repos/${GH_REPO}/contents/${GH_PATH}`,{
+      headers:{'Authorization':`token ${pat}`,'Accept':'application/vnd.github.v3+json'}
+    });
+    if(res.status===404){updateGhBadge('synced');return false;}
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const j=await res.json();
+    _ghSha=j.sha;
+    const parsed=JSON.parse(atob(j.content.replace(/\n/g,'')));
+    if(!parsed?.members||!parsed?.income) throw new Error('invalid data');
+    Object.assign(data,parsed);
+    localStorage.setItem('fp-data',JSON.stringify(data));
+    activePlanId=data.plans?.[0]?.id||1;
+    syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();
+    renderPlans(); updateMonthlySummary(); updateNetWorthSummary();
+    updateGhBadge('synced');
+    return true;
+  }catch(e){
+    console.error('GitHub fetch:',e);
+    updateGhBadge('error',e.message);
+    return false;
+  }
+}
+
+async function ghSave(){
+  const pat=ghPAT(); if(!pat) return false;
+  updateGhBadge('syncing');
+  try{
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))));
+    const body={message:'update financial planner data',content};
+    if(_ghSha) body.sha=_ghSha;
+    let res=await fetch(`${GH_API}/repos/${GH_REPO}/contents/${GH_PATH}`,{
+      method:'PUT',
+      headers:{'Authorization':`token ${pat}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(res.status===409){
+      const cur=await fetch(`${GH_API}/repos/${GH_REPO}/contents/${GH_PATH}`,{
+        headers:{'Authorization':`token ${pat}`,'Accept':'application/vnd.github.v3+json'}
+      });
+      if(cur.ok){const cj=await cur.json();_ghSha=cj.sha;body.sha=_ghSha;}
+      res=await fetch(`${GH_API}/repos/${GH_REPO}/contents/${GH_PATH}`,{
+        method:'PUT',
+        headers:{'Authorization':`token ${pat}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+        body:JSON.stringify(body)
+      });
+    }
+    if(!res.ok){const ej=await res.json();throw new Error(ej.message||`HTTP ${res.status}`);}
+    const j=await res.json();
+    _ghSha=j.content.sha;
+    updateGhBadge('synced');
+    return true;
+  }catch(e){
+    console.error('GitHub save:',e);
+    updateGhBadge('error',e.message);
+    return false;
+  }
+}
+
+function saveGhPAT(){
+  const pat=document.getElementById('gh-pat-input')?.value?.trim();
+  if(!pat){showToast('⚠️ トークンを入力してください');return;}
+  localStorage.setItem('fp-github-pat',pat);
+  _ghUpdateUI(pat);
+  showToast('🔑 トークンを保存しました。GitHubからデータを読み込みます…');
+  ghFetch().then(ok=>{if(ok) showToast('✅ GitHubからデータを読み込みました');});
+}
+
+function clearGhPAT(){
+  if(!confirm('GitHub同期を解除します。ローカルのデータはそのまま残ります。')) return;
+  localStorage.removeItem('fp-github-pat');
+  _ghSha=null;
+  document.getElementById('gh-pat-input').value='';
+  _ghUpdateUI('');
+  updateGhBadge('none');
+  showToast('🔓 GitHub同期を解除しました');
+}
+
+function _ghUpdateUI(pat){
+  const connected=!!pat;
+  const cb=document.getElementById('gh-connected-block');
+  const sb=document.getElementById('gh-setup-block');
+  const disp=document.getElementById('gh-pat-display');
+  if(cb) cb.style.display=connected?'':'none';
+  if(sb) sb.style.display=connected?'none':'';
+  if(disp&&pat) disp.textContent=pat.slice(0,12)+'…';
+}
+
 function saveAll(){
   syncFromDOM();
   localStorage.setItem('fp-data',JSON.stringify(data));
   clearDirty();
   showToast('✅ 保存しました');
+  ghSave();
 }
 
 function exportData(){
@@ -4298,8 +4442,9 @@ function init(){
   refreshAgesFromBirthdates();
   // タブ復帰時に自動再計算
   document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden && refreshAgesFromBirthdates())
-      showToast('📅 生年月日から年齢を自動更新しました');
+    if(document.hidden) return;
+    if(refreshAgesFromBirthdates()) showToast('📅 生年月日から年齢を自動更新しました');
+    if(ghPAT()) ghFetch();
   });
   initMoneyInputs();
   renderMembers();
@@ -4314,6 +4459,13 @@ function init(){
   setTimeout(renderUpdateBadge, 100);
   // prices.json から株価・配当を自動ロード（サイレント: 更新あり時のみトースト）
   setTimeout(()=>refreshHoldingPrices(true), 500);
+  // GitHub自動同期：PAT設定済みなら起動時に読み込み
+  const _ghPat=ghPAT();
+  _ghUpdateUI(_ghPat);
+  if(_ghPat){
+    updateGhBadge('syncing');
+    setTimeout(()=>ghFetch(), 800);
+  }
 
   // Live recalculation listeners
   const incomeIds=['income-self','income-spouse','income-side','income-investment','bonus-self','bonus-spouse',
