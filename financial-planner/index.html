@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>パーソナル ファイナンシャルプランナー</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
   <style>
     :root{
       --primary:#2563eb;--primary-light:#dbeafe;--primary-dark:#1d4ed8;
@@ -504,6 +505,7 @@
         <button class="btn-tool" onclick="importData()" title="JSONファイルから読み込み">⬆ インポート</button>
       </div>
       <button class="btn-tool" id="btn-view-mode" onclick="toggleViewMode()" style="width:100%">📱 スマホ表示</button>
+      <button class="btn-tool" onclick="openSyncModal()" style="width:100%;background:var(--secondary-light);border-color:var(--secondary);color:var(--secondary);font-weight:800">📲 スマホと同期</button>
     </div>
   </nav>
 
@@ -818,6 +820,17 @@
           <span id="update-badge" style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:white;background:var(--secondary)">確認中…</span>
         </div>
       </div>
+      <div class="card" style="border:2px solid var(--secondary);background:linear-gradient(135deg,var(--secondary-light) 0%,#ffffff 60%)">
+        <div class="card-title" style="font-size:16px;color:var(--secondary)">📲 スマホ・PC間でデータを同期</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:6px;line-height:1.7">
+          データはこの端末のみに保存されるため、スマホとPCで異なるデータになります。<br>
+          同期URLをコピーしてLINEやメールで自分宛に送ると、スマホ側で同じデータを使えます。
+        </p>
+        <div style="font-size:12px;color:var(--text-muted);background:white;border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.9;border:1px solid var(--border)">
+          ① 「同期URLを生成・コピー」→ ② LINEで自分に送信 → ③ スマホでURLを開く → ④「インポート」をタップ
+        </div>
+        <button class="btn btn-success" style="font-size:14px;padding:11px 24px;font-weight:800" onclick="openSyncModal()">📲 同期URLを生成・コピー / データを受け取る</button>
+      </div>
       <div class="card">
         <div class="card-title">🔒 プライバシーについて</div>
         <div style="background:var(--secondary-light);border-radius:10px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.8">
@@ -988,6 +1001,43 @@
   </main>
 
 </div><!-- /.layout -->
+
+<!-- ===== SYNC MODAL ===== -->
+<div id="sync-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeSyncModal()">
+  <div class="modal-box" style="max-width:500px">
+    <h3>📲 端末間でデータを同期</h3>
+    <div id="sync-incoming-banner" style="display:none;background:var(--secondary-light);border:1.5px solid var(--secondary);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;font-weight:700;color:var(--secondary)">
+      📥 他の端末からのデータが届いています！下の「インポート」ボタンをタップしてください。
+    </div>
+    <div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:var(--text-muted);line-height:1.8">
+      <strong style="color:var(--text)">PCからスマホへ送る手順：</strong><br>
+      ① 「URLをコピー」 → ② LINEやメール等で自分に送信 → ③ スマホでURLを開く → ④「インポート」をタップ
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">📤 このデータを他の端末へ送る</div>
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <input id="sync-url-display" readonly style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:11px;color:var(--text-muted);background:var(--bg);min-width:0;font-family:monospace" value="生成中...">
+        <button class="btn btn-primary" onclick="copySyncURL()" style="white-space:nowrap">📋 コピー</button>
+      </div>
+      <div id="sync-webshare-row" style="display:none">
+        <button class="btn btn-secondary" style="width:100%" onclick="shareSyncURL()">📤 LINEやメールで共有</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div>
+      <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">📥 他の端末からデータを受け取る（URLを貼り付け）</div>
+      <textarea id="sync-import-input" placeholder="他の端末で生成した同期URLをここに貼り付け…" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:11px;height:72px;resize:none;font-family:monospace;background:var(--bg)"></textarea>
+      <button class="btn btn-success" style="margin-top:8px;width:100%;font-size:14px;padding:11px" onclick="importFromSyncInput()">⬆ この端末にインポート（上書き）</button>
+    </div>
+
+    <div style="margin-top:18px;text-align:right">
+      <button class="btn btn-secondary" onclick="closeSyncModal()">閉じる</button>
+    </div>
+  </div>
+</div>
 
 <!-- MOBILE BOTTOM NAV (fixed, shown on mobile / preview) -->
 <nav class="mobile-bottomnav" id="mobile-bottomnav">
@@ -4133,6 +4183,93 @@ function renderUpdateBadge(){
 }
 
 // ============================================================
+// DEVICE SYNC  (LZString URL-based cross-device sync)
+// ============================================================
+function generateSyncURL(){
+  syncFromDOM();
+  if(typeof LZString==='undefined'){showToast('⚠️ ライブラリ読み込み中。少し待ってください');return null;}
+  const compressed=LZString.compressToEncodedURIComponent(JSON.stringify(data));
+  return location.href.split('#')[0]+'#sync='+compressed;
+}
+
+function openSyncModal(){
+  document.getElementById('sync-import-input').value='';
+  document.getElementById('sync-url-display').value='生成中...';
+  document.getElementById('sync-incoming-banner').style.display='none';
+  document.getElementById('sync-modal').style.display='flex';
+  if(navigator.share) document.getElementById('sync-webshare-row').style.display='';
+  setTimeout(()=>{
+    const url=generateSyncURL();
+    if(url) document.getElementById('sync-url-display').value=url;
+  },60);
+}
+
+function closeSyncModal(){
+  document.getElementById('sync-modal').style.display='none';
+}
+
+function copySyncURL(){
+  const url=document.getElementById('sync-url-display').value;
+  if(!url||url==='生成中...'){showToast('⚠️ 生成中です、少し待ってください');return;}
+  const fallback=()=>{
+    const el=document.getElementById('sync-url-display');
+    el.select();document.execCommand('copy');showToast('📋 URLをコピーしました。LINEなどで自分宛に送ってください');
+  };
+  if(navigator.clipboard?.writeText)
+    navigator.clipboard.writeText(url).then(()=>showToast('📋 URLをコピーしました。LINEなどで自分宛に送ってください')).catch(fallback);
+  else fallback();
+}
+
+function shareSyncURL(){
+  const url=document.getElementById('sync-url-display').value;
+  if(!url||url==='生成中...') return;
+  navigator.share({title:'ファイナンシャルプランナー データ同期',url}).catch(()=>{});
+}
+
+function importFromSyncInput(){
+  const input=document.getElementById('sync-import-input').value.trim();
+  if(!input){showToast('⚠️ URLを貼り付けてください');return;}
+  const match=input.match(/#sync=(.+?)(?:\s|$)/)||input.match(/#sync=(.+)$/);
+  if(!match){showToast('⚠️ 同期URLではありません（#sync= で始まるURLが必要です）');return;}
+  _applySync(match[1]);
+}
+
+function _applySync(compressed){
+  if(typeof LZString==='undefined'){showToast('⚠️ ライブラリ読み込み中。少し待ってください');return;}
+  try{
+    const json=LZString.decompressFromEncodedURIComponent(compressed);
+    if(!json) throw new Error('decompression failed');
+    const parsed=JSON.parse(json);
+    if(!parsed?.members||!parsed?.income) throw new Error('invalid data');
+    if(!confirm('この端末のデータを、受け取ったデータで上書きしますか？\n（現在のデータは失われます）')) return;
+    Object.assign(data,parsed);
+    localStorage.setItem('fp-data',JSON.stringify(data));
+    activePlanId=data.plans?.[0]?.id||1;
+    syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();
+    renderPlans(); updateMonthlySummary(); updateNetWorthSummary();
+    closeSyncModal();
+    history.replaceState(null,'',location.pathname+location.search);
+    showToast('✅ データをインポートしました');
+  }catch(e){
+    console.error(e);
+    showToast('⚠️ インポートに失敗しました。URLが正しいか確認してください');
+  }
+}
+
+function checkURLSync(){
+  const hash=location.hash;
+  if(!hash.startsWith('#sync=')) return;
+  const compressed=hash.substring(6);
+  setTimeout(()=>{
+    document.getElementById('sync-incoming-banner').style.display='';
+    document.getElementById('sync-import-input').value=location.href;
+    document.getElementById('sync-url-display').value='（受信モード）';
+    document.getElementById('sync-modal').style.display='flex';
+    showToast('📲 他の端末からのデータが届いています');
+  },800);
+}
+
+// ============================================================
 // INIT
 // ============================================================
 function init(){
@@ -4195,6 +4332,7 @@ function init(){
     const btn=document.getElementById('btn-view-mode');
     if(btn){btn.textContent='🖥 PC表示';btn.classList.add('view-active');}
   }
+  checkURLSync();
 }
 
 init();
