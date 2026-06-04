@@ -1,0 +1,37 @@
+name: Enable GitHub Pages
+
+on:
+  push:
+    branches: [gh-pages]
+
+permissions:
+  pages: write
+  id-token: write
+  contents: read
+
+jobs:
+  enable-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable GitHub Pages via API
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Pages が既に有効か確認
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/pages)
+
+          if [ "$STATUS" = "200" ]; then
+            echo "Pages already enabled."
+          else
+            echo "Enabling Pages from gh-pages branch..."
+            curl -s -X POST \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "Content-Type: application/json" \
+              https://api.github.com/repos/${{ github.repository }}/pages \
+              -d '{"source":{"branch":"gh-pages","path":"/"}}'
+            echo "Done. URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          fi
