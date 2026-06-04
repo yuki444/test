@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ぽかぽかガーデン">
+  <meta name="theme-color" content="#ffb74d">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
   <title>ぽかぽかガーデン</title>
   <style>
     * {
@@ -694,6 +698,11 @@ document.getElementById('btn-rainbow-back').addEventListener('click', () => {
 // Prevent zoom on double-tap
 document.addEventListener('dblclick', e => e.preventDefault());
 document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
+// PWA Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
 </script>
 </body>
 </html>
