@@ -837,19 +837,20 @@
           </div>
         </div>
         <div id="gh-setup-block">
-          <div style="background:#f6f8fa;border:1px solid #d0d7de;border-radius:8px;padding:10px 14px;font-size:12px;color:#57606a;line-height:1.9;margin-bottom:12px">
-            <strong style="color:#24292f">📋 GitHub PAT発行手順（初回のみ・5分）</strong><br>
-            ① GitHub.com → 右上アイコン → <strong>Settings</strong><br>
-            ② 左下 <strong>Developer settings</strong> → <strong>Personal access tokens</strong> → <strong>Fine-grained tokens</strong><br>
-            ③ <strong>Generate new token</strong> → Repository access: <code>yuki444/test</code> のみ<br>
-            ④ Permissions → Repository permissions → <strong>Contents: Read and write</strong><br>
-            ⑤ 生成されたトークン（<code>github_pat_...</code>）を下に貼り付け
+          <div style="text-align:center;padding:6px 0 14px">
+            <button class="btn btn-primary" style="font-size:15px;padding:13px 32px;font-weight:800;border-radius:12px" onclick="ghStartDeviceAuth()">
+              🐙 GitHubでログイン
+            </button>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:8px">ボタンを押すとコードが表示されます。GitHubで確認するだけで完了。</div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <input id="gh-pat-input" type="password" placeholder="github_pat_XXXXXXXXXXXX..."
-              style="flex:1;padding:9px 12px;border:1.5px solid #d0d7de;border-radius:8px;font-size:13px;font-family:monospace;min-width:0">
-            <button class="btn btn-primary" onclick="saveGhPAT()" style="white-space:nowrap;font-weight:800">接続する</button>
-          </div>
+          <details style="margin-top:4px">
+            <summary style="font-size:11px;color:var(--text-muted);cursor:pointer;user-select:none">🔑 Personal Access Tokenを直接入力する（上級者向け）</summary>
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+              <input id="gh-pat-input" type="password" placeholder="github_pat_..."
+                style="flex:1;padding:9px 12px;border:1.5px solid #d0d7de;border-radius:8px;font-size:13px;font-family:monospace;min-width:0">
+              <button class="btn btn-secondary btn-sm" onclick="saveGhPAT()" style="white-space:nowrap">接続</button>
+            </div>
+          </details>
         </div>
         <div style="margin-top:10px;font-size:11px;color:var(--text-muted)">
           ※ トークンはこの端末のlocalStorageにのみ保存。GitHub APIリクエスト以外には送信されません。
@@ -1065,6 +1066,26 @@
     <div style="margin-top:18px;text-align:right">
       <button class="btn btn-secondary" onclick="closeSyncModal()">閉じる</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== GITHUB DEVICE AUTH MODAL ===== -->
+<div id="gh-device-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeGhDeviceModal()">
+  <div class="modal-box" style="max-width:400px;text-align:center">
+    <h3>🐙 GitHubで認証</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px;line-height:1.7">
+      下のコードをGitHubで確認するだけで完了します。<br>ボタンを押すとGitHubが開きます。
+    </p>
+    <div id="gh-device-code" style="font-size:32px;font-weight:900;letter-spacing:.18em;color:var(--primary);background:var(--primary-light);padding:16px 24px;border-radius:14px;margin-bottom:16px;font-family:monospace;min-height:64px;display:flex;align-items:center;justify-content:center">
+      取得中…
+    </div>
+    <button id="gh-device-open-btn" class="btn btn-primary" style="width:100%;margin-bottom:14px;font-size:15px;padding:13px;font-weight:800;display:none">
+      🌐 GitHubを開いてコードを確認する
+    </button>
+    <div id="gh-device-status" style="font-size:12px;color:var(--text-muted);margin-bottom:16px;min-height:20px">
+      ⏳ GitHubに接続中…
+    </div>
+    <button class="btn btn-secondary" onclick="closeGhDeviceModal()">キャンセル</button>
   </div>
 </div>
 
@@ -2903,7 +2924,9 @@ function clearDirty(){
 const GH_REPO='yuki444/test';
 const GH_PATH='financial-planner/user-data.json';
 const GH_API='https://api.github.com';
+const GH_CLIENT_ID='Ov23liS7V5Kyv6F0uPDL';
 let _ghSha=null;
+let _ghDevicePolling=false;
 
 function ghPAT(){ return localStorage.getItem('fp-github-pat')||''; }
 
@@ -3010,6 +3033,86 @@ function _ghUpdateUI(pat){
   if(cb) cb.style.display=connected?'':'none';
   if(sb) sb.style.display=connected?'none':'';
   if(disp&&pat) disp.textContent=pat.slice(0,12)+'…';
+}
+
+async function ghStartDeviceAuth(){
+  const modal=document.getElementById('gh-device-modal');
+  modal.style.display='flex';
+  const codeEl=document.getElementById('gh-device-code');
+  const statusEl=document.getElementById('gh-device-status');
+  const openBtn=document.getElementById('gh-device-open-btn');
+  codeEl.textContent='取得中…';
+  statusEl.textContent='⏳ GitHubに接続中…';
+  openBtn.style.display='none';
+  _ghDevicePolling=true;
+
+  try{
+    const r=await fetch('https://github.com/login/device/code',{
+      method:'POST',
+      headers:{'Accept':'application/json','Content-Type':'application/json'},
+      body:JSON.stringify({client_id:GH_CLIENT_ID,scope:'repo'})
+    });
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const {device_code,user_code,verification_uri,expires_in,interval=5}=await r.json();
+
+    codeEl.textContent=user_code;
+    openBtn.style.display='';
+    openBtn.onclick=()=>window.open(verification_uri||'https://github.com/login/device','_blank');
+
+    const expiresAt=Date.now()+expires_in*1000;
+    let pollMs=interval*1000;
+
+    const token=await new Promise((resolve,reject)=>{
+      let tid;
+      const timerTick=setInterval(()=>{
+        if(!_ghDevicePolling){clearInterval(timerTick);return;}
+        const rem=Math.max(0,Math.round((expiresAt-Date.now())/1000));
+        const m=Math.floor(rem/60),s=rem%60;
+        statusEl.textContent=`⏳ GitHubでコードを確認してください  残り${m}:${String(s).padStart(2,'0')}`;
+        if(rem<=0){clearInterval(timerTick);clearTimeout(tid);reject(new Error('タイムアウトしました'));}
+      },1000);
+
+      const poll=async()=>{
+        if(!_ghDevicePolling){clearInterval(timerTick);return;}
+        try{
+          const tr=await fetch('https://github.com/login/oauth/access_token',{
+            method:'POST',
+            headers:{'Accept':'application/json','Content-Type':'application/json'},
+            body:JSON.stringify({client_id:GH_CLIENT_ID,device_code,grant_type:'urn:ietf:params:oauth:grant-type:device_code'})
+          });
+          const td=await tr.json();
+          if(td.access_token){clearInterval(timerTick);clearTimeout(tid);resolve(td.access_token);}
+          else if(td.error==='slow_down'){pollMs+=5000;tid=setTimeout(poll,pollMs);}
+          else if(td.error==='authorization_pending'){tid=setTimeout(poll,pollMs);}
+          else if(td.error==='expired_token'){clearInterval(timerTick);reject(new Error('コードの有効期限が切れました'));}
+          else if(td.error){clearInterval(timerTick);reject(new Error(td.error_description||td.error));}
+          else{tid=setTimeout(poll,pollMs);}
+        }catch(e){tid=setTimeout(poll,pollMs);} // network error → retry
+      };
+      tid=setTimeout(poll,pollMs);
+    });
+
+    statusEl.textContent='✅ 認証完了！データを同期します…';
+    setTimeout(()=>{
+      localStorage.setItem('fp-github-pat',token);
+      _ghUpdateUI(token);
+      modal.style.display='none';
+      showToast('✅ GitHubと接続しました！');
+      ghFetch().then(ok=>{if(ok) showToast('✅ データを読み込みました');});
+    },800);
+
+  }catch(e){
+    if(_ghDevicePolling){
+      statusEl.textContent='❌ '+e.message;
+      showToast('❌ 認証エラー: '+e.message);
+    }
+    _ghDevicePolling=false;
+  }
+}
+
+function closeGhDeviceModal(){
+  _ghDevicePolling=false;
+  document.getElementById('gh-device-modal').style.display='none';
 }
 
 function saveAll(){
@@ -4445,6 +4548,10 @@ function init(){
     if(document.hidden) return;
     if(refreshAgesFromBirthdates()) showToast('📅 生年月日から年齢を自動更新しました');
     if(ghPAT()) ghFetch();
+    // スマホでGitHub認証後に戻ってきたとき、ポーリング中なら即チェック
+    if(_ghDevicePolling && document.getElementById('gh-device-modal')?.style.display!=='none'){
+      // polling loop handles itself; just ensure modal is visible
+    }
   });
   initMoneyInputs();
   renderMembers();
