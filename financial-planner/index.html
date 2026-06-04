@@ -2475,121 +2475,259 @@ function toggleDetailGroup(btn){
 function renderAdvice(){
   syncFromDOM();
   const self=data.members.find(m=>m.role==='self');
+  const spouse=data.members.find(m=>m.role==='spouse');
+  const children=data.members.filter(m=>m.role==='child');
   const selfAge=self?.age||35;
-  const retireAge=data.settings.retireAge;
+  const retireAge=data.settings.retireAge||65;
+  const endAge=data.settings.endAge||90;
   const monthlyIncome=data.income.self+data.income.spouse+data.income.side+data.income.investment+(data.income.bonusSelf+data.income.bonusSpouse)/12;
   const monthlyExp=Object.values(data.expenses).reduce((a,b)=>a+b,0);
   const surplus=monthlyIncome-monthlyExp;
   const savingRate=monthlyIncome>0?(data.savings.invest+data.savings.deposit)/monthlyIncome*100:0;
+  const cash=data.assets.cash;
+  const fixedDeposit=data.assets.fixedDeposit;
+  const stocks=data.assets.stocks;
+  const ideco=data.assets.ideco;
   const totalA=Object.values(data.assets).reduce((a,b)=>a+b,0);
   const totalD=data.debts.mortgage+data.debts.car+data.debts.education+data.debts.consumer+data.debts.other;
   const netWorth=totalA-totalD;
-  const cash=data.assets.cash;
   const emergencyMonths=monthlyExp>0?cash/monthlyExp:0;
   const highRiskDebt=data.debts.consumer+data.debts.car;
-  const investRatio=(data.assets.stocks+data.assets.ideco)/(totalA||1)*100;
+  const investRatio=(stocks+ideco)/(totalA||1)*100;
+  const cashRatio=(cash+fixedDeposit)/(totalA||1)*100;
+  const ir=data.settings.investReturn/100;
+  const yearsToRetire=retireAge-selfAge;
+  const nisaMonthlyMax=300000;
+  const idecoMax=23000;
   const simBase=simulate(data.plans[0]);
   const retireRow=simBase.find(r=>r.isRetired)||simBase[simBase.length-1];
   const lastRow=simBase[simBase.length-1];
   const depletionRow=simBase.find(r=>r.netWorth<0);
-  const targetRetire=monthlyExp*12*25; // 4% rule
-  const nisaMonthlyMax=300000; // 年360万÷12
-  const idecoMax=23000;
+  const liquidDeplRow=simBase.find(r=>r.financialAssets<0);
+  const targetRetire=monthlyExp*12*25;
   const advice=[];
 
-  // 緊急資金
+  // ===== 基礎 =====
   if(emergencyMonths<3){
-    advice.push({type:'alert',icon:'🚨',title:'緊急資金が不足しています',
+    advice.push({section:'基礎',type:'alert',icon:'🚨',title:'緊急資金が不足しています',
       desc:`現金・預金${fmtM(cash)}は生活費の${emergencyMonths.toFixed(1)}ヶ月分です。最低3ヶ月分（約${fmtM(monthlyExp*3)}）を優先的に確保してください。この資金は絶対に投資に回さないことが原則です。`});
   } else if(emergencyMonths<6){
-    advice.push({type:'warn',icon:'⚠️',title:'緊急資金はほぼ適正です',
+    advice.push({section:'基礎',type:'warn',icon:'⚠️',title:'緊急資金はほぼ適正です',
       desc:`${emergencyMonths.toFixed(1)}ヶ月分（${fmtM(cash)}）確保できています。6ヶ月分（${fmtM(monthlyExp*6)}）まで積み増すと、より安心です。`});
   } else {
-    advice.push({type:'good',icon:'✅',title:'緊急資金は十分です',
-      desc:`生活費${emergencyMonths.toFixed(1)}ヶ月分（${fmtM(cash)}）を確保しています。安心できる水準です。余剰現金は投資で働かせましょう。`});
+    advice.push({section:'基礎',type:'good',icon:'✅',title:'緊急資金は十分です',
+      desc:`生活費${emergencyMonths.toFixed(1)}ヶ月分（${fmtM(cash)}）を確保しています。余剰現金は投資で働かせましょう。`});
   }
 
-  // 月次収支
   if(surplus<0){
-    advice.push({type:'alert',icon:'🔴',title:`毎月${fmt(Math.abs(Math.round(surplus)))}円の赤字です`,
+    advice.push({section:'基礎',type:'alert',icon:'🔴',title:`毎月${fmt(Math.abs(Math.round(surplus)))}円の赤字です`,
       desc:`このまま続くと年間${fmtM(Math.abs(surplus)*12)}の資産減少になります。固定費（保険・通信費・サブスク・住居費）の見直しが最優先です。変動費より固定費削減の方が効果が大きく、一度削れると継続的な節約になります。`});
   } else if(surplus<50000){
-    advice.push({type:'warn',icon:'💸',title:'月次黒字はありますが余裕が少ないです',
+    advice.push({section:'基礎',type:'warn',icon:'💸',title:'月次黒字はありますが余裕が少ないです',
       desc:`月${fmt(Math.round(surplus))}円の黒字です。急な出費に備え、まず緊急資金を固めましょう。収入増・固定費削減でもう少し余裕を作ることをお勧めします。`});
   } else {
-    advice.push({type:'good',icon:'💹',title:`月${fmt(Math.round(surplus))}円の黒字です`,
+    advice.push({section:'基礎',type:'good',icon:'💹',title:`月${fmt(Math.round(surplus))}円の黒字です`,
       desc:`収支はしっかりプラスです。この余剰をNISAやiDeCoで効率よく運用できていれば理想的です。`});
   }
 
-  // 貯蓄率
   if(savingRate<10){
-    advice.push({type:'alert',icon:'📉',title:`貯蓄率${savingRate.toFixed(1)}%は低水準です`,
+    advice.push({section:'基礎',type:'alert',icon:'📉',title:`貯蓄率${savingRate.toFixed(1)}%は低水準です`,
       desc:`手取り収入の10〜20%以上の積立が推奨されます。まずNISAで月${fmt(nisaMonthlyMax)}円、iDeCoで月${fmt(idecoMax)}円から始めると税制優遇を最大活用できます。`});
   } else if(savingRate<20){
-    advice.push({type:'info',icon:'📊',title:`貯蓄率${savingRate.toFixed(1)}%、20%を目指しましょう`,
+    advice.push({section:'基礎',type:'info',icon:'📊',title:`貯蓄率${savingRate.toFixed(1)}%、20%を目指しましょう`,
       desc:`現在は及第点です。NISA（年360万円枠）・iDeCoを活用し、あと月${fmt(Math.round((monthlyIncome*0.2)-(data.savings.invest+data.savings.deposit)))}円増やせると20%に達します。`});
   } else {
-    advice.push({type:'good',icon:'🎯',title:`貯蓄率${savingRate.toFixed(1)}%は優秀です`,
+    advice.push({section:'基礎',type:'good',icon:'🎯',title:`貯蓄率${savingRate.toFixed(1)}%は優秀です`,
       desc:`非常に良好な水準です。NISA・iDeCoの非課税枠を使い切れているか確認しましょう。`});
   }
 
-  // 高金利負債
   if(highRiskDebt>0){
-    advice.push({type:'alert',icon:'💳',title:'高金利負債の早期返済を最優先に',
+    advice.push({section:'基礎',type:'alert',icon:'💳',title:'高金利負債の早期返済を最優先に',
       desc:`カード・消費者・自動車ローン残高が${fmtM(highRiskDebt)}あります。これらは年利3〜15%と高く、投資リターン（想定${data.settings.investReturn}%）を上回ることも多いです。まずこれらを完済してから投資を本格化させてください。`});
   }
 
-  // 退職資産
-  if(retireRow.netWorth<targetRetire){
-    const gap=targetRetire-retireRow.netWorth;
-    const yearsLeft=retireAge-selfAge;
-    const extraPerMonth=yearsLeft>0?Math.round(gap/(yearsLeft*12)):0;
-    advice.push({type:'warn',icon:'🏖️',title:'退職時資産が目標の25年分生活費に届かない見込みです',
-      desc:`退職時（${retireRow.age}歳）純資産見込み${fmtM(retireRow.netWorth)}に対し、目標（生活費25年分）は${fmtM(targetRetire)}です。差額${fmtM(gap)}を埋めるため、月${fmt(extraPerMonth)}円の追加積立または生活費削減が必要です。`});
+  // ===== 税制優遇 =====
+  if(ideco===0&&selfAge<60){
+    advice.push({section:'税制優遇',type:'warn',icon:'🏛️',title:'iDeCoをまだ活用していません',
+      desc:`iDeCoは掛金が全額所得控除になる強力な節税手段です。会社員なら月${fmt(idecoMax)}円（年最大${fmt(idecoMax*12)}円）の掛金で、所得税・住民税が年${fmt(Math.round(idecoMax*12*0.2))}〜${fmt(Math.round(idecoMax*12*0.3))}円節税できます。${selfAge}歳から始めれば${60-selfAge}年間の複利運用が可能です。`});
+  } else if(ideco>0&&selfAge<60){
+    const idecoYield=Math.round(ideco*(Math.pow(1+ir,60-selfAge)-1));
+    advice.push({section:'税制優遇',type:'good',icon:'✅',title:`iDeCo残高${fmtM(ideco)}を運用中です`,
+      desc:`${60-selfAge}年後（60歳）には年率${data.settings.investReturn}%想定で約${fmtM(ideco+idecoYield)}になる見込みです。拠出額の引き上げも検討しましょう（上限：会社員${fmt(idecoMax)}円/月、自営業${fmt(68000)}円/月）。`});
+  }
+
+  const nisaAccounts=data.tradeLog.some(t=>t.account&&t.account.includes('NISA'));
+  if(!nisaAccounts&&selfAge<55){
+    advice.push({section:'税制優遇',type:'warn',icon:'📋',title:'NISA口座での取引が見当たりません',
+      desc:'NISA（新NISA）は年360万円まで非課税で運用できます。つみたて投資枠（月10万円）は低コストインデックスファンドの積立に最適です。20〜30年の長期積立で、運用益・配当が全額非課税になります。'});
+  } else if(nisaAccounts){
+    advice.push({section:'税制優遇',type:'good',icon:'🎊',title:'NISA口座を活用しています',
+      desc:'NISA口座での取引が記録されています。新NISAの年間投資枠（つみたて投資枠120万円＋成長投資枠240万円＝計360万円）と生涯非課税枠（1800万円）をフルに活用することを目指しましょう。'});
+  }
+
+  // ===== 資産配分 =====
+  const targetStockRatio=Math.max(20,100-selfAge);
+  if(investRatio<targetStockRatio-15&&selfAge<60){
+    advice.push({section:'資産配分',type:'warn',icon:'⚖️',title:`株式比率${investRatio.toFixed(0)}%は年齢対比で低めです`,
+      desc:`「100引く年齢」ルールでは${selfAge}歳の目安は約${targetStockRatio}%です。現在の投資性資産比率は${investRatio.toFixed(0)}%で約${(targetStockRatio-investRatio).toFixed(0)}ポイント低い水準です。インフレ（年2〜3%）に対抗するため、長期では株式比率を高めることが有効です。`});
+  } else if(investRatio>targetStockRatio+15&&selfAge>55){
+    advice.push({section:'資産配分',type:'warn',icon:'⚖️',title:`株式比率${investRatio.toFixed(0)}%は退職前としてやや高めです`,
+      desc:`${selfAge}歳の推奨目安は約${targetStockRatio}%です。退職が近づいたら株式比率を徐々に引き下げ、暴落時の影響を限定しましょう。債券・定期預金・金などへのリバランスを検討してください。`});
   } else {
-    advice.push({type:'good',icon:'🎉',title:'退職資産の目標達成見込みです',
-      desc:`退職時（${retireRow.age}歳）純資産${fmtM(retireRow.netWorth)}は、生活費25年分の目標${fmtM(targetRetire)}を上回っています。現在の計画を維持しましょう。`});
+    advice.push({section:'資産配分',type:'good',icon:'✅',title:`株式比率${investRatio.toFixed(0)}%は適正水準です`,
+      desc:`「100引く年齢」ルール目安（${targetStockRatio}%前後）に沿った配分です。年1回のリバランスで適正水準を維持しましょう。`});
   }
 
-  // 金融資産枯渇（純資産はプラスでも流動資産がマイナスになる早期警告）
-  const liquidDeplRow=simBase.find(r=>r.financialAssets<0);
-  // 資産枯渇
-  if(depletionRow){
-    advice.push({type:'alert',icon:'📉',title:`${depletionRow.age}歳頃に資産が枯渇する見込みです`,
-      desc:`現在のシナリオでは${depletionRow.year}年頃（${depletionRow.age}歳）に純資産がマイナスになります。年金の繰り下げ受給（75歳まで最大84%増）、退職後の生活費削減（10〜20%）、パートタイム収入の追加を検討してください。`});
-  } else if(liquidDeplRow){
-    advice.push({type:'warn',icon:'⚠️',title:`${liquidDeplRow.age}歳頃に流動資産が枯渇する見込みです`,
-      desc:`純資産はプラスですが、${liquidDeplRow.age}歳頃に現金・株式などの流動資産がマイナスになります。不動産などの資産は残りますが、日常の生活費を賄えなくなる可能性があります。売却・取り崩しの検討を。`});
-  } else if(lastRow.netWorth>0){
-    advice.push({type:'good',icon:'🏆',title:`${lastRow.age}歳まで資産が持続します`,
-      desc:`シミュレーション終端（${lastRow.age}歳）時点でも純資産${fmtM(lastRow.netWorth)}が残ります。資産の長期持続性は確保されています。`});
+  if(cashRatio>40&&totalA>500*10000){
+    advice.push({section:'資産配分',type:'warn',icon:'💴',title:`現金・預金が資産の${cashRatio.toFixed(0)}%と過剰です`,
+      desc:`現金・定期預金が${fmtM(cash+fixedDeposit)}（資産全体の${cashRatio.toFixed(0)}%）あります。年2%のインフレが続くと、10年後には実質価値が約18%目減りします。緊急資金を超える部分はNISA・iDeCoで運用することを検討してください。`});
   }
 
-  // NISA/iDeCo活用
-  if(investRatio<25&&selfAge<55){
-    advice.push({type:'info',icon:'📈',title:'投資性資産の比率を高める余地があります',
-      desc:`投資性資産（株式・投信・iDeCo）の比率は${investRatio.toFixed(0)}%です。退職まで${retireAge-selfAge}年ある場合、NISA（つみたて投資枠：月10万円、成長投資枠：年240万円）やiDeCo（月最大${fmt(idecoMax)}〜68,000円）の活用でインフレに強いポートフォリオを構築できます。`});
-  }
-
-  // 保険過多
   if(data.expenses.insurance>monthlyIncome*0.1){
-    advice.push({type:'warn',icon:'🛡️',title:'保険料が月収の10%を超えています',
+    advice.push({section:'資産配分',type:'warn',icon:'🛡️',title:'保険料が月収の10%を超えています',
       desc:`月${fmt(data.expenses.insurance)}円（収入の${(data.expenses.insurance/monthlyIncome*100).toFixed(0)}%）が保険料です。「必要な保障を最低コストで」が鉄則。掛け捨て生命保険の見直し、不要な特約の削除、貯蓄型保険の解約検討をお勧めします。`});
   }
 
-  // 複数シナリオ比較
-  if(data.plans.length>1){
-    const sims=data.plans.map(p=>({name:p.name,rows:simulate(p)}));
-    const comparison=sims.map(s=>`${s.name}: 退職時${fmtM(s.rows.find(r=>r.isRetired)?.netWorth||0)}`).join(' / ');
-    advice.push({type:'info',icon:'🔀',title:'シナリオ間の退職資産比較',
-      desc:`${comparison}。シミュレーションページで各シナリオの長期推移を確認し、最善のライフプランを選びましょう。`});
+  // ===== 退職計画 =====
+  if(retireRow.netWorth<targetRetire){
+    const gap=targetRetire-retireRow.netWorth;
+    const extraPerMonth=yearsToRetire>0?Math.round(gap/(yearsToRetire*12)):0;
+    advice.push({section:'退職計画',type:'warn',icon:'🏖️',title:'退職時資産が目標の25年分生活費に届かない見込みです',
+      desc:`退職時（${retireRow.age}歳）純資産見込み${fmtM(retireRow.netWorth)}に対し、目標（生活費25年分）は${fmtM(targetRetire)}です。差額${fmtM(gap)}を埋めるため、月${fmt(extraPerMonth)}円の追加積立または生活費削減が必要です。`});
+  } else {
+    advice.push({section:'退職計画',type:'good',icon:'🎉',title:'退職資産の目標達成見込みです',
+      desc:`退職時（${retireRow.age}歳）純資産${fmtM(retireRow.netWorth)}は、生活費25年分の目標${fmtM(targetRetire)}を上回っています。現在の計画を維持しましょう。`});
   }
 
-  document.getElementById('advice-content').innerHTML=advice.map(a=>`
-    <div class="advice-item ${a.type}">
-      <div class="advice-icon">${a.icon}</div>
-      <div class="advice-content"><div class="title">${a.title}</div><div class="desc">${a.desc}</div></div>
-    </div>`).join('');
+  if(data.savings.pensionSelf>0&&selfAge<65){
+    const p0=data.savings.pensionSelf;
+    const p70=Math.round(p0*1.42);
+    const p75=Math.round(p0*1.84);
+    advice.push({section:'退職計画',type:'info',icon:'👴',title:'年金繰り下げ受給の効果を検討しましょう',
+      desc:`65歳受給${fmt(p0)}円/月に対し、70歳繰下げで${fmt(p70)}円/月（+${fmt(p70-p0)}円）、75歳繰下げで${fmt(p75)}円/月（+${fmt(p75-p0)}円）になります。シミュレーション上の資産が十分あれば、繰り下げで長生きリスクへの備えが強化されます。`});
+  }
+
+  if(retireAge<65){
+    const bridgeYears=65-retireAge;
+    const bridgeCost=monthlyExp*12*bridgeYears;
+    advice.push({section:'退職計画',type:'warn',icon:'🌉',title:`早期退職後の年金空白期間（${retireAge}〜65歳）に注意`,
+      desc:`${retireAge}歳退職から年金受給（65歳）まで${bridgeYears}年間は年金収入がありません。この期間の生活費として最低${fmtM(bridgeCost)}が必要です。退職金・NISA取り崩し計画を事前に策定してください。`});
+  }
+
+  if(depletionRow){
+    advice.push({section:'退職計画',type:'alert',icon:'📉',title:`${depletionRow.age}歳頃に資産が枯渇する見込みです`,
+      desc:`現在のシナリオでは${depletionRow.year}年頃（${depletionRow.age}歳）に純資産がマイナスになります。年金の繰り下げ受給（75歳まで最大84%増）、退職後の生活費削減（10〜20%）、パートタイム収入の追加を検討してください。`});
+  } else if(liquidDeplRow){
+    advice.push({section:'退職計画',type:'warn',icon:'⚠️',title:`${liquidDeplRow.age}歳頃に流動資産が枯渇する見込みです`,
+      desc:`純資産はプラスですが、${liquidDeplRow.age}歳頃に現金・株式などの流動資産がマイナスになります。不動産などの資産は残りますが、日常の生活費を賄えなくなる可能性があります。売却・取り崩しの検討を。`});
+  } else {
+    advice.push({section:'退職計画',type:'good',icon:'🏆',title:`${lastRow.age}歳まで資産が持続します`,
+      desc:`シミュレーション終端（${lastRow.age}歳）時点でも純資産${fmtM(lastRow.netWorth)}が残ります。資産の長期持続性は確保されています。`});
+  }
+
+  const fireRow=simBase.find(r=>r.financialAssets>=monthlyExp*12*25);
+  if(fireRow&&fireRow.age<retireAge){
+    advice.push({section:'退職計画',type:'good',icon:'🔥',title:`FIRE達成の可能性があります（${fireRow.age}歳頃）`,
+      desc:`現在の計画では${fireRow.age}歳頃に金融資産が生活費の25年分（${fmtM(monthlyExp*12*25)}）を超える見込みです。希望退職年齢（${retireAge}歳）より${retireAge-fireRow.age}年早いFIRE達成の可能性があります。`});
+  }
+
+  // ===== 教育費 =====
+  if(children.length>0){
+    children.forEach(child=>{
+      const childAge=child.age||0;
+      const yearsToUniv=Math.max(0,18-childAge);
+      const univCost=4*150*10000;
+      const savedForChild=yearsToUniv>0?Math.round(univCost/yearsToUniv/12):0;
+      if(yearsToUniv>0&&yearsToUniv<=10){
+        const urgency=yearsToUniv<=5?'alert':'warn';
+        const urgencyIcon=yearsToUniv<=5?'🚨':'🎓';
+        advice.push({section:'教育費',type:urgency,icon:urgencyIcon,title:`${child.name||'お子様'}の大学入学まで${yearsToUniv}年です`,
+          desc:`大学4年間の費用（私立目安）は約${fmtM(univCost)}です。今から月${fmt(savedForChild)}円の積立（ジュニアNISA・つみたてNISA）が必要です。${yearsToUniv<=5?'入学が近く、確保できているか急ぎ確認を。':''}`});
+      } else if(yearsToUniv<=0){
+        advice.push({section:'教育費',type:'info',icon:'🎓',title:`${child.name||'お子様'}は大学生・社会人世代です`,
+          desc:'教育費の支出が続いている可能性があります。教育ローンや奨学金の利用状況も含めて家族で確認しましょう。'});
+      }
+    });
+  } else {
+    advice.push({section:'教育費',type:'info',icon:'👨‍👩‍👧',title:'お子様の情報がありません',
+      desc:'「家族構成」タブでお子様を登録すると、大学費用の準備時期・必要積立額を自動計算します。'});
+  }
+
+  // ===== 住宅 =====
+  if(data.debts.mortgage>0){
+    const mortgageRate=data.settings.mortgageRate||1.5;
+    if(mortgageRate<ir){
+      advice.push({section:'住宅',type:'info',icon:'🏠',title:'住宅ローンより投資リターンが高い可能性があります',
+        desc:`住宅ローン金利（${mortgageRate}%）が投資想定リターン（${data.settings.investReturn}%）を下回っています。繰上げ返済より余剰資金の投資（NISA等）を優先する選択も合理的です。ただし精神的安心感や変動金利リスクも考慮してください。`});
+    } else {
+      advice.push({section:'住宅',type:'warn',icon:'🏠',title:'住宅ローン残高が残っています',
+        desc:`残債${fmtM(data.debts.mortgage)}があります。ローン金利（${mortgageRate}%）が投資リターンを上回る場合は繰上げ返済を優先してください。固定金利か変動金利かも再確認しましょう。`});
+    }
+  } else {
+    const homePlanEvent=data.plans[0]?.events?.find(e=>e.type==='buy-home');
+    if(homePlanEvent){
+      advice.push({section:'住宅',type:'info',icon:'🏠',title:'住宅購入イベントが計画されています',
+        desc:`${homePlanEvent.age||'?'}歳頃の住宅購入が計画されています。頭金・諸費用（物件価格の5〜10%）を現金で用意し、残りをローンで賄う計画を具体化させましょう。`});
+    } else {
+      advice.push({section:'住宅',type:'info',icon:'🏠',title:'住宅ローンは完済または未取得です',
+        desc:'住宅ローンの残債がありません。住宅購入を検討中の場合はシミュレーションのイベントに「住宅購入」を追加して影響を確認しましょう。'});
+    }
+  }
+
+  // ===== 取引実績 =====
+  const trades=data.tradeLog||[];
+  if(trades.length>0){
+    const totalBuyCost=trades.filter(t=>t.type==='buy').reduce((s,t)=>s+t.qty*t.price+(t.fee||0),0);
+    const totalRealGain=trades.filter(t=>t.type==='sell').reduce((s,t)=>s+(t.realizedGain||0),0);
+    const totalDividends=trades.filter(t=>t.type==='dividend').reduce((s,t)=>s+(t.realizedGain||0),0);
+    const totalGain=totalRealGain+totalDividends;
+    const gainRate=totalBuyCost>0?totalGain/totalBuyCost*100:0;
+    const tradeCount=trades.filter(t=>t.type==='buy'||t.type==='sell').length;
+    const divCount=trades.filter(t=>t.type==='dividend').length;
+    advice.push({section:'取引実績',type:totalGain>=0?'good':'alert',icon:'📊',title:`取引${tradeCount}件、配当${divCount}件の実績があります`,
+      desc:`累積確定損益（売却＋配当）は${totalGain>=0?'＋':''}${fmtM(totalGain)}（売却益${fmtM(totalRealGain)}＋配当${fmtM(totalDividends)}）です。購入コスト合計比で約${gainRate.toFixed(1)}%の利益率です。`});
+    const thisYear=new Date().getFullYear();
+    const lastYearDivAmt=trades.filter(t=>t.type==='dividend'&&t.date&&t.date.startsWith(String(thisYear-1))).reduce((s,t)=>s+(t.realizedGain||0),0);
+    const recentDivAmt=trades.filter(t=>t.type==='dividend'&&t.date&&t.date.startsWith(String(thisYear))).reduce((s,t)=>s+(t.realizedGain||0),0);
+    if(lastYearDivAmt>0||recentDivAmt>0){
+      const dispAmt=lastYearDivAmt>0?lastYearDivAmt:recentDivAmt;
+      const dispYear=lastYearDivAmt>0?thisYear-1:thisYear;
+      advice.push({section:'取引実績',type:'info',icon:'💰',title:`${dispYear}年の配当金受領実績があります`,
+        desc:`${dispYear}年の配当受領合計は${fmtM(dispAmt)}です。配当をNISA口座で再投資することで複利効果を最大化できます。`});
+    }
+  } else {
+    advice.push({section:'取引実績',type:'info',icon:'📋',title:'取引記録がまだありません',
+      desc:'「取引ログ」タブで取引・配当を記録すると、累積損益の推移や配当実績の分析ができます。'});
+  }
+
+  // ===== シナリオ =====
+  if(data.plans.length>1){
+    const sims=data.plans.map(p=>({name:p.name,rows:simulate(p)}));
+    const retireAmts=sims.map(s=>({name:s.name,amt:s.rows.find(r=>r.isRetired)?.netWorth||0}));
+    const best=retireAmts.reduce((a,b)=>a.amt>b.amt?a:b);
+    const worst=retireAmts.reduce((a,b)=>a.amt<b.amt?a:b);
+    const spread=best.amt-worst.amt;
+    advice.push({section:'シナリオ',type:'info',icon:'🔀',title:'複数シナリオの退職時資産比較',
+      desc:`退職時純資産：${retireAmts.map(s=>`${s.name} ${fmtM(s.amt)}`).join(' / ')}。最良（${best.name}）と最悪（${worst.name}）の差は${fmtM(spread)}です。シミュレーションページで各シナリオの長期推移を確認し、最善のライフプランを選びましょう。`});
+    const deplCount=sims.filter(s=>s.rows.some(r=>r.netWorth<0)).length;
+    if(deplCount>0){
+      advice.push({section:'シナリオ',type:deplCount===sims.length?'alert':'warn',icon:'📉',title:`${sims.length}シナリオのうち${deplCount}つで資産枯渇リスクがあります`,
+        desc:'悲観的なシナリオでは資産が枯渇する可能性があります。収入・支出・運用リターンの前提を再検討し、堅牢なプランを策定してください。'});
+    }
+  } else {
+    advice.push({section:'シナリオ',type:'info',icon:'🔀',title:'複数シナリオで感度分析をしましょう',
+      desc:'「シミュレーション」タブで楽観・標準・悲観の3シナリオを作成すると、リターンや支出の変動がどれだけ影響するか一目で比較できます。'});
+  }
+
+  const sections=[...new Set(advice.map(a=>a.section))];
+  const SECTION_ICON={基礎:'🏗️',税制優遇:'🏛️',資産配分:'⚖️',退職計画:'🏖️',教育費:'🎓',住宅:'🏠',取引実績:'📊',シナリオ:'🔀'};
+  document.getElementById('advice-content').innerHTML=sections.map(sec=>{
+    const items=advice.filter(a=>a.section===sec);
+    return `<div style="margin-bottom:24px">
+      <div style="font-size:13px;font-weight:800;padding:6px 12px;background:var(--surface);border-bottom:2px solid var(--border);border-radius:6px 6px 0 0;color:var(--text)">${SECTION_ICON[sec]||'📌'} ${sec}</div>
+      ${items.map(a=>`<div class="advice-item ${a.type}"><div class="advice-icon">${a.icon}</div><div class="advice-content"><div class="title">${a.title}</div><div class="desc">${a.desc}</div></div></div>`).join('')}
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
