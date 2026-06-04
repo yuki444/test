@@ -3,6 +3,7 @@ name: Enable GitHub Pages
 on:
   push:
     branches: [gh-pages]
+  workflow_dispatch:
 
 permissions:
   pages: write
@@ -13,25 +14,48 @@ jobs:
   enable-pages:
     runs-on: ubuntu-latest
     steps:
-      - name: Enable GitHub Pages via API
+      - name: Configure GitHub Pages source to gh-pages branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
-          # Pages が既に有効か確認
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+          # 現在のPages設定を取得してソースブランチを確認
+          CURRENT=$(curl -s \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/pages)
+            https://api.github.com/repos/$REPO/pages)
 
-          if [ "$STATUS" = "200" ]; then
-            echo "Pages already enabled."
+          SOURCE=$(echo "$CURRENT" | python3 -c "
+          import sys,json
+          d=json.load(sys.stdin)
+          print(d.get('source',{}).get('branch','none'))
+          " 2>/dev/null || echo "none")
+
+          echo "Current Pages source branch: $SOURCE"
+
+          if [ "$SOURCE" = "gh-pages" ]; then
+            echo "Already correctly configured."
+            echo "URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
           else
-            echo "Enabling Pages from gh-pages branch..."
-            curl -s -X POST \
+            # Pages未設定 → 新規作成を試みる
+            echo "Setting Pages source to gh-pages branch..."
+            RESULT=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
               -H "Authorization: Bearer $GH_TOKEN" \
               -H "Accept: application/vnd.github+json" \
               -H "Content-Type: application/json" \
-              https://api.github.com/repos/${{ github.repository }}/pages \
-              -d '{"source":{"branch":"gh-pages","path":"/"}}'
-            echo "Done. URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+              https://api.github.com/repos/$REPO/pages \
+              -d '{"source":{"branch":"gh-pages","path":"/"}}')
+
+            if [ "$RESULT" = "409" ]; then
+              # 既に存在するが別ソース設定 → PUTで上書き更新
+              echo "Pages exists with different source. Updating via PUT..."
+              curl -s -X PUT \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                -H "Content-Type: application/json" \
+                https://api.github.com/repos/$REPO/pages \
+                -d '{"source":{"branch":"gh-pages","path":"/"}}'
+            fi
+            echo "Done."
+            echo "URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
           fi
