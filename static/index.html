@@ -762,37 +762,37 @@
     </div>
     <div class="p-5 space-y-4">
       <div class="bg-blue-950/50 border border-blue-800/40 rounded-xl px-4 py-3 text-xs text-blue-300 space-y-1.5 leading-relaxed">
-        <p class="font-semibold text-blue-200">無料で使えるクラウドストレージ（JSONBin.io）を使います</p>
+        <p class="font-semibold text-blue-200">GitHubの無料機能（Gist）でデータを同期します</p>
         <ol class="list-decimal list-inside space-y-1 text-blue-300/80">
-          <li><a href="https://jsonbin.io" target="_blank" class="underline text-blue-400">jsonbin.io</a> で無料アカウント作成</li>
-          <li>「NEW BIN」→ 内容は <code class="bg-blue-900/60 px-1 rounded">{}</code> のまま → Create</li>
-          <li>表示された <strong class="text-blue-200">BIN ID</strong> をコピー</li>
-          <li>「API KEYS」→ Master Key をコピー</li>
+          <li><a href="https://gist.github.com" target="_blank" class="underline text-blue-400">gist.github.com</a> → 「+ New gist」</li>
+          <li>ファイル名: <code class="bg-blue-900/60 px-1 rounded">portfolio.json</code>、内容: <code class="bg-blue-900/60 px-1 rounded">{}</code> → 「Create secret gist」</li>
+          <li>URLの末尾の英数字が <strong class="text-blue-200">Gist ID</strong></li>
+          <li><a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank" class="underline text-blue-400">github.com/settings/tokens/new</a> → スコープ「gist」のみ✓ → Generate → コピー</li>
         </ol>
-        <p class="text-blue-400/70">※ キーはこのデバイスのブラウザにのみ保存されます</p>
+        <p class="text-blue-400/70">※ トークンはこのデバイスのブラウザにのみ保存されます</p>
       </div>
       <div>
-        <label class="block text-xs text-slate-400 mb-1.5">Bin ID</label>
-        <input type="text" x-model="sf.binId" placeholder="65f2a3b4c3e7d82b3f7a1234" class="fi font-mono text-sm" />
+        <label class="block text-xs text-slate-400 mb-1.5">Gist ID</label>
+        <input type="text" x-model="sf.gistId" placeholder="abc123def456..." class="fi font-mono text-sm" />
       </div>
       <div>
-        <label class="block text-xs text-slate-400 mb-1.5">Master Key (API Key)</label>
-        <input type="password" x-model="sf.apiKey" placeholder="$2b$12$..." class="fi font-mono text-sm" />
+        <label class="block text-xs text-slate-400 mb-1.5">GitHub Token（gistスコープ）</label>
+        <input type="password" x-model="sf.token" placeholder="ghp_..." class="fi font-mono text-sm" />
       </div>
       <div x-show="sf.testMsg" class="text-xs px-3 py-2 rounded-lg"
            :class="sf.testOk ? 'bg-emerald-900/40 text-emerald-300 border border-emerald-700/40' : 'bg-red-900/40 text-red-300 border border-red-700/40'"
            x-text="sf.testMsg"></div>
       <div x-show="syncStatus!=='local'" class="bg-slate-800/50 border border-slate-700/40 rounded-xl px-4 py-2.5 text-xs text-slate-400 flex items-center justify-between">
-        <span>現在の接続: <span class="text-white font-mono" x-text="sf.savedBinId ? sf.savedBinId.slice(0,12)+'…' : ''"></span></span>
+        <span>接続中: <span class="text-white font-mono" x-text="sf.savedGistId ? sf.savedGistId.slice(0,12)+'…' : ''"></span></span>
         <button @click="disconnectSync()" class="text-red-400 hover:text-red-300 font-medium transition-colors">切断</button>
       </div>
     </div>
     <div class="flex gap-3 px-5 py-4 border-t border-[#334155]">
-      <button @click="testSync()" :disabled="sf.testing||!sf.binId||!sf.apiKey"
+      <button @click="testSync()" :disabled="sf.testing||!sf.gistId||!sf.token"
         class="flex-1 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-sm font-medium disabled:opacity-40 flex items-center justify-center gap-2">
         <span x-show="sf.testing" class="spinner"></span>テスト接続
       </button>
-      <button @click="saveSettings()" :disabled="!sf.binId||!sf.apiKey"
+      <button @click="saveSettings()" :disabled="!sf.gistId||!sf.token"
         class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white disabled:opacity-40">
         保存して同期開始
       </button>
@@ -803,25 +803,27 @@
 
 <script>
 // ════════════════════════════════════════
-// Cloud Sync (JSONBin.io)
+// Cloud Sync (GitHub Gist — 永久無料)
 // ════════════════════════════════════════
 const CloudSync = {
-  get binId() { return localStorage.getItem('cfg_bin') || ''; },
-  get apiKey() { return localStorage.getItem('cfg_key') || ''; },
-  isReady()   { return !!(this.binId && this.apiKey); },
+  get gistId() { return localStorage.getItem('cfg_gist')  || ''; },
+  get token()  { return localStorage.getItem('cfg_token') || ''; },
+  isReady()    { return !!(this.gistId && this.token); },
+  _file:       'portfolio.json',
+  _headers()   { return { 'Authorization': `token ${this.token}`, 'Accept': 'application/vnd.github+json' }; },
 
   async pull() {
     if (!this.isReady()) return false;
     const ac = new AbortController();
     const tid = setTimeout(()=>ac.abort(), 8000);
     try {
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}/latest`, {
-        headers: {'X-Master-Key': this.apiKey, 'X-Bin-Meta': 'false'},
-        signal: ac.signal,
-      });
+      const r = await fetch(`https://api.github.com/gists/${this.gistId}`, { headers: this._headers(), signal: ac.signal });
       clearTimeout(tid);
       if (!r.ok) return false;
-      const d = await r.json();
+      const j = await r.json();
+      const content = j.files?.[this._file]?.content;
+      if (!content) return false;
+      const d = JSON.parse(content);
       if (d.holdings) localStorage.setItem('pf_holdings', JSON.stringify(d.holdings));
       if (d.trades)   localStorage.setItem('pf_trades',   JSON.stringify(d.trades));
       if (d.watchlist)localStorage.setItem('pf_watchlist',JSON.stringify(d.watchlist));
@@ -832,32 +834,33 @@ const CloudSync = {
 
   async push() {
     if (!this.isReady()) return false;
-    const body = JSON.stringify({
+    const data = {
       holdings: JSON.parse(localStorage.getItem('pf_holdings')||'[]'),
       trades:   JSON.parse(localStorage.getItem('pf_trades')  ||'[]'),
       watchlist:JSON.parse(localStorage.getItem('pf_watchlist')||'[]'),
       events:   JSON.parse(localStorage.getItem('pf_events')  ||'[]'),
-    });
+    };
     const ac = new AbortController();
     const tid = setTimeout(()=>ac.abort(), 8000);
     try {
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}`, {
-        method: 'PUT',
-        headers: {'Content-Type':'application/json', 'X-Master-Key': this.apiKey},
-        body, signal: ac.signal,
+      const r = await fetch(`https://api.github.com/gists/${this.gistId}`, {
+        method: 'PATCH',
+        headers: { ...this._headers(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ files: { [this._file]: { content: JSON.stringify(data) } } }),
+        signal: ac.signal,
       });
       clearTimeout(tid);
       return r.ok;
     } catch(e) { clearTimeout(tid); return false; }
   },
 
-  configure(binId, apiKey) {
-    localStorage.setItem('cfg_bin', binId);
-    localStorage.setItem('cfg_key', apiKey);
+  configure(gistId, token) {
+    localStorage.setItem('cfg_gist',  gistId);
+    localStorage.setItem('cfg_token', token);
   },
   disconnect() {
-    localStorage.removeItem('cfg_bin');
-    localStorage.removeItem('cfg_key');
+    localStorage.removeItem('cfg_gist');
+    localStorage.removeItem('cfg_token');
   },
 };
 
@@ -1065,7 +1068,7 @@ function portfolioApp() {
     loading:false, submitting:false, lastUpdated:'', autoRefresh:false, _arTimer:null, toasts:[],
     syncStatus: CloudSync.isReady() ? 'synced' : 'local',
     modals:{holding:false,trade:false,watchlist:false,event:false,chart:false,settings:false},
-    sf:{binId:'',apiKey:'',testing:false,testOk:false,testMsg:'',savedBinId:CloudSync.binId},
+    sf:{gistId:'',token:'',testing:false,testOk:false,testMsg:'',savedGistId:CloudSync.gistId},
     editingHolding:null,
     hf:{ticker:'',shares:null,avg_cost:null,notes:'',stockName:'',stockErr:''},
     tf:{ticker:'',trade_type:'BUY',shares:null,price:null,fee:0,trade_date:todayISO(),notes:'',stockName:''},
@@ -1382,46 +1385,45 @@ function portfolioApp() {
 
     // ── Settings / Cloud Sync ──
     openSettings() {
-      this.sf.binId = CloudSync.binId;
-      this.sf.apiKey = CloudSync.apiKey;
+      this.sf.gistId = CloudSync.gistId;
+      this.sf.token  = CloudSync.token;
       this.sf.testMsg = ''; this.sf.testOk = false;
-      this.sf.savedBinId = CloudSync.binId;
+      this.sf.savedGistId = CloudSync.gistId;
       this.modals.settings = true;
     },
     async testSync() {
-      if (!this.sf.binId||!this.sf.apiKey) return;
+      if (!this.sf.gistId||!this.sf.token) return;
       this.sf.testing = true; this.sf.testMsg = '';
       try {
-        const r = await fetch(`https://api.jsonbin.io/v3/b/${this.sf.binId}/latest`, {
-          headers:{'X-Master-Key':this.sf.apiKey,'X-Bin-Meta':'false'},
-          signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined,
+        const r = await fetch(`https://api.github.com/gists/${this.sf.gistId.trim()}`, {
+          headers: { 'Authorization': `token ${this.sf.token.trim()}`, 'Accept': 'application/vnd.github+json' },
         });
         this.sf.testOk = r.ok;
-        this.sf.testMsg = r.ok ? '✓ 接続成功！このBinのデータを使います' : `✗ エラー: ${r.status} — Bin IDまたはAPI Keyを確認してください`;
+        this.sf.testMsg = r.ok ? '✓ 接続成功！このGistにデータを同期します' : `✗ エラー: ${r.status} — Gist IDまたはTokenを確認してください`;
       } catch(e) {
         this.sf.testOk = false;
         this.sf.testMsg = '✗ 接続失敗: ' + e.message;
       } finally { this.sf.testing = false; }
     },
     async saveSettings() {
-      CloudSync.configure(this.sf.binId.trim(), this.sf.apiKey.trim());
-      this.sf.savedBinId = this.sf.binId.trim();
+      CloudSync.configure(this.sf.gistId.trim(), this.sf.token.trim());
+      this.sf.savedGistId = this.sf.gistId.trim();
       this.modals.settings = false;
       this.syncStatus = 'syncing';
       this.toast('設定を保存しました。クラウドからデータを取得中…','info');
       const ok = await CloudSync.pull();
       this.syncStatus = ok ? 'synced' : 'error';
       if (ok) {
-        this.toast('クラウドと同期しました','success');
+        this.toast('GitHubと同期しました','success');
         await this.boot();
       } else {
-        this.toast('同期失敗。Bin IDとAPI Keyを確認してください','error');
+        this.toast('同期失敗。Gist IDとTokenを確認してください','error');
       }
     },
     disconnectSync() {
       CloudSync.disconnect();
       this.syncStatus = 'local';
-      this.sf.savedBinId = '';
+      this.sf.savedGistId = '';
       this.modals.settings = false;
       this.toast('クラウド同期を切断しました','info');
     },
