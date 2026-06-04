@@ -2965,7 +2965,7 @@ async function ghFetch(){
     const res=await fetch(`${GH_API}/repos/${GH_REPO}/contents/${GH_PATH}`,{
       headers:{'Authorization':`token ${pat}`,'Accept':'application/vnd.github.v3+json'}
     });
-    if(res.status===404){updateGhBadge('synced');return false;}
+    if(res.status===404){updateGhBadge('none');return false;}
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const j=await res.json();
     _ghSha=j.sha;
@@ -3020,13 +3020,21 @@ async function ghSave(){
   }
 }
 
-function saveGhPAT(){
+async function saveGhPAT(){
   const pat=document.getElementById('gh-pat-input')?.value?.trim();
   if(!pat){showToast('⚠️ トークンを入力してください');return;}
   localStorage.setItem('fp-github-pat',pat);
   _ghUpdateUI(pat);
-  showToast('🔑 トークンを保存しました。GitHubからデータを読み込みます…');
-  ghFetch().then(ok=>{if(ok) showToast('✅ GitHubからデータを読み込みました');});
+  showToast('⏳ GitHubに接続中…');
+  const loaded=await ghFetch();
+  if(loaded){
+    showToast('✅ GitHubからデータを読み込みました');
+  } else {
+    syncFromDOM();
+    const saved=await ghSave();
+    if(saved) showToast('✅ GitHubにデータを保存しました');
+    else showToast('❌ GitHubへの保存に失敗しました。トークンを確認してください');
+  }
 }
 
 function clearGhPAT(){
@@ -3078,14 +3086,26 @@ function ghTransferToken(){
   show();
 }
 
-function ghApplyToken(){
+async function ghApplyToken(){
   const token=(document.getElementById('gh-token-input')?.value||'').trim();
   if(!token){showToast('⚠️ トークンを貼り付けてください');return;}
   localStorage.setItem('fp-github-pat',token);
   _ghUpdateUI(token);
   document.getElementById('gh-device-modal').style.display='none';
-  showToast('✅ GitHubと接続しました！');
-  ghFetch().then(ok=>{if(ok) showToast('✅ データを読み込みました');});
+  showToast('⏳ GitHubに接続中…');
+  const loaded=await ghFetch();
+  if(loaded){
+    showToast('✅ GitHubからデータを読み込みました');
+  } else {
+    // ファイル未作成 → 現在のデータをGitHubに保存して初期化
+    syncFromDOM();
+    const saved=await ghSave();
+    if(saved){
+      showToast('✅ GitHubにデータを保存しました。iPhoneでも同じトークンを設定してください');
+    } else {
+      showToast('❌ GitHubへの保存に失敗しました。設定ページでトークンを確認してください');
+    }
+  }
 }
 
 function closeGhDeviceModal(){
