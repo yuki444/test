@@ -2675,12 +2675,14 @@ function renderAdvice(){
   const stocks=data.assets.stocks;
   const ideco=data.assets.ideco;
   const totalA=Object.values(data.assets).reduce((a,b)=>a+b,0);
+  // 金融資産のみ（自宅・不動産を除く）- 資産配分の比率計算に使用
+  const financialA=cash+fixedDeposit+stocks+ideco+(data.assets.insurance||0)+(data.assets.other||0);
   const totalD=data.debts.mortgage+data.debts.car+data.debts.education+data.debts.consumer+data.debts.other;
   const netWorth=totalA-totalD;
   const emergencyMonths=monthlyExp>0?cash/monthlyExp:0;
   const highRiskDebt=data.debts.consumer+data.debts.car;
-  const investRatio=(stocks+ideco)/(totalA||1)*100;
-  const cashRatio=(cash+fixedDeposit)/(totalA||1)*100;
+  const investRatio=(stocks+ideco)/(financialA||1)*100;
+  const cashRatio=(cash+fixedDeposit)/(financialA||1)*100;
   const ir=data.settings.investReturn/100;
   const yearsToRetire=retireAge-selfAge;
   const nisaMonthlyMax=300000;
@@ -2721,7 +2723,7 @@ function renderAdvice(){
       desc:`手取り収入の10〜20%以上の積立が推奨されます。まずNISAで月${fmt(nisaMonthlyMax)}円、iDeCoで月${fmt(idecoMax)}円から始めると税制優遇を最大活用できます。`});
   } else if(savingRate<20){
     advice.push({section:'基礎',type:'info',icon:'📊',title:`貯蓄率${savingRate.toFixed(1)}%、20%を目指しましょう`,
-      desc:`現在は及第点です。NISA（年360万円枠）・iDeCoを活用し、あと月${fmt(Math.round((monthlyIncome*0.2)-(data.savings.invest+data.savings.deposit)))}円増やせると20%に達します。`});
+      desc:`現在は及第点です。NISA（年360万円枠）をフル活用し、あと月${fmt(Math.round((monthlyIncome*0.2)-(data.savings.invest+data.savings.deposit)))}円増やせると20%に達します。`});
   } else {
     advice.push({section:'基礎',type:'good',icon:'🎯',title:`貯蓄率${savingRate.toFixed(1)}%は優秀です`,
       desc:`非常に良好な水準です。NISA・iDeCoの非課税枠を使い切れているか確認しましょう。`});
@@ -2734,8 +2736,8 @@ function renderAdvice(){
 
   // ===== 税制優遇 =====
   if(ideco===0&&selfAge<60){
-    advice.push({section:'税制優遇',type:'warn',icon:'🏛️',title:'iDeCoをまだ活用していません',
-      desc:`iDeCoは掛金が全額所得控除になる強力な節税手段です。会社員なら月${fmt(idecoMax)}円（年最大${fmt(idecoMax*12)}円）の掛金で、所得税・住民税が年${fmt(Math.round(idecoMax*12*0.2))}〜${fmt(Math.round(idecoMax*12*0.3))}円節税できます。${selfAge}歳から始めれば${60-selfAge}年間の複利運用が可能です。`});
+    advice.push({section:'税制優遇',type:'info',icon:'🏛️',title:'iDeCo残高はゼロです',
+      desc:`iDeCoは掛金が全額所得控除になる節税手段ですが、企業型DC（確定拠出年金）加入者はiDeCoとの併用に制限がある場合があります。企業型DCに加入中であれば、そちらの掛金・運用状況を定期的に確認しましょう。`});
   } else if(ideco>0&&selfAge<60){
     const idecoYield=Math.round(ideco*(Math.pow(1+ir,60-selfAge)-1));
     advice.push({section:'税制優遇',type:'good',icon:'✅',title:`iDeCo残高${fmtM(ideco)}を運用中です`,
@@ -2841,7 +2843,7 @@ function renderAdvice(){
 
   // ===== 住宅 =====
   if(data.debts.mortgage>0){
-    const mortgageRate=data.settings.mortgageRate||1.5;
+    const mortgageRate=data.debts.mortgageRate||data.settings.mortgageRate||1.5;
     if(mortgageRate<ir){
       advice.push({section:'住宅',type:'info',icon:'🏠',title:'住宅ローンより投資リターンが高い可能性があります',
         desc:`住宅ローン金利（${mortgageRate}%）が投資想定リターン（${data.settings.investReturn}%）を下回っています。繰上げ返済より余剰資金の投資（NISA等）を優先する選択も合理的です。ただし精神的安心感や変動金利リスクも考慮してください。`});
