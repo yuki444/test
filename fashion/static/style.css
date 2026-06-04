@@ -488,6 +488,16 @@ select:focus {
   color: var(--text-light);
 }
 
+.season-now {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: var(--primary);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-top: 2px;
+}
+
 /* Loading */
 .loading {
   display: flex;

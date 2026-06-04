@@ -5,6 +5,15 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// ---------- Current season detection ----------
+function currentSeason() {
+  const m = new Date().getMonth() + 1;
+  if (m >= 3 && m <= 5) return 'spring';
+  if (m >= 6 && m <= 8) return 'summer';
+  if (m >= 9 && m <= 11) return 'autumn';
+  return 'winter';
+}
+
 // ---------- Tab switching ----------
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -118,9 +127,18 @@ document.getElementById('add-item-form').addEventListener('submit', e => {
 });
 
 // ---------- Recommend ----------
-let selectedSeason = 'spring';
+let selectedSeason = currentSeason();
 
+// 起動時に今のシーズンを自動選択＋「今」バッジを表示
 document.querySelectorAll('.season-btn').forEach(btn => {
+  const isCurrent = btn.dataset.season === selectedSeason;
+  btn.classList.toggle('active', isCurrent);
+  if (isCurrent) {
+    const badge = document.createElement('span');
+    badge.className = 'season-now';
+    badge.textContent = '今';
+    btn.appendChild(badge);
+  }
   btn.addEventListener('click', () => {
     document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
