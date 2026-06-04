@@ -119,22 +119,27 @@ def get_portfolio_summary():
     enriched = [enrich_holding(h) for h in holdings]
 
     total_cost = sum(h["cost_basis"] for h in enriched)
-    total_value = sum(h["current_value"] for h in enriched if h["current_value"] is not None)
-    total_pnl = round(total_value - total_cost, 2)
-    total_pnl_pct = round(total_pnl / total_cost * 100, 2) if total_cost != 0 else 0
+    priced = [h for h in enriched if h["current_value"] is not None]
 
-    day_change_total = sum(
-        (h["day_change"] or 0) * h["shares"]
-        for h in enriched
-        if h["day_change"] is not None
-    )
+    if priced:
+        total_value = round(sum(h["current_value"] for h in priced), 2)
+        priced_cost = sum(h["cost_basis"] for h in priced)
+        total_pnl = round(total_value - priced_cost, 2)
+        total_pnl_pct = round(total_pnl / priced_cost * 100, 2) if priced_cost else 0
+    else:
+        total_value = None
+        total_pnl = None
+        total_pnl_pct = None
+
+    day_priced = [h for h in enriched if h["day_change"] is not None]
+    day_change_total = round(sum(h["day_change"] * h["shares"] for h in day_priced), 2) if day_priced else None
 
     return {
         "total_cost": round(total_cost, 2),
-        "total_value": round(total_value, 2),
+        "total_value": total_value,
         "total_pnl": total_pnl,
         "total_pnl_pct": total_pnl_pct,
-        "day_change_total": round(day_change_total, 2),
+        "day_change_total": day_change_total,
         "count": len(enriched),
     }
 
