@@ -4572,7 +4572,13 @@ function init(){
   _ghUpdateUI(_ghPat);
   if(_ghPat){
     updateGhBadge('syncing');
-    setTimeout(()=>ghFetch(), 800);
+    setTimeout(async()=>{
+      const loaded=await ghFetch();
+      if(!loaded){
+        syncFromDOM();
+        await ghSave();
+      }
+    }, 800);
   }
 
   // Live recalculation listeners
