@@ -114,6 +114,16 @@
       ↑ <span class="hidden sm:inline">読込</span>
       <input type="file" accept=".json" class="hidden" @change="doImport($event)" />
     </label>
+    <!-- Sync status -->
+    <div class="flex items-center gap-1.5 text-[11px] font-medium px-2 hidden sm:flex"
+         :class="syncStatus==='synced'?'text-emerald-400':syncStatus==='syncing'?'text-blue-400':syncStatus==='error'?'text-red-400':'text-slate-500'">
+      <span x-show="syncStatus==='syncing'" class="spinner" style="width:10px;height:10px;border-width:1.5px"></span>
+      <span x-show="syncStatus!=='syncing'" class="text-[8px]">●</span>
+      <span x-text="syncStatus==='synced'?'同期済み':syncStatus==='syncing'?'同期中':syncStatus==='error'?'同期失敗':'ローカル'"></span>
+    </div>
+    <button @click="openSettings()"
+      class="flex items-center px-2.5 py-1.5 rounded-lg bg-[#1e293b] hover:bg-[#263348] border border-[#334155] text-sm transition-colors"
+      title="クラウド同期設定">⚙️</button>
   </div>
 </header>
 
@@ -741,8 +751,116 @@
   </div>
 </div>
 
+<!-- MODAL: Cloud Sync Settings -->
+<div x-show="modals.settings" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+     @click.self="modals.settings=false" @keydown.escape.window="modals.settings=false">
+  <div class="bg-[#1e293b] border border-[#334155] rounded-2xl w-full max-w-md shadow-2xl" @click.stop>
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#334155]">
+      <h3 class="font-bold text-white">☁️ クラウド同期設定</h3>
+      <button @click="modals.settings=false" class="text-slate-400 hover:text-white text-lg leading-none">✕</button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="bg-blue-950/50 border border-blue-800/40 rounded-xl px-4 py-3 text-xs text-blue-300 space-y-1.5 leading-relaxed">
+        <p class="font-semibold text-blue-200">無料で使えるクラウドストレージ（JSONBin.io）を使います</p>
+        <ol class="list-decimal list-inside space-y-1 text-blue-300/80">
+          <li><a href="https://jsonbin.io" target="_blank" class="underline text-blue-400">jsonbin.io</a> で無料アカウント作成</li>
+          <li>「NEW BIN」→ 内容は <code class="bg-blue-900/60 px-1 rounded">{}</code> のまま → Create</li>
+          <li>表示された <strong class="text-blue-200">BIN ID</strong> をコピー</li>
+          <li>「API KEYS」→ Master Key をコピー</li>
+        </ol>
+        <p class="text-blue-400/70">※ キーはこのデバイスのブラウザにのみ保存されます</p>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">Bin ID</label>
+        <input type="text" x-model="sf.binId" placeholder="65f2a3b4c3e7d82b3f7a1234" class="fi font-mono text-sm" />
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">Master Key (API Key)</label>
+        <input type="password" x-model="sf.apiKey" placeholder="$2b$12$..." class="fi font-mono text-sm" />
+      </div>
+      <div x-show="sf.testMsg" class="text-xs px-3 py-2 rounded-lg"
+           :class="sf.testOk ? 'bg-emerald-900/40 text-emerald-300 border border-emerald-700/40' : 'bg-red-900/40 text-red-300 border border-red-700/40'"
+           x-text="sf.testMsg"></div>
+      <div x-show="syncStatus!=='local'" class="bg-slate-800/50 border border-slate-700/40 rounded-xl px-4 py-2.5 text-xs text-slate-400 flex items-center justify-between">
+        <span>現在の接続: <span class="text-white font-mono" x-text="sf.savedBinId ? sf.savedBinId.slice(0,12)+'…' : ''"></span></span>
+        <button @click="disconnectSync()" class="text-red-400 hover:text-red-300 font-medium transition-colors">切断</button>
+      </div>
+    </div>
+    <div class="flex gap-3 px-5 py-4 border-t border-[#334155]">
+      <button @click="testSync()" :disabled="sf.testing||!sf.binId||!sf.apiKey"
+        class="flex-1 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-sm font-medium disabled:opacity-40 flex items-center justify-center gap-2">
+        <span x-show="sf.testing" class="spinner"></span>テスト接続
+      </button>
+      <button @click="saveSettings()" :disabled="!sf.binId||!sf.apiKey"
+        class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white disabled:opacity-40">
+        保存して同期開始
+      </button>
+    </div>
+  </div>
+</div>
+
 
 <script>
+// ════════════════════════════════════════
+// Cloud Sync (JSONBin.io)
+// ════════════════════════════════════════
+const CloudSync = {
+  get binId() { return localStorage.getItem('cfg_bin') || ''; },
+  get apiKey() { return localStorage.getItem('cfg_key') || ''; },
+  isReady()   { return !!(this.binId && this.apiKey); },
+
+  async pull() {
+    if (!this.isReady()) return false;
+    const ac = new AbortController();
+    const tid = setTimeout(()=>ac.abort(), 8000);
+    try {
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}/latest`, {
+        headers: {'X-Master-Key': this.apiKey, 'X-Bin-Meta': 'false'},
+        signal: ac.signal,
+      });
+      clearTimeout(tid);
+      if (!r.ok) return false;
+      const d = await r.json();
+      if (d.holdings) localStorage.setItem('pf_holdings', JSON.stringify(d.holdings));
+      if (d.trades)   localStorage.setItem('pf_trades',   JSON.stringify(d.trades));
+      if (d.watchlist)localStorage.setItem('pf_watchlist',JSON.stringify(d.watchlist));
+      if (d.events)   localStorage.setItem('pf_events',   JSON.stringify(d.events));
+      return true;
+    } catch(e) { clearTimeout(tid); return false; }
+  },
+
+  async push() {
+    if (!this.isReady()) return false;
+    const body = JSON.stringify({
+      holdings: JSON.parse(localStorage.getItem('pf_holdings')||'[]'),
+      trades:   JSON.parse(localStorage.getItem('pf_trades')  ||'[]'),
+      watchlist:JSON.parse(localStorage.getItem('pf_watchlist')||'[]'),
+      events:   JSON.parse(localStorage.getItem('pf_events')  ||'[]'),
+    });
+    const ac = new AbortController();
+    const tid = setTimeout(()=>ac.abort(), 8000);
+    try {
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json', 'X-Master-Key': this.apiKey},
+        body, signal: ac.signal,
+      });
+      clearTimeout(tid);
+      return r.ok;
+    } catch(e) { clearTimeout(tid); return false; }
+  },
+
+  configure(binId, apiKey) {
+    localStorage.setItem('cfg_bin', binId);
+    localStorage.setItem('cfg_key', apiKey);
+  },
+  disconnect() {
+    localStorage.removeItem('cfg_bin');
+    localStorage.removeItem('cfg_key');
+  },
+};
+
 // ════════════════════════════════════════
 // Utilities
 // ════════════════════════════════════════
@@ -945,7 +1063,9 @@ function portfolioApp() {
     ],
     holdings:[], summary:null, trades:[], watchlist:[], events:[], upcomingEvents:[],
     loading:false, submitting:false, lastUpdated:'', autoRefresh:false, _arTimer:null, toasts:[],
-    modals:{holding:false,trade:false,watchlist:false,event:false,chart:false},
+    syncStatus: CloudSync.isReady() ? 'synced' : 'local',
+    modals:{holding:false,trade:false,watchlist:false,event:false,chart:false,settings:false},
+    sf:{binId:'',apiKey:'',testing:false,testOk:false,testMsg:'',savedBinId:CloudSync.binId},
     editingHolding:null,
     hf:{ticker:'',shares:null,avg_cost:null,notes:'',stockName:'',stockErr:''},
     tf:{ticker:'',trade_type:'BUY',shares:null,price:null,fee:0,trade_date:todayISO(),notes:'',stockName:''},
@@ -954,8 +1074,21 @@ function portfolioApp() {
     chartData:{}, chartPeriod:'3m', chartLoading:false, chartEmpty:false, _chartInst:null,
 
     async boot() {
+      if (CloudSync.isReady()) {
+        this.syncStatus = 'syncing';
+        const ok = await CloudSync.pull();
+        this.syncStatus = ok ? 'synced' : 'error';
+      }
       await Promise.all([this.fetchHoldings(), this.fetchSummary()]);
       this.fetchTrades(); this.fetchWatchlist(); this.fetchEvents();
+    },
+
+    async _syncPush() {
+      if (!CloudSync.isReady()) return;
+      this.syncStatus = 'syncing';
+      const ok = await CloudSync.push();
+      this.syncStatus = ok ? 'synced' : 'error';
+      if (!ok) this.toast('クラウド同期に失敗しました','error');
     },
 
     async switchTab(id) {
@@ -1086,6 +1219,7 @@ function portfolioApp() {
         }
         this.modals.holding = false;
         await Promise.all([this.fetchHoldings(), this.fetchSummary()]);
+        this._syncPush();
       } catch(e) { this.toast(e.message,'error'); }
       finally { this.submitting = false; }
     },
@@ -1094,6 +1228,7 @@ function portfolioApp() {
       Store.deleteHolding(id);
       this.toast('削除しました','success');
       await Promise.all([this.fetchHoldings(), this.fetchSummary()]);
+      this._syncPush();
     },
 
     // ── Trade CRUD ──
@@ -1122,6 +1257,7 @@ function portfolioApp() {
         this.modals.trade = false;
         this.toast(msg,'success');
         await Promise.all([this.fetchTrades(), this.fetchHoldings(), this.fetchSummary()]);
+        this._syncPush();
       } catch(e) { this.toast(e.message,'error'); }
       finally { this.submitting = false; }
     },
@@ -1129,6 +1265,7 @@ function portfolioApp() {
       if (!confirm('この取引記録を削除しますか？')) return;
       Store.deleteTrade(id); this.toast('削除しました','success');
       await this.fetchTrades();
+      this._syncPush();
     },
 
     // ── Watchlist CRUD ──
@@ -1146,6 +1283,7 @@ function portfolioApp() {
         this.modals.watchlist = false;
         this.toast('ウォッチリストに追加しました','success');
         await this.fetchWatchlist();
+        this._syncPush();
       } catch(e) { this.toast(e.message,'error'); }
       finally { this.submitting = false; }
     },
@@ -1153,6 +1291,7 @@ function portfolioApp() {
       if (!confirm('ウォッチリストから削除しますか？')) return;
       Store.deleteWatchlist(id); this.toast('削除しました','success');
       await this.fetchWatchlist();
+      this._syncPush();
     },
 
     // ── Event CRUD ──
@@ -1169,6 +1308,7 @@ function portfolioApp() {
         this.modals.event = false;
         this.toast('イベントを追加しました','success');
         await this.fetchEvents();
+        this._syncPush();
       } catch(e) { this.toast(e.message,'error'); }
       finally { this.submitting = false; }
     },
@@ -1176,6 +1316,7 @@ function portfolioApp() {
       if (!confirm('このイベントを削除しますか？')) return;
       Store.deleteEvent(id); this.toast('削除しました','success');
       await this.fetchEvents();
+      this._syncPush();
     },
 
     // ── Ticker lookup ──
@@ -1237,6 +1378,52 @@ function portfolioApp() {
     closeChart() {
       this.modals.chart = false;
       if (this._chartInst) { this._chartInst.destroy(); this._chartInst = null; }
+    },
+
+    // ── Settings / Cloud Sync ──
+    openSettings() {
+      this.sf.binId = CloudSync.binId;
+      this.sf.apiKey = CloudSync.apiKey;
+      this.sf.testMsg = ''; this.sf.testOk = false;
+      this.sf.savedBinId = CloudSync.binId;
+      this.modals.settings = true;
+    },
+    async testSync() {
+      if (!this.sf.binId||!this.sf.apiKey) return;
+      this.sf.testing = true; this.sf.testMsg = '';
+      try {
+        const r = await fetch(`https://api.jsonbin.io/v3/b/${this.sf.binId}/latest`, {
+          headers:{'X-Master-Key':this.sf.apiKey,'X-Bin-Meta':'false'},
+          signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined,
+        });
+        this.sf.testOk = r.ok;
+        this.sf.testMsg = r.ok ? '✓ 接続成功！このBinのデータを使います' : `✗ エラー: ${r.status} — Bin IDまたはAPI Keyを確認してください`;
+      } catch(e) {
+        this.sf.testOk = false;
+        this.sf.testMsg = '✗ 接続失敗: ' + e.message;
+      } finally { this.sf.testing = false; }
+    },
+    async saveSettings() {
+      CloudSync.configure(this.sf.binId.trim(), this.sf.apiKey.trim());
+      this.sf.savedBinId = this.sf.binId.trim();
+      this.modals.settings = false;
+      this.syncStatus = 'syncing';
+      this.toast('設定を保存しました。クラウドからデータを取得中…','info');
+      const ok = await CloudSync.pull();
+      this.syncStatus = ok ? 'synced' : 'error';
+      if (ok) {
+        this.toast('クラウドと同期しました','success');
+        await this.boot();
+      } else {
+        this.toast('同期失敗。Bin IDとAPI Keyを確認してください','error');
+      }
+    },
+    disconnectSync() {
+      CloudSync.disconnect();
+      this.syncStatus = 'local';
+      this.sf.savedBinId = '';
+      this.modals.settings = false;
+      this.toast('クラウド同期を切断しました','info');
     },
 
     // ── Export / Import ──
