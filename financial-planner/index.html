@@ -4008,15 +4008,16 @@ function renderTradeLog(){
   const totalBuy=data.tradeLog.filter(t=>t.type==='buy').reduce((s,t)=>s+t.qty*t.price+(t.fee||0),0);
   const totalSell=data.tradeLog.filter(t=>t.type==='sell').reduce((s,t)=>s+t.qty*t.price-(t.fee||0),0);
   const netInvested=totalBuy-totalSell;
-  const totalRealizedGain=data.tradeLog.filter(t=>t.type==='sell').reduce((s,t)=>s+t.realizedGain,0);
-  const totalDividend=data.tradeLog.filter(t=>t.type==='dividend').reduce((s,t)=>s+t.realizedGain,0);
+  const totalRealizedGain=data.tradeLog.filter(t=>t.type==='sell').reduce((s,t)=>s+(t.realizedGain||0),0);
+  const totalDividend=data.tradeLog.filter(t=>t.type==='dividend').reduce((s,t)=>s+(t.realizedGain||0),0);
+  const totalGain=totalRealizedGain+totalDividend;
   const totalFee=data.tradeLog.reduce((s,t)=>s+(t.fee||0),0);
 
   const sumEl=document.getElementById('trade-summary');
   if(sumEl){
     sumEl.innerHTML=`
       <div class="summary-card"><div class="label">現在の投下元本</div><div class="value value-neutral">${fmtM(netInvested)}</div><div class="sub">買付合計 − 売却回収額</div></div>
-      <div class="summary-card"><div class="label">確定損益（売却）</div><div class="value ${totalRealizedGain>=0?'value-positive':'value-negative'}">${totalRealizedGain>=0?'+':''}${fmtM(totalRealizedGain)}</div><div class="sub">税引前</div></div>
+      <div class="summary-card"><div class="label">確定損益（売却＋配当）</div><div class="value ${totalGain>=0?'value-positive':'value-negative'}">${totalGain>=0?'+':''}${fmtM(totalGain)}</div><div class="sub">売却${fmtM(totalRealizedGain)}　配当${fmtM(totalDividend)}</div></div>
       <div class="summary-card"><div class="label">受取配当累計</div><div class="value value-positive">${fmtM(totalDividend)}</div><div class="sub">税引前</div></div>
       <div class="summary-card"><div class="label">支払手数料合計</div><div class="value value-negative">${fmtM(totalFee)}</div><div class="sub">全取引</div></div>
     `;
@@ -4068,22 +4069,24 @@ function _renderTradeChart(){
     return;
   }
   const sorted=[...data.tradeLog].sort((a,b)=>a.date.localeCompare(b.date));
-  const labels=[],cumBuy=[],cumDiv=[];
-  let sBuy=0,sDiv=0;
+  const labels=[],cumBuy=[],cumDiv=[],cumGain=[];
+  let sBuy=0,sDiv=0,sGain=0;
   sorted.forEach(t=>{
     if(t.type==='buy') sBuy+=t.qty*t.price+(t.fee||0);
-    if(t.type==='sell') sBuy-=t.qty*t.price-(t.fee||0);
-    if(t.type==='dividend') sDiv+=t.realizedGain||0;
+    if(t.type==='sell'){sBuy-=t.qty*t.price-(t.fee||0); sGain+=t.realizedGain||0;}
+    if(t.type==='dividend'){sDiv+=t.realizedGain||0; sGain+=t.realizedGain||0;}
     labels.push(t.date);
     cumBuy.push(Math.round(sBuy));
     cumDiv.push(Math.round(sDiv));
+    cumGain.push(Math.round(sGain));
   });
   if(_tradeChart){_tradeChart.destroy();}
   _tradeChart=new Chart(canvas,{
     type:'line',
     data:{labels,datasets:[
       {label:'投下元本（純額）',data:cumBuy,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.08)',tension:0.3,pointRadius:3,fill:true},
-      {label:'累積配当',data:cumDiv,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.08)',tension:0.3,pointRadius:3,fill:true}
+      {label:'累積配当',data:cumDiv,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.08)',tension:0.3,pointRadius:3,fill:true},
+      {label:'累積確定損益（売却＋配当）',data:cumGain,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.06)',tension:0.3,pointRadius:3,fill:false,borderDash:[4,3]}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{y:{ticks:{callback:v=>fmtM(v)},grid:{color:'#f1f5f9'}},x:{ticks:{maxTicksLimit:8,maxRotation:0}}},
