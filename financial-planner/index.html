@@ -833,6 +833,7 @@
           <div style="font-size:12px;color:#166534;margin-bottom:10px">トークン：<code id="gh-pat-display" style="font-size:11px;background:#dcfce7;padding:2px 6px;border-radius:4px"></code></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-secondary btn-sm" onclick="ghFetch().then(ok=>ok&&showToast('✅ GitHubからデータを読み込みました'))">🔄 今すぐ読み込み</button>
+            <button class="btn btn-primary btn-sm" style="font-weight:800" onclick="ghTransferToken()">📱 スマホにも設定する</button>
             <button class="btn btn-secondary btn-sm" onclick="clearGhPAT()">🔓 同期を解除</button>
           </div>
         </div>
@@ -1086,7 +1087,8 @@
     </div>
     <!-- Step 2 -->
     <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px">
-      <div style="font-size:12px;font-weight:800;color:var(--text);margin-bottom:8px">② コピーしたトークンを貼り付ける</div>
+      <div style="font-size:12px;font-weight:800;color:var(--text);margin-bottom:4px">② トークンを貼り付ける</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">新しく発行したもの、または別の端末からコピーしたものどちらでもOK</div>
       <input id="gh-token-input" type="password" placeholder="ghp_xxxxxxxxxxxx"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:monospace;box-sizing:border-box;margin-bottom:10px">
       <button class="btn btn-success" style="width:100%;font-size:14px;font-weight:800;padding:12px" onclick="ghApplyToken()">
@@ -3053,10 +3055,27 @@ function ghStartDeviceAuth(){
 }
 
 function ghOpenTokenPage(){
+  // 毎回ユニークな名前にして「発行済み」エラーを回避
+  const suffix=Date.now().toString(36).slice(-4).toUpperCase();
   window.open(
-    'https://github.com/settings/tokens/new?scopes=repo&description=FinancialPlanner',
+    `https://github.com/settings/tokens/new?scopes=repo&description=FinancialPlanner-${suffix}`,
     '_blank'
   );
+}
+
+function ghTransferToken(){
+  const pat=ghPAT(); if(!pat) return;
+  const show=()=>{
+    const masked=pat.slice(0,8)+'…';
+    // モーダルを開いてトークンを input に入れた状態にする
+    document.getElementById('gh-token-input').value=pat;
+    document.getElementById('gh-device-modal').style.display='flex';
+    // コピーも試みる
+    navigator.clipboard?.writeText(pat).then(()=>
+      showToast('📋 トークンをコピーしました。スマホの同じ画面に貼り付けて「接続する」を押してください')
+    ).catch(()=>{});
+  };
+  show();
 }
 
 function ghApplyToken(){
