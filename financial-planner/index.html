@@ -2969,7 +2969,7 @@ async function ghFetch(){
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const j=await res.json();
     _ghSha=j.sha;
-    const parsed=JSON.parse(atob(j.content.replace(/\n/g,'')));
+    const parsed=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
     if(!parsed?.members||!parsed?.income) throw new Error('invalid data');
     Object.assign(data,parsed);
     localStorage.setItem('fp-data',JSON.stringify(data));
