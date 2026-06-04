@@ -1749,10 +1749,10 @@ function syncFromDOM(){
   data.settings.retireAge=g('retire-age');
   data.settings.retireAgeSpouse=g('retire-age-spouse');
   data.settings.endAge=g('end-age');
-  data.settings.investReturn=+document.getElementById('investment-return').value;
-  data.settings.inflation=+document.getElementById('inflation-rate').value;
-  data.settings.salaryGrowth=+document.getElementById('salary-growth').value;
-  data.settings.retireExpenseRatio=+document.getElementById('retire-expense-ratio').value||1.0;
+  data.settings.investReturn=+(document.getElementById('investment-return')?.value??3.0);
+  data.settings.inflation=+(document.getElementById('inflation-rate')?.value??1.5);
+  data.settings.salaryGrowth=+(document.getElementById('salary-growth')?.value??1.0);
+  data.settings.retireExpenseRatio=+(document.getElementById('retire-expense-ratio')?.value)||1.0;
   data.income={self:g('income-self'),spouse:g('income-spouse'),side:g('income-side'),
     investment:g('income-investment'),bonusSelf:g('bonus-self'),bonusSpouse:g('bonus-spouse')};
   ['housing','food','utilities','insurance','education','transport','medical']
