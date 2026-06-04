@@ -465,6 +465,7 @@
   <div class="mobile-topbar" id="mobile-topbar">
     <button class="mobile-menu-btn" onclick="saveAll()" title="保存">💾</button>
     <div class="mobile-topbar-title" id="mobile-topbar-title">ファイナンシャルプランナー</div>
+    <button class="mobile-topbar-action" id="btn-view-mode-top" onclick="toggleViewMode()" title="PC表示に切り替え">🖥</button>
     <button class="mobile-topbar-action" onclick="showPage('page-settings')" title="設定">⚙️</button>
   </div>
 
@@ -1788,6 +1789,8 @@ function toggleViewMode(){
     btn.textContent=isPreview?'🖥 PC表示':'📱 スマホ表示';
     btn.classList.toggle('view-active',isPreview);
   }
+  const btnTop=document.getElementById('btn-view-mode-top');
+  if(btnTop) btnTop.textContent=isPreview?'🖥':'📱';
   localStorage.setItem('fp-view-mode',isPreview?'mobile':'desktop');
 }
 
@@ -4331,6 +4334,8 @@ function init(){
     document.body.classList.add('mobile-preview');
     const btn=document.getElementById('btn-view-mode');
     if(btn){btn.textContent='🖥 PC表示';btn.classList.add('view-active');}
+    const btnTop=document.getElementById('btn-view-mode-top');
+    if(btnTop) btnTop.textContent='📱';
   }
   checkURLSync();
 }
