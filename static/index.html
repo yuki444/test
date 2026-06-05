@@ -762,18 +762,13 @@
     </div>
     <div class="p-5 space-y-4">
       <div class="bg-blue-950/50 border border-blue-800/40 rounded-xl px-4 py-3 text-xs text-blue-300 space-y-1.5 leading-relaxed">
-        <p class="font-semibold text-blue-200">GitHubの無料機能（Gist）でデータを同期します</p>
+        <p class="font-semibold text-blue-200">GitHubトークンを1つ入力するだけで自動セットアップします</p>
         <ol class="list-decimal list-inside space-y-1 text-blue-300/80">
-          <li><a href="https://gist.github.com" target="_blank" class="underline text-blue-400">gist.github.com</a> → 「+ New gist」</li>
-          <li>ファイル名: <code class="bg-blue-900/60 px-1 rounded">portfolio.json</code>、内容: <code class="bg-blue-900/60 px-1 rounded">{}</code> → 「Create secret gist」</li>
-          <li>URLの末尾の英数字が <strong class="text-blue-200">Gist ID</strong></li>
-          <li><a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank" class="underline text-blue-400">github.com/settings/tokens/new</a> → スコープ「gist」のみ✓ → Generate → コピー</li>
+          <li><a href="https://github.com/settings/tokens/new?scopes=gist&description=portfolio-sync" target="_blank" class="underline text-blue-400 font-medium">← ここをクリック</a>してTokenを発行</li>
+          <li>ページ下部の「Generate token」→ コピー</li>
+          <li>下のフィールドに貼り付けて「自動セットアップ」</li>
         </ol>
-        <p class="text-blue-400/70">※ トークンはこのデバイスのブラウザにのみ保存されます</p>
-      </div>
-      <div>
-        <label class="block text-xs text-slate-400 mb-1.5">Gist ID</label>
-        <input type="text" x-model="sf.gistId" placeholder="abc123def456..." class="fi font-mono text-sm" />
+        <p class="text-blue-400/70">※ Gistの作成・設定は自動で行います。Tokenはこのデバイスのみ保存。</p>
       </div>
       <div>
         <label class="block text-xs text-slate-400 mb-1.5">GitHub Token（gistスコープ）</label>
@@ -783,18 +778,17 @@
            :class="sf.testOk ? 'bg-emerald-900/40 text-emerald-300 border border-emerald-700/40' : 'bg-red-900/40 text-red-300 border border-red-700/40'"
            x-text="sf.testMsg"></div>
       <div x-show="syncStatus!=='local'" class="bg-slate-800/50 border border-slate-700/40 rounded-xl px-4 py-2.5 text-xs text-slate-400 flex items-center justify-between">
-        <span>接続中: <span class="text-white font-mono" x-text="sf.savedGistId ? sf.savedGistId.slice(0,12)+'…' : ''"></span></span>
+        <span>接続中 Gist: <span class="text-white font-mono" x-text="sf.savedGistId ? sf.savedGistId.slice(0,12)+'…' : ''"></span></span>
         <button @click="disconnectSync()" class="text-red-400 hover:text-red-300 font-medium transition-colors">切断</button>
       </div>
     </div>
     <div class="flex gap-3 px-5 py-4 border-t border-[#334155]">
-      <button @click="testSync()" :disabled="sf.testing||!sf.gistId||!sf.token"
-        class="flex-1 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-sm font-medium disabled:opacity-40 flex items-center justify-center gap-2">
-        <span x-show="sf.testing" class="spinner"></span>テスト接続
-      </button>
-      <button @click="saveSettings()" :disabled="!sf.gistId||!sf.token"
-        class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white disabled:opacity-40">
-        保存して同期開始
+      <button @click="modals.settings=false"
+        class="px-4 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-sm font-medium transition-colors">キャンセル</button>
+      <button @click="saveSettings()" :disabled="sf.testing||!sf.token"
+        class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white disabled:opacity-40 flex items-center justify-center gap-2">
+        <span x-show="sf.testing" class="spinner"></span>
+        <span x-text="sf.testing ? 'セットアップ中…' : '自動セットアップ開始'"></span>
       </button>
     </div>
   </div>
@@ -1385,40 +1379,67 @@ function portfolioApp() {
 
     // ── Settings / Cloud Sync ──
     openSettings() {
-      this.sf.gistId = CloudSync.gistId;
       this.sf.token  = CloudSync.token;
       this.sf.testMsg = ''; this.sf.testOk = false;
       this.sf.savedGistId = CloudSync.gistId;
       this.modals.settings = true;
     },
-    async testSync() {
-      if (!this.sf.gistId||!this.sf.token) return;
+    async saveSettings() {
+      const token = this.sf.token.trim();
+      if (!token) return;
       this.sf.testing = true; this.sf.testMsg = '';
       try {
-        const r = await fetch(`https://api.github.com/gists/${this.sf.gistId.trim()}`, {
-          headers: { 'Authorization': `token ${this.sf.token.trim()}`, 'Accept': 'application/vnd.github+json' },
+        // Verify token is valid
+        const meRes = await fetch('https://api.github.com/user', {
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' },
         });
-        this.sf.testOk = r.ok;
-        this.sf.testMsg = r.ok ? '✓ 接続成功！このGistにデータを同期します' : `✗ エラー: ${r.status} — Gist IDまたはTokenを確認してください`;
+        if (!meRes.ok) {
+          this.sf.testOk = false;
+          this.sf.testMsg = `✗ Tokenが無効です (${meRes.status}) — gistスコープ付きのTokenを確認してください`;
+          return;
+        }
+
+        let gistId = CloudSync.gistId;
+
+        // Auto-create Gist if not yet configured
+        if (!gistId) {
+          const createRes = await fetch('https://api.github.com/gists', {
+            method: 'POST',
+            headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              description: '株式ポートフォリオデータ (auto-created by portfolio app)',
+              public: false,
+              files: { 'portfolio.json': { content: JSON.stringify({ holdings:[], trades:[], watchlist:[], events:[] }) } },
+            }),
+          });
+          if (!createRes.ok) {
+            this.sf.testOk = false;
+            this.sf.testMsg = `✗ Gist作成失敗 (${createRes.status}) — TokenにGistスコープがあるか確認してください`;
+            return;
+          }
+          const created = await createRes.json();
+          gistId = created.id;
+        }
+
+        CloudSync.configure(gistId, token);
+        this.sf.savedGistId = gistId;
+        this.sf.testOk = true;
+        this.sf.testMsg = `✓ Gist ID: ${gistId.slice(0,8)}… — セットアップ完了！`;
+        this.modals.settings = false;
+        this.syncStatus = 'syncing';
+        this.toast('セットアップ完了。クラウドからデータを取得中…', 'info');
+        const ok = await CloudSync.pull();
+        this.syncStatus = ok ? 'synced' : 'error';
+        if (ok) {
+          this.toast('GitHubと同期しました', 'success');
+          await this.boot();
+        } else {
+          this.toast('同期失敗。しばらく後に再試行してください', 'error');
+        }
       } catch(e) {
         this.sf.testOk = false;
-        this.sf.testMsg = '✗ 接続失敗: ' + e.message;
+        this.sf.testMsg = '✗ エラー: ' + e.message;
       } finally { this.sf.testing = false; }
-    },
-    async saveSettings() {
-      CloudSync.configure(this.sf.gistId.trim(), this.sf.token.trim());
-      this.sf.savedGistId = this.sf.gistId.trim();
-      this.modals.settings = false;
-      this.syncStatus = 'syncing';
-      this.toast('設定を保存しました。クラウドからデータを取得中…','info');
-      const ok = await CloudSync.pull();
-      this.syncStatus = ok ? 'synced' : 'error';
-      if (ok) {
-        this.toast('GitHubと同期しました','success');
-        await this.boot();
-      } else {
-        this.toast('同期失敗。Gist IDとTokenを確認してください','error');
-      }
     },
     disconnectSync() {
       CloudSync.disconnect();
