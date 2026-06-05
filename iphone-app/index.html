@@ -450,7 +450,7 @@ function renderGarden() {
       if (stage==='seed') plantHtml = seedSVG(30,34);
       else if (stage==='sprout') plantHtml = sproutSVG(38,52);
       else if (stage==='plant') plantHtml = plantSVG(50,66);
-      else if (stage==='bud') plantHtml = budSVG(54,70);
+      else if (stage==='bud') plantHtml = budSVG(f,54,70);
     }
 
     const badge = pl.bloomed ? '✅' : (pl.care.some(v=>v>0) ? '🌱' : '');
