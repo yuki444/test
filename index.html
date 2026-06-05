@@ -1,708 +1,805 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="ぽかぽかガーデン">
-  <meta name="theme-color" content="#ffb74d">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.svg">
-  <title>ぽかぽかガーデン</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ぽかぽかガーデン">
+<meta name="theme-color" content="#81d4fa">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>ぽかぽかガーデン</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:'Hiragino Maru Gothic Pro','BIZ UDPGothic','M PLUS Rounded 1c',sans-serif;background:#b3e5fc}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center}
+.screen.hidden{display:none!important}
 
-    :root {
-      --sky: #b3e5fc;
-      --ground: #a5d6a7;
-      --soil: #8d6e63;
-      --pastel1: #f8bbd9;
-      --pastel2: #fff9c4;
-    }
+/* ===== TITLE ===== */
+#s-title{background:linear-gradient(180deg,#81d4fa 0%,#e1f5fe 45%,#c8e6c9 45%,#a5d6a7 100%);justify-content:space-between}
+.t-sky{position:relative;width:100%;height:45%;overflow:hidden}
+.t-sun{position:absolute;font-size:52px;right:24px;top:16px;animation:spin 25s linear infinite;filter:drop-shadow(0 0 12px #fff9c4)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cloud{position:absolute;background:#fff;border-radius:40px;opacity:.9}
+.cloud::before,.cloud::after{content:'';position:absolute;background:#fff;border-radius:50%}
+.cl1{width:90px;height:34px;top:28px;left:8%;animation:dr1 9s ease-in-out infinite}
+.cl1::before{width:44px;height:44px;top:-22px;left:12px}
+.cl1::after{width:34px;height:34px;top:-14px;right:10px}
+.cl2{width:70px;height:26px;top:60px;right:12%;animation:dr2 12s ease-in-out infinite}
+.cl2::before{width:36px;height:36px;top:-18px;left:8px}
+.cl2::after{width:26px;height:26px;top:-10px;right:8px}
+.cl3{width:50px;height:20px;top:16px;left:45%;animation:dr3 7s ease-in-out infinite}
+.cl3::before{width:26px;height:26px;top:-13px;left:6px}
+.cl3::after{width:20px;height:20px;top:-8px;right:6px}
+@keyframes dr1{0%,100%{transform:translateX(0)}50%{transform:translateX(18px)}}
+@keyframes dr2{0%,100%{transform:translateX(0)}50%{transform:translateX(-14px)}}
+@keyframes dr3{0%,100%{transform:translateX(0)}50%{transform:translateX(10px)}}
+.t-center{display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 20px;margin-top:-30px;z-index:1}
+.t-logo{font-size:40px;animation:bounce 2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.t-title{font-size:42px;font-weight:bold;color:#3e2723;text-shadow:3px 3px 0 #fff,0 0 20px rgba(255,200,100,.5);text-align:center;line-height:1.15}
+.t-sub{font-size:18px;color:#5d4037;background:rgba(255,255,255,.6);padding:4px 16px;border-radius:20px}
+.t-deco{font-size:30px;letter-spacing:4px}
+#btn-start{background:linear-gradient(135deg,#ffb74d,#ff7043);color:#fff;font-size:28px;font-weight:bold;border:none;border-radius:50px;padding:18px 56px;box-shadow:0 7px 0 #bf360c,0 9px 20px rgba(0,0,0,.2);cursor:pointer;transition:transform .1s,box-shadow .1s;-webkit-appearance:none;margin-top:6px}
+#btn-start:active{transform:translateY(5px);box-shadow:0 2px 0 #bf360c}
+.t-ground{width:100%;height:80px;background:linear-gradient(180deg,#a5d6a7,#66bb6a);display:flex;align-items:center;justify-content:center;font-size:28px;letter-spacing:6px}
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: var(--sky);
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-    }
+/* ===== GARDEN ===== */
+#s-garden{background:linear-gradient(180deg,#81d4fa 0%,#e1f5fe 38%,#dcedc8 38%,#c8e6c9 100%)}
+.g-sky{position:relative;width:100%;height:80px;overflow:hidden;flex-shrink:0}
+.g-sun{position:absolute;font-size:38px;right:18px;top:10px;animation:spin 30s linear infinite}
+.g-cloud{position:absolute;background:#fff;border-radius:30px;opacity:.85}
+.g-cloud::before,.g-cloud::after{content:'';position:absolute;background:#fff;border-radius:50%}
+.gc1{width:70px;height:26px;top:22px;left:5%;animation:dr1 11s ease-in-out infinite}
+.gc1::before{width:36px;height:36px;top:-18px;left:8px}.gc1::after{width:26px;height:26px;top:-10px;right:8px}
+.gc2{width:55px;height:22px;top:10px;left:38%;animation:dr2 14s ease-in-out infinite}
+.gc2::before{width:30px;height:30px;top:-15px;left:6px}.gc2::after{width:22px;height:22px;top:-8px;right:6px}
+#garden-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:8px;padding:8px 10px 4px;width:100%;min-height:0}
+.plot{background:rgba(255,255,255,.35);border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px 4px 8px;cursor:pointer;transition:transform .15s,box-shadow .2s;position:relative;border:2px solid rgba(255,255,255,.5);overflow:hidden}
+.plot:active{transform:scale(.93)}
+.plot.bloomed{background:rgba(255,255,255,.65);border-color:rgba(255,255,255,.9);box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.plot-plant{display:flex;align-items:flex-end;justify-content:center;flex:1;padding-top:4px;min-height:0}
+.plot-soil{width:80%;height:16px;background:radial-gradient(ellipse,#8d6e63,#5d4037);border-radius:50%;margin-top:-2px;flex-shrink:0}
+.plot-soil.wet{background:radial-gradient(ellipse,#5d4037,#3e2723)}
+.plot-label{font-size:12px;font-weight:bold;color:#4e342e;margin-top:3px;flex-shrink:0}
+.plot-badge{position:absolute;top:4px;right:5px;font-size:14px}
+.butterfly{position:absolute;font-size:18px;animation:flutter 1.8s ease-in-out infinite}
+@keyframes flutter{0%,100%{transform:rotate(-12deg) translateY(0) scale(1)}50%{transform:rotate(12deg) translateY(-6px) scale(1.05)}}
+.sway{animation:sway 3s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.g-bottom{width:100%;height:52px;background:linear-gradient(180deg,#a5d6a7,#66bb6a);flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:20px;padding-bottom:env(safe-area-inset-bottom)}
 
-    /* ========== SCREENS ========== */
-    .screen {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: opacity 0.4s ease;
-    }
-    .screen.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
+/* ===== CARE ===== */
+#s-care{background:linear-gradient(180deg,#81d4fa 0%,#e1f5fe 45%,#f1f8e9 45%,#dcedc8 100%)}
+.care-head{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));flex-shrink:0}
+#btn-back{background:#ef9a9a;border:none;border-radius:20px;padding:10px 20px;font-size:20px;cursor:pointer;box-shadow:0 3px 0 #c62828;transition:transform .1s;-webkit-appearance:none}
+#btn-back:active{transform:translateY(2px);box-shadow:0 1px 0 #c62828}
+.care-name-badge{font-size:20px;font-weight:bold;color:#fff;padding:7px 18px;border-radius:20px;text-shadow:1px 1px 2px rgba(0,0,0,.3)}
+.step-dots{display:flex;gap:7px}
+.sdot{width:13px;height:13px;border-radius:50%;background:#bdbdbd;transition:background .3s,transform .3s}
+.sdot.done{background:#4caf50}
+.sdot.active{background:#ff9800;transform:scale(1.3)}
 
-    /* ========== TITLE SCREEN ========== */
-    #title-screen {
-      background: linear-gradient(180deg, #ffe0f0 0%, #fff9c4 60%, #c8e6c9 100%);
-      justify-content: center;
-      gap: 24px;
-    }
-    .title-logo {
-      font-size: 56px;
-      line-height: 1;
-    }
-    .title-text {
-      font-size: 32px;
-      font-weight: bold;
-      color: #5d4037;
-      text-shadow: 2px 2px 0 #fff;
-      text-align: center;
-    }
-    .title-sub {
-      font-size: 18px;
-      color: #795548;
-    }
-    .btn-start {
-      margin-top: 16px;
-      background: #ffb74d;
-      color: #fff;
-      font-size: 28px;
-      font-weight: bold;
-      border: none;
-      border-radius: 50px;
-      padding: 20px 60px;
-      box-shadow: 0 6px 0 #e65100;
-      cursor: pointer;
-      transition: transform 0.1s, box-shadow 0.1s;
-    }
-    .btn-start:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 #e65100;
-    }
-    .flowers-deco {
-      font-size: 36px;
-      letter-spacing: 8px;
-    }
+.care-plant-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:8px;position:relative;min-height:0}
+#care-plant-svg{transition:transform .3s;transform-origin:bottom center}
+#care-plant-svg.grow{animation:grow-in .5s ease}
+@keyframes grow-in{0%{transform:scale(0.7)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+#care-plant-svg.wobble{animation:wobble .4s ease}
+@keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+.care-soil{width:130px;height:32px;background:radial-gradient(ellipse,#8d6e63,#5d4037);border-radius:50%;transition:background .6s;flex-shrink:0}
+.care-soil.wet{background:radial-gradient(ellipse,#4e342e,#3e2723)}
 
-    /* ========== MAIN GAME SCREEN ========== */
-    #game-screen {
-      background: linear-gradient(180deg, #b3e5fc 0%, #e1f5fe 50%, #a5d6a7 50%, #81c784 100%);
-    }
+.care-action{width:100%;padding:8px 16px 0;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0}
+.action-title{font-size:20px;font-weight:bold;color:#3e2723;background:rgba(255,255,255,.7);padding:6px 20px;border-radius:20px}
 
-    /* Top bar */
-    .top-bar {
-      width: 100%;
-      padding: 12px 16px 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: max(12px, env(safe-area-inset-top));
-    }
-    .btn-garden {
-      background: #66bb6a;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 18px;
-      font-size: 22px;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #388e3c;
-      transition: transform 0.1s;
-    }
-    .btn-garden:active { transform: translateY(3px); box-shadow: 0 1px 0 #388e3c; }
-    .progress-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .drop {
-      font-size: 26px;
-      transition: transform 0.2s;
-    }
-    .drop.filled { transform: scale(1.15); }
+/* --- water game --- */
+.water-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.water-drops{display:flex;gap:10px}
+.wd{font-size:28px;opacity:.25;transition:opacity .2s,transform .2s}
+.wd.on{opacity:1;animation:drop-pop .3s ease}
+@keyframes drop-pop{0%{transform:scale(0)}60%{transform:scale(1.4)}100%{transform:scale(1)}}
+#btn-water{font-size:76px;background:none;border:none;cursor:pointer;padding:8px;transition:transform .15s;-webkit-appearance:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))}
+#btn-water:active{transform:scale(.82) rotate(-22deg)}
 
-    /* Plant area */
-    .plant-stage {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      padding-bottom: 20px;
-      position: relative;
-    }
-    .plant-emoji {
-      font-size: 100px;
-      line-height: 1;
-      transition: transform 0.15s ease;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
-    }
-    .plant-emoji.pop {
-      animation: pop-anim 0.3s ease;
-    }
-    @keyframes pop-anim {
-      0%   { transform: scale(1); }
-      50%  { transform: scale(1.35); }
-      100% { transform: scale(1); }
-    }
-    .soil-patch {
-      width: 160px;
-      height: 40px;
-      background: radial-gradient(ellipse, #8d6e63 60%, #6d4c41);
-      border-radius: 50%;
-      margin-top: -8px;
-    }
-    .color-label {
-      margin-top: 12px;
-      font-size: 22px;
-      font-weight: bold;
-      color: #5d4037;
-      background: rgba(255,255,255,0.7);
-      padding: 4px 18px;
-      border-radius: 20px;
-    }
+/* --- cloud game --- */
+.cloud-game{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%}
+.cloud-sky{position:relative;width:100%;height:110px}
+.cg-sun{position:absolute;font-size:52px;left:50%;top:8px;transform:translateX(-50%);transition:filter .5s,transform .5s;filter:brightness(.6)}
+.cg-sun.shining{filter:brightness(1) drop-shadow(0 0 20px #fff9c4);transform:translateX(-50%) scale(1.15)}
+.cg-cloud-btn{position:absolute;bottom:8px;background:#fff;border:none;border-radius:40px;cursor:pointer;font-size:14px;font-weight:bold;color:#78909c;padding:8px 14px;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:transform .3s,opacity .4s;-webkit-appearance:none}
+.cg-cloud-btn::before,.cg-cloud-btn::after{content:'';position:absolute;background:#fff;border-radius:50%}
+.cg-cloud-btn::before{width:28px;height:28px;top:-14px;left:8px}
+.cg-cloud-btn::after{width:22px;height:22px;top:-10px;right:8px}
+.cg-cloud-btn.poof{animation:cloud-poof .4s ease forwards}
+@keyframes cloud-poof{0%{transform:scale(1) translateY(0);opacity:1}100%{transform:scale(2) translateY(-40px);opacity:0}}
+.cc1{left:4%;width:88px;height:32px}
+.cc2{left:50%;transform:translateX(-50%);width:78px;height:28px}
+.cc3{right:4%;width:82px;height:30px}
 
-    /* Watering can */
-    .can-area {
-      padding: 16px 0 max(24px, env(safe-area-inset-bottom));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-    .count-text {
-      font-size: 20px;
-      color: #5d4037;
-      font-weight: bold;
-      min-height: 28px;
-    }
-    .watering-can-btn {
-      width: 120px;
-      height: 120px;
-      border: none;
-      background: none;
-      font-size: 90px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      transition: transform 0.1s;
-      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
-    }
-    .watering-can-btn:active {
-      transform: scale(0.9) rotate(-15deg);
-    }
+/* --- song game --- */
+.song-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;padding:0 10px}
+.note-field{position:relative;width:100%;height:88px;overflow:hidden}
+.note-ball{position:absolute;bottom:0;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.2);animation:note-rise 3.5s linear forwards;-webkit-appearance:none;border:none;transition:transform .1s}
+.note-ball:active{transform:scale(.85)}
+@keyframes note-rise{0%{transform:translateY(0);opacity:1}85%{opacity:.9}100%{transform:translateY(-110px);opacity:0}}
+.note-ball.popped{animation:note-pop .25s ease forwards;pointer-events:none}
+@keyframes note-pop{0%{transform:scale(1);opacity:1}50%{transform:scale(2);opacity:.5}100%{transform:scale(0);opacity:0}}
+.song-progress{display:flex;gap:10px;font-size:24px}
+.sp-note{opacity:.25;transition:opacity .2s}
+.sp-note.on{opacity:1;animation:drop-pop .3s ease}
 
-    /* Canvas overlay for particles */
-    #particle-canvas {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 100;
-    }
+/* PROGRESS BAR */
+.care-bottom{width:100%;padding:8px 16px;padding-bottom:max(10px,env(safe-area-inset-bottom));flex-shrink:0}
+.progress-bar-wrap{background:rgba(255,255,255,.5);border-radius:20px;height:10px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#66bb6a,#4caf50);transition:width .4s ease}
 
-    /* ========== GARDEN SCREEN ========== */
-    #garden-screen {
-      background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
-    }
-    .garden-header {
-      width: 100%;
-      padding: 12px 16px;
-      padding-top: max(12px, env(safe-area-inset-top));
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .btn-back {
-      background: #ef9a9a;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 18px;
-      font-size: 22px;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #c62828;
-    }
-    .btn-back:active { transform: translateY(3px); box-shadow: 0 1px 0 #c62828; }
-    .garden-title {
-      font-size: 24px;
-      font-weight: bold;
-      color: #2e7d32;
-    }
-    .garden-grid {
-      width: 100%;
-      padding: 12px 20px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      overflow-y: auto;
-    }
-    .garden-slot {
-      aspect-ratio: 1;
-      background: rgba(255,255,255,0.5);
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-    }
-    .garden-slot.bloomed {
-      background: rgba(255,255,255,0.85);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-    }
-    .garden-slot.bloomed:active { transform: scale(0.95); }
-    .slot-flower { font-size: 44px; }
-    .slot-label { font-size: 12px; font-weight: bold; color: #5d4037; }
-    .slot-empty { font-size: 36px; opacity: 0.3; }
+/* ===== CELEBRATION ===== */
+#celebration{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:200;opacity:0;pointer-events:none;transition:opacity .35s;background:rgba(255,255,200,.15)}
+#celebration.show{opacity:1;pointer-events:all}
+#celeb-flower{animation:celeb-spin .6s ease}
+@keyframes celeb-spin{0%{transform:scale(0) rotate(-200deg)}70%{transform:scale(1.25) rotate(15deg)}100%{transform:scale(1) rotate(0)}}
+.celeb-text{font-size:58px;font-weight:bold;color:#fff;text-shadow:4px 4px 0 #f57f17,-2px -2px 0 #e65100;animation:bounce-in .4s ease}
+@keyframes bounce-in{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+.celeb-butterfly{font-size:40px;animation:flutter 1.5s ease-in-out infinite}
 
-    /* ========== CELEBRATION OVERLAY ========== */
-    #celebration {
-      position: fixed;
-      inset: 0;
-      background: rgba(255,255,255,0.0);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    #celebration.show {
-      opacity: 1;
-      pointer-events: all;
-    }
-    .celeb-text {
-      font-size: 64px;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 3px 3px 0 #f57f17, 6px 6px 0 #e65100;
-      text-align: center;
-      animation: bounce-in 0.4s ease;
-    }
-    .celeb-flower {
-      font-size: 96px;
-      animation: spin-grow 0.6s ease;
-    }
-    @keyframes bounce-in {
-      0%   { transform: scale(0); }
-      70%  { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-    @keyframes spin-grow {
-      0%   { transform: rotate(-180deg) scale(0); }
-      100% { transform: rotate(0deg) scale(1); }
-    }
+/* ===== COMPLETE ===== */
+#s-complete{background:linear-gradient(135deg,#ffcdd2 0%,#fff9c4 25%,#dcedc8 50%,#b3e5fc 75%,#f3e5f5 100%);justify-content:center;gap:12px;padding:16px}
+.comp-rainbow{font-size:72px;animation:bounce-in .5s ease}
+.comp-title{font-size:30px;font-weight:bold;color:#4e342e;text-align:center;text-shadow:2px 2px 0 #fff}
+.comp-sub{font-size:16px;color:#5d4037;background:rgba(255,255,255,.6);padding:4px 16px;border-radius:16px}
+.comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 10px}
+.comp-slot{display:flex;flex-direction:column;align-items:center;gap:4px;animation:bounce-in .5s ease}
+.comp-slot-name{font-size:12px;font-weight:bold;color:#5d4037}
+#btn-restart{background:linear-gradient(135deg,#66bb6a,#43a047);color:#fff;font-size:24px;font-weight:bold;border:none;border-radius:50px;padding:16px 48px;box-shadow:0 6px 0 #2e7d32;cursor:pointer;transition:transform .1s,box-shadow .1s;-webkit-appearance:none}
+#btn-restart:active{transform:translateY(4px);box-shadow:0 2px 0 #2e7d32}
 
-    /* ========== RAINBOW SPECIAL ========== */
-    #rainbow-screen {
-      background: linear-gradient(135deg, #ff8a80, #ffb74d, #fff176, #a5d6a7, #80d8ff, #ea80fc);
-      justify-content: center;
-      gap: 20px;
-    }
-    .rainbow-title { font-size: 36px; font-weight: bold; color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); text-align: center; }
-    .rainbow-flower { font-size: 120px; animation: pulse 1s infinite alternate; }
-    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
-    .btn-rainbow-back {
-      background: rgba(255,255,255,0.9);
-      border: none;
-      border-radius: 50px;
-      padding: 16px 40px;
-      font-size: 24px;
-      font-weight: bold;
-      color: #7b1fa2;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-
-    /* Ripple effect on tap */
-    .ripple {
-      position: fixed;
-      border-radius: 50%;
-      background: rgba(100, 181, 246, 0.5);
-      transform: scale(0);
-      pointer-events: none;
-      z-index: 50;
-      animation: ripple-anim 0.5s ease-out forwards;
-    }
-    @keyframes ripple-anim {
-      to { transform: scale(4); opacity: 0; }
-    }
-  </style>
+/* FX */
+#fx-canvas{position:fixed;inset:0;pointer-events:none;z-index:100}
+.ripple{position:fixed;border-radius:50%;pointer-events:none;z-index:50;animation:ripple-out .55s ease-out forwards}
+@keyframes ripple-out{0%{transform:scale(0);opacity:1}100%{transform:scale(5);opacity:0}}
+</style>
 </head>
 <body>
+<canvas id="fx-canvas"></canvas>
 
-<canvas id="particle-canvas"></canvas>
-
-<!-- Title Screen -->
-<div id="title-screen" class="screen">
-  <div class="flowers-deco">🌸🌼🌷🌻🌺</div>
-  <div class="title-logo">🪴</div>
-  <div class="title-text">ぽかぽか<br>ガーデン</div>
-  <div class="title-sub">おはなをそだてよう！</div>
-  <button class="btn-start" id="btn-start">はじめる ▶</button>
-  <div class="flowers-deco">🌺🌻🌷🌼🌸</div>
+<!-- TITLE -->
+<div id="s-title" class="screen">
+  <div class="t-sky">
+    <div class="t-sun">☀️</div>
+    <div class="cloud cl1"></div>
+    <div class="cloud cl2"></div>
+    <div class="cloud cl3"></div>
+  </div>
+  <div class="t-center">
+    <div class="t-logo">🌸🌼🌷</div>
+    <div class="t-title">ぽかぽか<br>ガーデン</div>
+    <div class="t-sub">おはなをそだてよう！</div>
+    <button id="btn-start">はじめる ▶</button>
+  </div>
+  <div class="t-ground">🌱🌱🌱🌱🌱🌱🌱🌱</div>
 </div>
 
-<!-- Game Screen -->
-<div id="game-screen" class="screen hidden">
-  <div class="top-bar">
-    <button class="btn-garden" id="btn-garden">🌻 にわ</button>
-    <div class="progress-row" id="progress-drops"></div>
+<!-- GARDEN -->
+<div id="s-garden" class="screen hidden">
+  <div class="g-sky">
+    <div class="g-sun">☀️</div>
+    <div class="g-cloud gc1"></div>
+    <div class="g-cloud gc2"></div>
   </div>
-  <div class="plant-stage">
-    <div class="plant-emoji" id="plant-display">🌱</div>
-    <div class="soil-patch"></div>
-    <div class="color-label" id="color-label">あか</div>
+  <div id="garden-grid"></div>
+  <div class="g-bottom">🌿 わたしのにわ 🌿</div>
+</div>
+
+<!-- CARE -->
+<div id="s-care" class="screen hidden">
+  <div class="care-head">
+    <button id="btn-back">← もどる</button>
+    <div class="care-name-badge" id="care-name-badge"></div>
+    <div class="step-dots" id="step-dots">
+      <div class="sdot active"></div>
+      <div class="sdot"></div>
+      <div class="sdot"></div>
+    </div>
   </div>
-  <div class="can-area">
-    <div class="count-text" id="count-text">みずをあげてね！</div>
-    <button class="watering-can-btn" id="can-btn">🪣</button>
+  <div class="care-plant-wrap">
+    <div id="care-plant-svg"></div>
+    <div class="care-soil" id="care-soil"></div>
+  </div>
+  <div class="care-action" id="care-action"></div>
+  <div class="care-bottom">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
   </div>
 </div>
 
-<!-- Garden Screen -->
-<div id="garden-screen" class="screen hidden">
-  <div class="garden-header">
-    <button class="btn-back" id="btn-back">← もどる</button>
-    <div class="garden-title">🌿 わたしのにわ</div>
-  </div>
-  <div class="garden-grid" id="garden-grid"></div>
-</div>
-
-<!-- Rainbow Special Screen -->
-<div id="rainbow-screen" class="screen hidden">
-  <div class="rainbow-title">🎉 すごい！！<br>にじのはなが さいたよ！</div>
-  <div class="rainbow-flower">🌈🌸</div>
-  <div style="font-size:28px; color:#fff; text-align:center;">6しょくぜんぶ<br>あつめたね！</div>
-  <button class="btn-rainbow-back" id="btn-rainbow-back">もう一度あそぶ</button>
-</div>
-
-<!-- Celebration Overlay -->
+<!-- CELEBRATION -->
 <div id="celebration">
-  <div class="celeb-flower" id="celeb-flower">🌸</div>
+  <div id="celeb-flower"></div>
   <div class="celeb-text">さいた！！</div>
+  <div class="celeb-butterfly">🦋</div>
+</div>
+
+<!-- COMPLETE -->
+<div id="s-complete" class="screen hidden">
+  <div class="comp-rainbow">🌈</div>
+  <div class="comp-title">にじのはなばたけ！</div>
+  <div class="comp-sub">6しょくぜんぶ さいたね！✨</div>
+  <div class="comp-grid" id="comp-grid"></div>
+  <button id="btn-restart">もういちど あそぶ</button>
 </div>
 
 <script>
-// ===================== AUDIO ENGINE =====================
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let ctx;
-function getCtx() {
-  if (!ctx) ctx = new AudioCtx();
-  if (ctx.state === 'suspended') ctx.resume();
-  return ctx;
+// ============ PLANTS (SVG-drawn, color-accurate) ============
+const PLANTS = [
+  { name:'あか',    p:'#ef5350', p2:'#b71c1c', cx:'#fdd835', cx2:'#f9a825', bf:'🦋', bfc:'#ef5350' },
+  { name:'きいろ',  p:'#fff176', p2:'#f9a825', cx:'#ff8f00', cx2:'#e65100', bf:'🌟', bfc:'#fdd835' },
+  { name:'ピンク',  p:'#f48fb1', p2:'#ad1457', cx:'#fff9c4', cx2:'#ffd54f', bf:'🦋', bfc:'#f06292' },
+  { name:'しろ',    p:'#f5f5f5', p2:'#9e9e9e', cx:'#fff9c4', cx2:'#ffd54f', bf:'🕊️', bfc:'#e0e0e0' },
+  { name:'オレンジ',p:'#ff8a65', p2:'#bf360c', cx:'#fff176', cx2:'#fdd835', bf:'🦋', bfc:'#ff7043' },
+  { name:'むらさき',p:'#ce93d8', p2:'#6a1b9a', cx:'#fff9c4', cx2:'#ffd54f', bf:'🦋', bfc:'#ab47bc' },
+];
+
+// badge colors for care screen label
+const BADGE_COLORS = ['#ef5350','#fbc02d','#e91e63','#9e9e9e','#ff7043','#9c27b0'];
+
+// ============ SVG GENERATORS ============
+function flowerSVG(pl, w=100, h=110) {
+  const outline = pl.name==='しろ' ? `stroke="#bdbdbd" stroke-width="1.5"` : '';
+  const petals = [0,60,120,180,240,300].map(r=>
+    `<ellipse cx="0" cy="-38" rx="15" ry="26" fill="${pl.p}" ${outline} transform="rotate(${r})"/>`
+  ).join('');
+  return `<svg viewBox="0 0 100 115" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(50,50)">${petals}
+<circle r="16" fill="${pl.p2}"/><circle r="10" fill="${pl.cx}"/><circle r="5" fill="${pl.cx2}"/></g>
+<path d="M50 66 C47 85 49 100 50 110" stroke="#43a047" stroke-width="4" fill="none" stroke-linecap="round"/>
+<ellipse cx="38" cy="92" rx="12" ry="5" fill="#66bb6a" transform="rotate(-38 38 92)"/>
+<ellipse cx="62" cy="100" rx="12" ry="5" fill="#66bb6a" transform="rotate(32 62 100)"/>
+</svg>`;
 }
 
-function playTone(freq, type = 'sine', dur = 0.15, vol = 0.3) {
-  const ac = getCtx();
-  const osc = ac.createOscillator();
-  const gain = ac.createGain();
-  osc.connect(gain);
-  gain.connect(ac.destination);
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, ac.currentTime);
-  gain.gain.setValueAtTime(vol, ac.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
-  osc.start();
-  osc.stop(ac.currentTime + dur);
+function budSVG(pl, w=70, h=90) {
+  return `<svg viewBox="0 0 100 115" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(50,52)">
+<ellipse cx="-9" cy="5" rx="7" ry="20" fill="#43a047" transform="rotate(-20 -9 5)"/>
+<ellipse cx="9" cy="5" rx="7" ry="20" fill="#43a047" transform="rotate(20 9 5)"/>
+<ellipse cx="0" cy="-8" rx="17" ry="25" fill="${pl.p}"/>
+<ellipse cx="0" cy="-10" rx="9" ry="16" fill="${pl.p}" opacity=".55"/>
+</g>
+<path d="M50 72 C47 88 49 100 50 110" stroke="#43a047" stroke-width="4" fill="none" stroke-linecap="round"/>
+<ellipse cx="38" cy="92" rx="12" ry="5" fill="#66bb6a" transform="rotate(-38 38 92)"/>
+</svg>`;
 }
 
-function playWaterSound() {
-  const ac = getCtx();
-  const buf = ac.createBuffer(1, ac.sampleRate * 0.2, ac.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < data.length; i++) {
-    data[i] = (Math.random() * 2 - 1) * Math.max(0, 1 - i / data.length);
-  }
-  const src = ac.createBufferSource();
-  const gain = ac.createGain();
-  const filter = ac.createBiquadFilter();
-  filter.type = 'bandpass';
-  filter.frequency.value = 800;
-  filter.Q.value = 0.5;
-  src.buffer = buf;
-  src.connect(filter);
-  filter.connect(gain);
-  gain.connect(ac.destination);
-  gain.gain.value = 0.2;
-  src.start();
+function plantSVG(w=60, h=80) {
+  return `<svg viewBox="0 0 100 115" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+<path d="M50 55 C47 78 49 98 50 110" stroke="#43a047" stroke-width="4" fill="none" stroke-linecap="round"/>
+<ellipse cx="36" cy="80" rx="15" ry="6" fill="#66bb6a" transform="rotate(-40 36 80)"/>
+<ellipse cx="66" cy="90" rx="15" ry="6" fill="#66bb6a" transform="rotate(35 66 90)"/>
+<ellipse cx="44" cy="62" rx="11" ry="5" fill="#81c784" transform="rotate(-25 44 62)"/>
+</svg>`;
 }
 
-function playCountSound(n) {
-  const notes = [523, 587, 659, 698, 784];
-  playTone(notes[n - 1], 'triangle', 0.2, 0.35);
+function sproutSVG(w=44, h=58) {
+  return `<svg viewBox="0 0 100 115" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+<path d="M50 88 L50 110" stroke="#43a047" stroke-width="3" stroke-linecap="round"/>
+<ellipse cx="38" cy="88" rx="14" ry="6" fill="#81c784" transform="rotate(-14 38 88)"/>
+<ellipse cx="62" cy="90" rx="14" ry="6" fill="#81c784" transform="rotate(14 62 90)"/>
+</svg>`;
 }
 
-function playCelebSound() {
-  const ac = getCtx();
-  [523, 659, 784, 1047].forEach((f, i) => {
-    setTimeout(() => playTone(f, 'triangle', 0.3, 0.4), i * 80);
+function seedSVG(w=32, h=36) {
+  return `<svg viewBox="0 0 100 115" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="50" cy="100" rx="14" ry="10" fill="#8d6e63"/>
+<ellipse cx="50" cy="97" rx="10" ry="7" fill="#a1887f"/>
+</svg>`;
+}
+
+function emptySVG(w=32, h=36) {
+  return `<svg viewBox="0 0 100 50" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+<text x="50" y="35" text-anchor="middle" font-size="28">✨</text>
+</svg>`;
+}
+
+// ============ AUDIO ============
+let actx;
+function getActx() {
+  if (!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+  if (actx.state==='suspended') actx.resume();
+  return actx;
+}
+function tone(freq, type='sine', dur=0.18, vol=0.3, delay=0) {
+  const ac = getActx();
+  const osc = ac.createOscillator(), g = ac.createGain();
+  osc.connect(g); g.connect(ac.destination);
+  osc.type = type; osc.frequency.value = freq;
+  const t = ac.currentTime + delay;
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  osc.start(t); osc.stop(t + dur);
+}
+function playWater() {
+  const ac = getActx();
+  const buf = ac.createBuffer(1, ac.sampleRate*.18, ac.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i=0; i<d.length; i++) d[i] = (Math.random()*2-1)*Math.max(0,1-i/d.length);
+  const src = ac.createBufferSource(), g = ac.createGain(), f = ac.createBiquadFilter();
+  f.type='bandpass'; f.frequency.value=900; f.Q.value=0.6;
+  src.buffer=buf; src.connect(f); f.connect(g); g.connect(ac.destination);
+  g.gain.value=0.18; src.start();
+}
+function playSun() { [523,659,784].forEach((f,i)=>tone(f,'triangle',.2,.3,i*.08)); }
+function playNote(n) {
+  const freqs=[523,587,659,698,784,880,1047];
+  tone(freqs[n%freqs.length],'triangle',.25,.35);
+}
+function playBloom() { [523,659,784,1047].forEach((f,i)=>tone(f,'triangle',.35,.4,i*.09)); }
+function playComplete() {
+  [523,587,659,784,880,1047,1175].forEach((f,i)=>{
+    tone(f,'sine',.5,.3,i*.11);
+    tone(f*2,'triangle',.3,.1,i*.11);
   });
 }
 
-function playRainbowSound() {
-  [523, 587, 659, 784, 880, 1047, 1175].forEach((f, i) => {
-    setTimeout(() => playTone(f, 'sine', 0.4, 0.35), i * 100);
-  });
-}
-
-// ===================== PARTICLE ENGINE =====================
-const canvas = document.getElementById('particle-canvas');
+// ============ PARTICLES ============
+const canvas = document.getElementById('fx-canvas');
 const pctx = canvas.getContext('2d');
 let particles = [];
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-function spawnParticles(x, y, colors, count = 30) {
-  for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 3 + Math.random() * 6;
+function spawnParticles(x, y, colors, count=30, emojis=null) {
+  const em = emojis || ['⭐','✨','💫','🌟'];
+  for (let i=0;i<count;i++) {
+    const a = Math.random()*Math.PI*2, s = 3+Math.random()*7;
     particles.push({
       x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 4,
-      size: 8 + Math.random() * 12,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      alpha: 1,
-      emoji: ['⭐','✨','💫','🌟'][Math.floor(Math.random() * 4)],
-      life: 1,
+      vx: Math.cos(a)*s, vy: Math.sin(a)*s-5,
+      size: 10+Math.random()*14,
+      em: em[Math.floor(Math.random()*em.length)],
+      alpha: 1
     });
   }
 }
+function spawnWaterDrops(x, y) {
+  for (let i=0;i<6;i++) {
+    const a = -Math.PI*.5 + (Math.random()-.5)*.8, s=2+Math.random()*3;
+    particles.push({ x, y, vx:Math.cos(a)*s, vy:Math.sin(a)*s-2, size:12, em:'💧', alpha:1 });
+  }
+}
 
-function animParticles() {
+(function animParticles() {
   pctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles = particles.filter(p => p.alpha > 0.02);
-  particles.forEach(p => {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vy += 0.3;
-    p.alpha -= 0.022;
-    pctx.globalAlpha = p.alpha;
-    pctx.font = `${p.size}px serif`;
-    pctx.fillText(p.emoji, p.x, p.y);
+  particles = particles.filter(p=>p.alpha>0.03);
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.28; p.alpha-=0.025;
+    pctx.globalAlpha=p.alpha;
+    pctx.font=`${p.size}px serif`;
+    pctx.fillText(p.em, p.x, p.y);
   });
-  pctx.globalAlpha = 1;
+  pctx.globalAlpha=1;
   requestAnimationFrame(animParticles);
-}
-animParticles();
+})();
 
-// ===================== RIPPLE =====================
-function createRipple(x, y) {
-  const r = document.createElement('div');
-  r.className = 'ripple';
-  const size = 60;
-  r.style.cssText = `width:${size}px;height:${size}px;left:${x - size/2}px;top:${y - size/2}px`;
+function ripple(x, y, color='rgba(100,181,246,.4)') {
+  const r=document.createElement('div');
+  r.className='ripple';
+  const sz=60;
+  r.style.cssText=`width:${sz}px;height:${sz}px;left:${x-sz/2}px;top:${y-sz/2}px;background:${color}`;
   document.body.appendChild(r);
-  setTimeout(() => r.remove(), 600);
+  setTimeout(()=>r.remove(), 600);
 }
 
-// ===================== GAME STATE =====================
-const PLANTS = [
-  { name: 'あか',  stages: ['🌱','🌿','🌷'], bloom: '🌷', color: '#f48fb1' },
-  { name: 'きいろ',stages: ['🌱','🌿','🌻'], bloom: '🌻', color: '#fff176' },
-  { name: 'ピンク',stages: ['🌱','🌿','🌸'], bloom: '🌸', color: '#f8bbd9' },
-  { name: 'しろ',  stages: ['🌱','🌿','🌼'], bloom: '🌼', color: '#e0e0e0' },
-  { name: 'オレンジ',stages:['🌱','🌿','🌺'], bloom: '🌺', color: '#ffcc80' },
-  { name: 'むらさき',stages:['🌱','🌿','💜'], bloom: '💐', color: '#ce93d8' },
-];
+// ============ GAME STATE ============
+const CARE_STEPS = 3;
+const WATER_GOAL = 4, CLOUD_GOAL = 3, NOTE_GOAL = 4;
 
-let garden = JSON.parse(localStorage.getItem('ppg_garden') || '[]');
-let currentPlantIdx = 0;
-let waterCount = 0;
-const WATER_TO_BLOOM = 5;
+let plots = [];  // { flowerIdx, care:[w,c,n], bloomed }
+let activePlot = -1;
+let cloudStates = [false,false,false];
+let notesHit = 0;
+let noteDivs = [];
+let noteTimers = [];
 
-function saveGarden() {
-  localStorage.setItem('ppg_garden', JSON.stringify(garden));
+function initPlots() {
+  plots = Array(6).fill(null).map((_,i) => ({ flowerIdx:i, care:[0,0,0], bloomed:false }));
+  try { const s=localStorage.getItem('ppg2'); if(s) plots=JSON.parse(s); } catch(e){}
+}
+function savePlots() {
+  try { localStorage.setItem('ppg2', JSON.stringify(plots)); } catch(e){}
 }
 
-function nextUnbloomed() {
-  for (let i = 0; i < PLANTS.length; i++) {
-    if (!garden.includes(i)) return i;
-  }
-  return -1;
+function currentCareStep(plot) {
+  if (plot.care[0] < WATER_GOAL) return 0;
+  if (plot.care[1] < CLOUD_GOAL) return 1;
+  return 2;
+}
+function totalProgress(plot) {
+  return (plot.care[0]/WATER_GOAL + plot.care[1]/CLOUD_GOAL + plot.care[2]/NOTE_GOAL) / CARE_STEPS;
+}
+function plantVisualStage(plot) {
+  const [w,c,n] = plot.care;
+  if (w===0) return 'seed';
+  if (w < WATER_GOAL) return 'sprout';
+  if (c < CLOUD_GOAL) return 'plant';
+  if (n < NOTE_GOAL) return 'bud';
+  return 'bloom';
 }
 
-// ===================== UI HELPERS =====================
-function getScreen(id) { return document.getElementById(id); }
-
-function showScreen(id) {
-  ['title-screen','game-screen','garden-screen','rainbow-screen'].forEach(s => {
-    getScreen(s).classList.toggle('hidden', s !== id);
-  });
+// ============ SCREENS ============
+function show(id) {
+  ['s-title','s-garden','s-care','s-complete'].forEach(s=>
+    document.getElementById(s).classList.toggle('hidden', s!==id)
+  );
 }
 
-function updatePlantDisplay() {
-  const plant = PLANTS[currentPlantIdx];
-  const el = document.getElementById('plant-display');
-  const stage = waterCount < 2 ? 0 : waterCount < 4 ? 1 : 1;
-  el.textContent = plant.stages[stage];
-  document.getElementById('color-label').textContent = plant.name;
-  updateDrops();
-
-  const msgs = [
-    'みずをあげてね！',
-    'もう1かい！',
-    'いい感じ！',
-    'もうすぐ！',
-    'あと1かい！',
-  ];
-  document.getElementById('count-text').textContent = msgs[waterCount] || '';
-}
-
-function updateDrops() {
-  const row = document.getElementById('progress-drops');
-  row.innerHTML = '';
-  for (let i = 0; i < WATER_TO_BLOOM; i++) {
-    const d = document.createElement('span');
-    d.className = 'drop' + (i < waterCount ? ' filled' : '');
-    d.textContent = i < waterCount ? '💧' : '🩶';
-    row.appendChild(d);
-  }
-}
-
+// ============ GARDEN RENDER ============
 function renderGarden() {
   const grid = document.getElementById('garden-grid');
   grid.innerHTML = '';
-  PLANTS.forEach((p, i) => {
-    const slot = document.createElement('div');
-    slot.className = 'garden-slot' + (garden.includes(i) ? ' bloomed' : '');
-    if (garden.includes(i)) {
-      slot.innerHTML = `<span class="slot-flower">${p.bloom}</span><span class="slot-label">${p.name}</span>`;
+  plots.forEach((pl, idx) => {
+    const f = PLANTS[pl.flowerIdx];
+    const div = document.createElement('div');
+    div.className = 'plot' + (pl.bloomed ? ' bloomed' : '');
+    div.onclick = () => onPlotTap(idx);
+
+    let plantHtml = '';
+    if (pl.bloomed) {
+      plantHtml = `<div class="sway" style="transform-origin:bottom center">${flowerSVG(f,70,76)}</div>`;
     } else {
-      slot.innerHTML = `<span class="slot-empty">🌱</span>`;
+      const stage = plantVisualStage(pl);
+      if (stage==='seed') plantHtml = seedSVG(30,34);
+      else if (stage==='sprout') plantHtml = sproutSVG(38,52);
+      else if (stage==='plant') plantHtml = plantSVG(50,66);
+      else if (stage==='bud') plantHtml = budSVG(54,70);
     }
+
+    const badge = pl.bloomed ? '✅' : (pl.care.some(v=>v>0) ? '🌱' : '');
+    const bf = pl.bloomed ? `<div class="butterfly" style="left:${4+Math.random()*20}px;top:${3+Math.random()*12}px">${f.bf}</div>` : '';
+
+    div.innerHTML = `
+      ${bf}
+      <div class="plot-plant">${plantHtml}</div>
+      <div class="plot-soil${pl.care[0]>0?' wet':''}"></div>
+      <div class="plot-label">${f.name}</div>
+      <div class="plot-badge">${badge}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+// ============ CARE SCREEN ============
+function openCare(idx) {
+  activePlot = idx;
+  const pl = plots[idx];
+  if (pl.bloomed) { bouncePlot(idx); return; }
+
+  clearNoteTimers();
+  cloudStates = [false, false, false];
+  notesHit = 0;
+  noteDivs = [];
+
+  const f = PLANTS[pl.flowerIdx];
+  document.getElementById('care-name-badge').textContent = f.name + ' のおはな';
+  document.getElementById('care-name-badge').style.background = BADGE_COLORS[pl.flowerIdx];
+  show('s-care');
+  renderCare();
+}
+
+function renderCare() {
+  const pl = plots[activePlot];
+  const f = PLANTS[pl.flowerIdx];
+  const step = currentCareStep(pl);
+
+  // Step dots
+  const dots = document.getElementById('step-dots').children;
+  for (let i=0;i<3;i++) {
+    dots[i].className = 'sdot' + (i<step?' done':i===step?' active':'');
+  }
+
+  // Plant visual
+  const stage = plantVisualStage(pl);
+  let plantHtml = '';
+  const sizes = { seed:[48,54], sprout:[64,82], plant:[82,102], bud:[90,112], bloom:[110,122] };
+  const [w,h] = sizes[stage];
+  if (stage==='seed') plantHtml = seedSVG(w,h);
+  else if (stage==='sprout') plantHtml = sproutSVG(w,h);
+  else if (stage==='plant') plantHtml = plantSVG(w,h);
+  else if (stage==='bud') plantHtml = budSVG(f,w,h);
+  else plantHtml = flowerSVG(f,w,h);
+  document.getElementById('care-plant-svg').innerHTML = plantHtml;
+
+  // Soil state
+  document.getElementById('care-soil').className = 'care-soil' + (pl.care[0]>0?' wet':'');
+
+  // Progress bar
+  const pct = Math.round(totalProgress(pl)*100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  // Action area
+  renderAction(step);
+}
+
+function renderAction(step) {
+  const pl = plots[activePlot];
+  const area = document.getElementById('care-action');
+  area.innerHTML = '';
+
+  if (step === 0) {
+    // Water game
+    const drops = Array(WATER_GOAL).fill(0).map((_,i)=>
+      `<span class="wd${i<pl.care[0]?' on':''}">💧</span>`
+    ).join('');
+    area.innerHTML = `
+      <div class="action-title">🪣 みずをあげよう！</div>
+      <div class="water-wrap">
+        <div class="water-drops">${drops}</div>
+        <button id="btn-water">🪣</button>
+      </div>`;
+    document.getElementById('btn-water').addEventListener('touchstart', e=>{ e.preventDefault(); doWater(e); }, {passive:false});
+    document.getElementById('btn-water').addEventListener('click', doWater);
+
+  } else if (step === 1) {
+    // Cloud game
+    const clouds = [0,1,2].map(i => {
+      const cls = cloudStates[i] ? 'cg-cloud-btn cc'+(i+1)+' poof' : 'cg-cloud-btn cc'+(i+1);
+      return `<button class="${cls}" id="cc${i}" style="pointer-events:${cloudStates[i]?'none':'auto'}">くも</button>`;
+    }).join('');
+    const allClear = cloudStates.every(Boolean);
+    area.innerHTML = `
+      <div class="action-title">☀️ くもをはらおう！</div>
+      <div class="cloud-game">
+        <div class="cloud-sky">
+          <div class="cg-sun${allClear?' shining':''}">☀️</div>
+          ${clouds}
+        </div>
+      </div>`;
+    [0,1,2].forEach(i => {
+      const btn = document.getElementById('cc'+i);
+      if (btn) {
+        btn.addEventListener('touchstart', e=>{ e.preventDefault(); doCloud(i,e); }, {passive:false});
+        btn.addEventListener('click', e=>doCloud(i,e));
+      }
+    });
+
+  } else {
+    // Song game
+    const prog = Array(NOTE_GOAL).fill(0).map((_,i)=>
+      `<span class="sp-note${i<notesHit?' on':''}">🎵</span>`
+    ).join('');
+    area.innerHTML = `
+      <div class="action-title">🎵 おとにさわろう！</div>
+      <div class="song-wrap">
+        <div class="note-field" id="note-field"></div>
+        <div class="song-progress">${prog}</div>
+      </div>`;
+    spawnNote();
+  }
+}
+
+// ============ ACTIONS ============
+function doWater(evt) {
+  const e = evt?.changedTouches ? evt.changedTouches[0] : evt;
+  const x = e?.clientX ?? window.innerWidth/2;
+  const y = e?.clientY ?? window.innerHeight/2;
+  ripple(x, y, 'rgba(100,200,255,.4)');
+  playWater();
+  spawnWaterDrops(x, y-50);
+  animatePlant('wobble');
+
+  const pl = plots[activePlot];
+  pl.care[0]++;
+  savePlots();
+  document.getElementById('care-soil').className = 'care-soil wet';
+
+  // Update drops UI
+  const wds = document.querySelectorAll('.wd');
+  wds.forEach((el,i) => el.className = 'wd'+(i<pl.care[0]?' on':''));
+
+  const pct = Math.round(totalProgress(pl)*100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  if (pl.care[0] >= WATER_GOAL) {
+    setTimeout(() => { animatePlant('grow'); renderCare(); }, 400);
+  }
+}
+
+function doCloud(idx, evt) {
+  if (cloudStates[idx]) return;
+  const e = evt?.changedTouches ? evt.changedTouches[0] : evt;
+  const x = e?.clientX ?? window.innerWidth/2;
+  const y = e?.clientY ?? window.innerHeight/2;
+  ripple(x, y, 'rgba(200,230,255,.5)');
+  spawnParticles(x, y, [], 8, ['☁️','💨']);
+
+  cloudStates[idx] = true;
+  const btn = document.getElementById('cc'+idx);
+  if (btn) btn.className = btn.className + ' poof';
+
+  const pl = plots[activePlot];
+  pl.care[1]++;
+  savePlots();
+
+  const pct = Math.round(totalProgress(pl)*100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  if (cloudStates.every(Boolean)) {
+    // all clouds cleared
+    playSun();
+    const sun = document.querySelector('.cg-sun');
+    if (sun) sun.className = 'cg-sun shining';
+    spawnParticles(window.innerWidth/2, 60, [], 12, ['☀️','✨','🌟']);
+    setTimeout(() => { animatePlant('grow'); renderCare(); }, 900);
+  }
+}
+
+function spawnNote() {
+  const pl = plots[activePlot];
+  if (notesHit >= NOTE_GOAL || !document.getElementById('note-field')) return;
+
+  const field = document.getElementById('note-field');
+  const colors = ['#ff8a65','#ce93d8','#81d4fa','#fff176','#f48fb1','#a5d6a7'];
+  const symbols = ['♩','♪','♫','♬'];
+  const nb = notesHit % colors.length;
+  const leftPct = [10, 32, 56, 74][notesHit % 4];
+
+  const btn = document.createElement('button');
+  btn.className = 'note-ball';
+  btn.style.cssText = `left:${leftPct}%;background:${colors[nb]};color:#fff;border:none`;
+  btn.textContent = symbols[notesHit % 4];
+
+  btn.addEventListener('touchstart', e=>{ e.preventDefault(); doNote(btn,e); }, {passive:false});
+  btn.addEventListener('click', e=>doNote(btn,e));
+  field.appendChild(btn);
+  noteDivs.push(btn);
+
+  // respawn if missed
+  const t = setTimeout(() => {
+    if (btn.parentNode) { btn.remove(); spawnNote(); }
+  }, 3300);
+  noteTimers.push(t);
+}
+
+function doNote(btn, evt) {
+  if (btn.classList.contains('popped')) return;
+  const e = evt?.changedTouches ? evt.changedTouches[0] : evt;
+  const x = e?.clientX ?? window.innerWidth/2;
+  const y = e?.clientY ?? window.innerHeight/2;
+
+  btn.className = 'note-ball popped';
+  ripple(x, y, 'rgba(255,200,100,.5)');
+  spawnParticles(x, y, [], 6, ['🎵','✨','⭐']);
+  playNote(notesHit);
+
+  notesHit++;
+  const pl = plots[activePlot];
+  pl.care[2] = notesHit;
+  savePlots();
+
+  // Update song progress
+  const spNotes = document.querySelectorAll('.sp-note');
+  spNotes.forEach((el,i) => { if(i<notesHit) el.className='sp-note on'; });
+
+  const pct = Math.round(totalProgress(pl)*100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  setTimeout(() => {
+    if (btn.parentNode) btn.remove();
+    if (notesHit >= NOTE_GOAL) {
+      clearNoteTimers();
+      triggerBloom();
+    } else {
+      spawnNote();
+    }
+  }, 280);
+}
+
+function clearNoteTimers() {
+  noteTimers.forEach(clearTimeout);
+  noteTimers = [];
+  noteDivs.forEach(n => n.remove());
+  noteDivs = [];
+}
+
+function animatePlant(cls) {
+  const el = document.getElementById('care-plant-svg');
+  if (!el) return;
+  el.classList.remove('grow','wobble');
+  void el.offsetWidth;
+  el.classList.add(cls);
+  setTimeout(() => el.classList.remove(cls), 600);
+}
+
+// ============ BLOOM ============
+function triggerBloom() {
+  const pl = plots[activePlot];
+  const f = PLANTS[pl.flowerIdx];
+  pl.bloomed = true;
+  savePlots();
+
+  // show bloom in care screen briefly
+  animatePlant('grow');
+  renderCare();
+
+  setTimeout(() => {
+    // celebration overlay
+    const celeb = document.getElementById('celebration');
+    document.getElementById('celeb-flower').innerHTML = flowerSVG(f, 100, 110);
+    celeb.classList.add('show');
+    playBloom();
+    spawnParticles(window.innerWidth/2, window.innerHeight/2, [], 60, ['🌸','✨','⭐','🌟','🎉']);
+
+    setTimeout(() => {
+      celeb.classList.remove('show');
+      // go back to garden
+      renderGarden();
+      show('s-garden');
+
+      // check all bloomed
+      if (plots.every(p=>p.bloomed)) {
+        setTimeout(() => {
+          playComplete();
+          renderComplete();
+          show('s-complete');
+        }, 600);
+      }
+    }, 2200);
+  }, 500);
+}
+
+function bouncePlot(idx) {
+  const grid = document.getElementById('garden-grid');
+  const cells = grid.querySelectorAll('.plot');
+  const el = cells[idx];
+  if (!el) return;
+  el.style.transform = 'scale(1.08)';
+  tone(784,'triangle',.15,.3);
+  spawnParticles(
+    el.getBoundingClientRect().left + el.offsetWidth/2,
+    el.getBoundingClientRect().top + 30, [], 8, ['✨','🌸']
+  );
+  setTimeout(() => { el.style.transform = ''; }, 200);
+}
+
+// ============ COMPLETE ============
+function renderComplete() {
+  const grid = document.getElementById('comp-grid');
+  grid.innerHTML = '';
+  plots.forEach(pl => {
+    const f = PLANTS[pl.flowerIdx];
+    const slot = document.createElement('div');
+    slot.className = 'comp-slot';
+    slot.innerHTML = flowerSVG(f,74,82) + `<div class="comp-slot-name">${f.name}</div>`;
     grid.appendChild(slot);
   });
 }
 
-// ===================== CELEBRATION =====================
-function showCelebration(flowerEmoji, colorArr) {
-  const celeb = document.getElementById('celebration');
-  document.getElementById('celeb-flower').textContent = flowerEmoji;
-  celeb.classList.add('show');
+// ============ INIT ============
+function onPlotTap(idx) { openCare(idx); }
 
-  const cx = window.innerWidth / 2;
-  const cy = window.innerHeight / 2;
-  spawnParticles(cx, cy, colorArr, 50);
-  playCelebSound();
-
-  setTimeout(() => {
-    celeb.classList.remove('show');
-  }, 1800);
-}
-
-// ===================== WATER ACTION =====================
-function waterPlant(evt) {
-  const x = evt ? (evt.changedTouches ? evt.changedTouches[0].clientX : evt.clientX) : window.innerWidth / 2;
-  const y = evt ? (evt.changedTouches ? evt.changedTouches[0].clientY : evt.clientY) : window.innerHeight / 2;
-
-  createRipple(x, y);
-  spawnParticles(x, y - 60, ['💧','🩵','🌊'], 12);
-  playWaterSound();
-
-  waterCount++;
-  playCountSound(waterCount);
-
-  const plantEl = document.getElementById('plant-display');
-  plantEl.classList.remove('pop');
-  void plantEl.offsetWidth;
-  plantEl.classList.add('pop');
-  setTimeout(() => plantEl.classList.remove('pop'), 300);
-
-  if (waterCount >= WATER_TO_BLOOM) {
-    const plant = PLANTS[currentPlantIdx];
-    plantEl.textContent = plant.bloom;
-
-    setTimeout(() => {
-      showCelebration(plant.bloom, ['⭐','✨','💫','🌟','🎉']);
-      garden.push(currentPlantIdx);
-      saveGarden();
-
-      setTimeout(() => {
-        if (garden.length >= PLANTS.length) {
-          playRainbowSound();
-          showScreen('rainbow-screen');
-        } else {
-          waterCount = 0;
-          currentPlantIdx = nextUnbloomed();
-          updatePlantDisplay();
-        }
-      }, 2000);
-    }, 400);
-  } else {
-    updatePlantDisplay();
-  }
-}
-
-// ===================== EVENT LISTENERS =====================
-document.getElementById('btn-start').addEventListener('click', (e) => {
-  playTone(659, 'triangle', 0.2, 0.4);
-  waterCount = 0;
-  currentPlantIdx = nextUnbloomed();
-  if (currentPlantIdx === -1) {
-    garden = [];
-    saveGarden();
-    currentPlantIdx = 0;
-  }
-  updatePlantDisplay();
-  showScreen('game-screen');
-});
-
-document.getElementById('can-btn').addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  waterPlant(e);
-}, { passive: false });
-document.getElementById('can-btn').addEventListener('click', (e) => {
-  waterPlant(e);
-});
-
-document.getElementById('btn-garden').addEventListener('click', () => {
-  playTone(523, 'triangle', 0.15, 0.3);
+document.getElementById('btn-start').addEventListener('click', () => {
+  tone(659,'triangle',.2,.4);
+  show('s-garden');
   renderGarden();
-  showScreen('garden-screen');
 });
-
 document.getElementById('btn-back').addEventListener('click', () => {
-  playTone(440, 'triangle', 0.15, 0.3);
-  showScreen('game-screen');
+  tone(440,'triangle',.15,.3);
+  clearNoteTimers();
+  renderGarden();
+  show('s-garden');
+});
+document.getElementById('btn-restart').addEventListener('click', () => {
+  tone(523,'triangle',.2,.4);
+  plots.forEach(pl => { pl.care=[0,0,0]; pl.bloomed=false; });
+  savePlots();
+  renderGarden();
+  show('s-garden');
 });
 
-document.getElementById('btn-rainbow-back').addEventListener('click', () => {
-  garden = [];
-  saveGarden();
-  waterCount = 0;
-  currentPlantIdx = 0;
-  updatePlantDisplay();
-  showScreen('game-screen');
-});
+document.addEventListener('dblclick', e=>e.preventDefault());
+document.addEventListener('touchmove', e=>e.preventDefault(), {passive:false});
 
-// Prevent zoom on double-tap
-document.addEventListener('dblclick', e => e.preventDefault());
-document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+initPlots();
 
-// PWA Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
-}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 </script>
 </body>
 </html>
