@@ -1,707 +1,1511 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="ぽかぽかガーデン">
-  <meta name="theme-color" content="#ffb74d">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.svg">
-  <title>ぽかぽかガーデン</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>株式ポートフォリオ管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
+    [x-cloak] { display: none !important; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    .tab-btn { position: relative; transition: color 0.15s; }
+    .tab-btn.active { color: #3b82f6 !important; }
+    .tab-btn.active::after {
+      content: ''; position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 2px; background: #3b82f6; border-radius: 2px 2px 0 0;
     }
-
-    :root {
-      --sky: #b3e5fc;
-      --ground: #a5d6a7;
-      --soil: #8d6e63;
-      --pastel1: #f8bbd9;
-      --pastel2: #fff9c4;
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid #334155; border-top-color: #3b82f6;
+      border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0;
     }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: var(--sky);
-      font-family: 'Helvetica Neue', Arial, sans-serif;
+    .spinner-lg { width: 28px; height: 28px; border-width: 3px; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
     }
-
-    /* ========== SCREENS ========== */
-    .screen {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: opacity 0.4s ease;
+    .toast-enter { animation: toastIn 0.25s ease forwards; }
+    .gain  { color: #10b981; }
+    .loss  { color: #ef4444; }
+    .muted { color: #64748b; }
+    .badge {
+      display: inline-block; padding: 0.1rem 0.5rem;
+      border-radius: 9999px; font-size: 0.7rem; font-weight: 600; line-height: 1.4;
     }
-    .screen.hidden {
-      opacity: 0;
-      pointer-events: none;
+    .fi {
+      width: 100%; background: #0f172a; border: 1px solid #334155;
+      border-radius: 0.5rem; padding: 0.45rem 0.75rem; color: #e2e8f0;
+      font-size: 0.875rem; transition: border-color 0.15s;
     }
-
-    /* ========== TITLE SCREEN ========== */
-    #title-screen {
-      background: linear-gradient(180deg, #ffe0f0 0%, #fff9c4 60%, #c8e6c9 100%);
-      justify-content: center;
-      gap: 24px;
-    }
-    .title-logo {
-      font-size: 56px;
-      line-height: 1;
-    }
-    .title-text {
-      font-size: 32px;
-      font-weight: bold;
-      color: #5d4037;
-      text-shadow: 2px 2px 0 #fff;
-      text-align: center;
-    }
-    .title-sub {
-      font-size: 18px;
-      color: #795548;
-    }
-    .btn-start {
-      margin-top: 16px;
-      background: #ffb74d;
-      color: #fff;
-      font-size: 28px;
-      font-weight: bold;
-      border: none;
-      border-radius: 50px;
-      padding: 20px 60px;
-      box-shadow: 0 6px 0 #e65100;
-      cursor: pointer;
-      transition: transform 0.1s, box-shadow 0.1s;
-    }
-    .btn-start:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 #e65100;
-    }
-    .flowers-deco {
-      font-size: 36px;
-      letter-spacing: 8px;
-    }
-
-    /* ========== MAIN GAME SCREEN ========== */
-    #game-screen {
-      background: linear-gradient(180deg, #b3e5fc 0%, #e1f5fe 50%, #a5d6a7 50%, #81c784 100%);
-    }
-
-    /* Top bar */
-    .top-bar {
-      width: 100%;
-      padding: 12px 16px 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: max(12px, env(safe-area-inset-top));
-    }
-    .btn-garden {
-      background: #66bb6a;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 18px;
-      font-size: 22px;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #388e3c;
-      transition: transform 0.1s;
-    }
-    .btn-garden:active { transform: translateY(3px); box-shadow: 0 1px 0 #388e3c; }
-    .progress-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .drop {
-      font-size: 26px;
-      transition: transform 0.2s;
-    }
-    .drop.filled { transform: scale(1.15); }
-
-    /* Plant area */
-    .plant-stage {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      padding-bottom: 20px;
-      position: relative;
-    }
-    .plant-emoji {
-      font-size: 100px;
-      line-height: 1;
-      transition: transform 0.15s ease;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
-    }
-    .plant-emoji.pop {
-      animation: pop-anim 0.3s ease;
-    }
-    @keyframes pop-anim {
-      0%   { transform: scale(1); }
-      50%  { transform: scale(1.35); }
-      100% { transform: scale(1); }
-    }
-    .soil-patch {
-      width: 160px;
-      height: 40px;
-      background: radial-gradient(ellipse, #8d6e63 60%, #6d4c41);
-      border-radius: 50%;
-      margin-top: -8px;
-    }
-    .color-label {
-      margin-top: 12px;
-      font-size: 22px;
-      font-weight: bold;
-      color: #5d4037;
-      background: rgba(255,255,255,0.7);
-      padding: 4px 18px;
-      border-radius: 20px;
-    }
-
-    /* Watering can */
-    .can-area {
-      padding: 16px 0 max(24px, env(safe-area-inset-bottom));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-    .count-text {
-      font-size: 20px;
-      color: #5d4037;
-      font-weight: bold;
-      min-height: 28px;
-    }
-    .watering-can-btn {
-      width: 120px;
-      height: 120px;
-      border: none;
-      background: none;
-      font-size: 90px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      transition: transform 0.1s;
-      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
-    }
-    .watering-can-btn:active {
-      transform: scale(0.9) rotate(-15deg);
-    }
-
-    /* Canvas overlay for particles */
-    #particle-canvas {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 100;
-    }
-
-    /* ========== GARDEN SCREEN ========== */
-    #garden-screen {
-      background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
-    }
-    .garden-header {
-      width: 100%;
-      padding: 12px 16px;
-      padding-top: max(12px, env(safe-area-inset-top));
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .btn-back {
-      background: #ef9a9a;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 18px;
-      font-size: 22px;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #c62828;
-    }
-    .btn-back:active { transform: translateY(3px); box-shadow: 0 1px 0 #c62828; }
-    .garden-title {
-      font-size: 24px;
-      font-weight: bold;
-      color: #2e7d32;
-    }
-    .garden-grid {
-      width: 100%;
-      padding: 12px 20px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      overflow-y: auto;
-    }
-    .garden-slot {
-      aspect-ratio: 1;
-      background: rgba(255,255,255,0.5);
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-    }
-    .garden-slot.bloomed {
-      background: rgba(255,255,255,0.85);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-    }
-    .garden-slot.bloomed:active { transform: scale(0.95); }
-    .slot-flower { font-size: 44px; }
-    .slot-label { font-size: 12px; font-weight: bold; color: #5d4037; }
-    .slot-empty { font-size: 36px; opacity: 0.3; }
-
-    /* ========== CELEBRATION OVERLAY ========== */
-    #celebration {
-      position: fixed;
-      inset: 0;
-      background: rgba(255,255,255,0.0);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    #celebration.show {
-      opacity: 1;
-      pointer-events: all;
-    }
-    .celeb-text {
-      font-size: 64px;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 3px 3px 0 #f57f17, 6px 6px 0 #e65100;
-      text-align: center;
-      animation: bounce-in 0.4s ease;
-    }
-    .celeb-flower {
-      font-size: 96px;
-      animation: spin-grow 0.6s ease;
-    }
-    @keyframes bounce-in {
-      0%   { transform: scale(0); }
-      70%  { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-    @keyframes spin-grow {
-      0%   { transform: rotate(-180deg) scale(0); }
-      100% { transform: rotate(0deg) scale(1); }
-    }
-
-    /* ========== RAINBOW SPECIAL ========== */
-    #rainbow-screen {
-      background: linear-gradient(135deg, #ff8a80, #ffb74d, #fff176, #a5d6a7, #80d8ff, #ea80fc);
-      justify-content: center;
-      gap: 20px;
-    }
-    .rainbow-title { font-size: 36px; font-weight: bold; color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); text-align: center; }
-    .rainbow-flower { font-size: 120px; animation: pulse 1s infinite alternate; }
-    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
-    .btn-rainbow-back {
-      background: rgba(255,255,255,0.9);
-      border: none;
-      border-radius: 50px;
-      padding: 16px 40px;
-      font-size: 24px;
-      font-weight: bold;
-      color: #7b1fa2;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-
-    /* Ripple effect on tap */
-    .ripple {
-      position: fixed;
-      border-radius: 50%;
-      background: rgba(100, 181, 246, 0.5);
-      transform: scale(0);
-      pointer-events: none;
-      z-index: 50;
-      animation: ripple-anim 0.5s ease-out forwards;
-    }
-    @keyframes ripple-anim {
-      to { transform: scale(4); opacity: 0; }
-    }
+    .fi:focus { outline: none; border-color: #3b82f6; }
+    .fi::placeholder { color: #475569; }
+    select.fi { cursor: pointer; }
+    input[type=date].fi { color-scheme: dark; }
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input[type=number] { -moz-appearance: textfield; }
+    .tbl th { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; padding: 0.6rem 0.85rem; text-align: right; white-space: nowrap; }
+    .tbl th:first-child { text-align: left; }
+    .tbl td { padding: 0.65rem 0.85rem; border-bottom: 1px solid #1e293b; font-size: 0.85rem; vertical-align: middle; }
+    .tbl tbody tr:last-child td { border-bottom: none; }
+    .tbl tbody tr:hover { background: rgba(30,41,59,0.8); }
+    .tbl thead tr { background: #0a111e; }
   </style>
+  <script>tailwind.config = { darkMode: 'class' }</script>
 </head>
-<body>
 
-<canvas id="particle-canvas"></canvas>
+<body class="bg-[#0f172a] text-slate-200 min-h-screen antialiased"
+      x-data="portfolioApp()"
+      x-init="boot()">
 
-<!-- Title Screen -->
-<div id="title-screen" class="screen">
-  <div class="flowers-deco">🌸🌼🌷🌻🌺</div>
-  <div class="title-logo">🪴</div>
-  <div class="title-text">ぽかぽか<br>ガーデン</div>
-  <div class="title-sub">おはなをそだてよう！</div>
-  <button class="btn-start" id="btn-start">はじめる ▶</button>
-  <div class="flowers-deco">🌺🌻🌷🌼🌸</div>
+<!-- TOAST -->
+<div class="fixed bottom-5 right-5 z-[200] flex flex-col gap-2 pointer-events-none" style="max-width:360px">
+  <template x-for="t in toasts" :key="t.id">
+    <div class="toast-enter pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl shadow-2xl text-sm font-medium border"
+         :class="{
+           'bg-emerald-950 border-emerald-700 text-emerald-200': t.type==='success',
+           'bg-red-950 border-red-700 text-red-200': t.type==='error',
+           'bg-blue-950 border-blue-700 text-blue-200': t.type==='info',
+         }">
+      <span class="mt-0.5 text-base leading-none flex-shrink-0"
+            x-text="t.type==='success' ? '✓' : t.type==='error' ? '✕' : 'ℹ'"></span>
+      <span x-text="t.message" class="leading-snug"></span>
+    </div>
+  </template>
 </div>
 
-<!-- Game Screen -->
-<div id="game-screen" class="screen hidden">
-  <div class="top-bar">
-    <button class="btn-garden" id="btn-garden">🌻 にわ</button>
-    <div class="progress-row" id="progress-drops"></div>
+<!-- HEADER -->
+<header class="sticky top-0 z-40 bg-[#0d1526]/95 backdrop-blur border-b border-[#1e293b] px-4 py-2.5 flex items-center justify-between gap-3">
+  <div class="flex items-center gap-3 min-w-0">
+    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow flex-shrink-0">株</div>
+    <div class="min-w-0 hidden sm:block">
+      <h1 class="font-bold text-white text-sm leading-tight">株式ポートフォリオ</h1>
+      <p class="text-[11px] text-slate-500 leading-tight">Portfolio Manager</p>
+    </div>
   </div>
-  <div class="plant-stage">
-    <div class="plant-emoji" id="plant-display">🌱</div>
-    <div class="soil-patch"></div>
-    <div class="color-label" id="color-label">あか</div>
+  <div class="flex items-center gap-2 flex-shrink-0">
+    <span class="text-[11px] text-slate-500 hidden md:block" x-text="lastUpdated ? '更新: ' + lastUpdated : ''"></span>
+    <button @click="refreshCurrent()" :disabled="loading"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1e293b] hover:bg-[#263348] border border-[#334155] text-xs font-medium transition-colors disabled:opacity-50">
+      <span x-show="!loading">↻</span>
+      <span x-show="loading" class="spinner"></span>
+      <span class="hidden sm:inline">更新</span>
+    </button>
+    <button @click="toggleAutoRefresh()"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+      :class="autoRefresh ? 'bg-blue-600 text-white' : 'bg-[#1e293b] hover:bg-[#263348] border border-[#334155] text-slate-300'">
+      <span x-text="autoRefresh ? '⏸' : '▶'"></span>
+      <span class="hidden sm:inline" x-text="autoRefresh ? '自動更新中' : '自動更新'"></span>
+    </button>
+    <button @click="doExport()"
+      class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1e293b] hover:bg-[#263348] border border-[#334155] text-xs font-medium transition-colors text-slate-300"
+      title="データをJSONでエクスポート">
+      ↓ <span class="hidden sm:inline">保存</span>
+    </button>
+    <label class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1e293b] hover:bg-[#263348] border border-[#334155] text-xs font-medium transition-colors text-slate-300 cursor-pointer"
+      title="JSONファイルをインポート">
+      ↑ <span class="hidden sm:inline">読込</span>
+      <input type="file" accept=".json" class="hidden" @change="doImport($event)" />
+    </label>
+    <!-- Sync status -->
+    <div class="flex items-center gap-1.5 text-[11px] font-medium px-2 hidden sm:flex"
+         :class="syncStatus==='synced'?'text-emerald-400':syncStatus==='syncing'?'text-blue-400':syncStatus==='error'?'text-red-400':'text-slate-500'">
+      <span x-show="syncStatus==='syncing'" class="spinner" style="width:10px;height:10px;border-width:1.5px"></span>
+      <span x-show="syncStatus!=='syncing'" class="text-[8px]">●</span>
+      <span x-text="syncStatus==='synced'?'同期済み':syncStatus==='syncing'?'同期中':syncStatus==='error'?'同期失敗':'ローカル'"></span>
+    </div>
+    <button @click="openSettings()"
+      class="flex items-center px-2.5 py-1.5 rounded-lg bg-[#1e293b] hover:bg-[#263348] border border-[#334155] text-sm transition-colors"
+      title="クラウド同期設定">⚙️</button>
   </div>
-  <div class="can-area">
-    <div class="count-text" id="count-text">みずをあげてね！</div>
-    <button class="watering-can-btn" id="can-btn">🪣</button>
+</header>
+
+<!-- TABS -->
+<div class="border-b border-[#1e293b] bg-[#0d1526]/60 px-4 flex gap-0.5 overflow-x-auto">
+  <template x-for="tab in tabs" :key="tab.id">
+    <button @click="switchTab(tab.id)"
+      class="tab-btn px-4 py-3 text-sm font-medium text-slate-400 hover:text-slate-200 transition-colors whitespace-nowrap"
+      :class="{ 'active': activeTab === tab.id }"
+      x-text="tab.label">
+    </button>
+  </template>
+</div>
+
+<!-- MAIN -->
+<main class="px-4 md:px-6 py-5 max-w-screen-xl mx-auto">
+
+  <!-- ══ PORTFOLIO TAB ══ -->
+  <div x-show="activeTab === 'portfolio'" x-cloak>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+      <div class="bg-[#1e293b] rounded-xl p-4 border border-[#334155]">
+        <p class="text-[11px] text-slate-400 mb-1.5 uppercase tracking-wide">総評価額</p>
+        <p class="text-xl font-bold text-white" x-text="summary ? yen(summary.total_value) : '---'"></p>
+        <p class="text-xs text-slate-500 mt-1" x-text="summary ? '投資額 ' + yen(summary.total_cost) : ''"></p>
+      </div>
+      <div class="bg-[#1e293b] rounded-xl p-4 border border-[#334155]">
+        <p class="text-[11px] text-slate-400 mb-1.5 uppercase tracking-wide">総損益</p>
+        <p class="text-xl font-bold" :class="pnlColor(summary && summary.total_pnl)"
+           x-text="summary ? signYen(summary.total_pnl) : '---'"></p>
+        <p class="text-xs mt-1" :class="pnlColor(summary && summary.total_pnl_pct)"
+           x-text="summary ? pct(summary.total_pnl_pct) : ''"></p>
+      </div>
+      <div class="bg-[#1e293b] rounded-xl p-4 border border-[#334155]">
+        <p class="text-[11px] text-slate-400 mb-1.5 uppercase tracking-wide">本日の変動</p>
+        <p class="text-xl font-bold" :class="pnlColor(summary && summary.day_change_total)"
+           x-text="summary ? signYen(summary.day_change_total) : '---'"></p>
+        <p class="text-xs text-slate-500 mt-1">デイチェンジ</p>
+      </div>
+      <div class="bg-[#1e293b] rounded-xl p-4 border border-[#334155]">
+        <p class="text-[11px] text-slate-400 mb-1.5 uppercase tracking-wide">保有銘柄数</p>
+        <p class="text-xl font-bold text-white" x-text="(summary ? summary.count : '0') + ' 銘柄'"></p>
+        <p class="text-xs text-slate-500 mt-1" x-text="lastUpdated ? lastUpdated + ' 更新' : ''"></p>
+      </div>
+    </div>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-semibold text-white text-sm flex items-center gap-2">
+        保有銘柄
+        <span class="text-slate-500 font-normal" x-text="holdings.length ? '(' + holdings.length + ')' : ''"></span>
+      </h2>
+      <button @click="openHoldingModal()"
+        class="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white transition-colors">
+        + 銘柄を追加
+      </button>
+    </div>
+    <div x-show="loading && holdings.length === 0" class="flex items-center justify-center py-24">
+      <div class="spinner spinner-lg"></div>
+    </div>
+    <div x-show="!loading && holdings.length === 0"
+         class="bg-[#1e293b] rounded-xl border border-[#334155] py-20 text-center">
+      <div class="text-4xl mb-3">📊</div>
+      <p class="font-semibold text-slate-300">保有銘柄がありません</p>
+      <p class="text-sm text-slate-500 mt-1">「銘柄を追加」ボタンから登録してください</p>
+    </div>
+    <div x-show="holdings.length > 0" class="bg-[#1e293b] rounded-xl border border-[#334155] overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full tbl">
+          <thead>
+            <tr>
+              <th class="text-left">銘柄</th>
+              <th>現在値</th>
+              <th>前日比</th>
+              <th>保有株数</th>
+              <th>取得単価</th>
+              <th>評価額</th>
+              <th>損益</th>
+              <th>損益率</th>
+              <th class="text-center">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="h in holdings" :key="h.id">
+              <tr class="cursor-pointer" @click="openChartModal(h)" title="クリックでチャート表示">
+                <td>
+                  <p class="font-bold text-white text-sm" x-text="h.ticker"></p>
+                  <p class="text-[11px] text-slate-400 truncate max-w-[150px]" x-text="h.name || ''"></p>
+                </td>
+                <td class="text-right font-mono">
+                  <span x-show="h.current_price != null" class="text-white font-medium" x-text="yen(h.current_price)"></span>
+                  <span x-show="h.current_price == null" class="muted text-xs">取得中…</span>
+                </td>
+                <td class="text-right font-mono">
+                  <template x-if="h.day_change != null">
+                    <div>
+                      <p :class="pnlColor(h.day_change)" x-text="sign(h.day_change)"></p>
+                      <p class="text-[11px]" :class="pnlColor(h.day_change_pct)" x-text="pct(h.day_change_pct)"></p>
+                    </div>
+                  </template>
+                  <span x-show="h.day_change == null" class="muted">---</span>
+                </td>
+                <td class="text-right font-mono text-slate-300" x-text="num(h.shares)"></td>
+                <td class="text-right font-mono text-slate-300" x-text="yen(h.avg_cost)"></td>
+                <td class="text-right font-mono">
+                  <span class="text-white font-medium"
+                        x-text="h.current_value != null ? yen(h.current_value) : yen(h.cost_basis)"></span>
+                </td>
+                <td class="text-right font-mono">
+                  <template x-if="h.pnl != null">
+                    <span :class="pnlColor(h.pnl)" x-text="signYen(h.pnl)"></span>
+                  </template>
+                  <span x-show="h.pnl == null" class="muted">---</span>
+                </td>
+                <td class="text-right">
+                  <template x-if="h.pnl_pct != null">
+                    <span class="badge" :class="h.pnl_pct >= 0 ? 'bg-emerald-900/60 text-emerald-400' : 'bg-red-900/60 text-red-400'"
+                          x-text="pct(h.pnl_pct)"></span>
+                  </template>
+                  <span x-show="h.pnl_pct == null" class="muted">---</span>
+                </td>
+                <td class="text-center" @click.stop>
+                  <div class="flex items-center justify-center gap-1">
+                    <button @click="openEditHoldingModal(h)"
+                      class="px-2 py-1 bg-[#334155] hover:bg-[#475569] rounded text-xs transition-colors">編集</button>
+                    <button @click="confirmDeleteHolding(h.id)"
+                      class="px-2 py-1 bg-red-900/40 hover:bg-red-800 text-red-400 hover:text-red-200 rounded text-xs transition-colors">削除</button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TRADES TAB ══ -->
+  <div x-show="activeTab === 'trades'" x-cloak>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+      <div class="flex gap-6 bg-[#1e293b] rounded-xl border border-[#334155] px-5 py-3.5">
+        <div>
+          <p class="text-[11px] text-slate-400 uppercase tracking-wide mb-0.5">実現損益合計</p>
+          <p class="text-xl font-bold" :class="pnlColor(totalRealizedPnl)" x-text="signYen(totalRealizedPnl)"></p>
+        </div>
+        <div class="w-px bg-[#334155]"></div>
+        <div>
+          <p class="text-[11px] text-slate-400 uppercase tracking-wide mb-0.5">取引件数</p>
+          <p class="text-xl font-bold text-white" x-text="trades.length + ' 件'"></p>
+        </div>
+      </div>
+      <button @click="openTradeModal()"
+        class="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white transition-colors">
+        + 取引を記録
+      </button>
+    </div>
+    <div class="bg-[#1e293b] rounded-xl border border-[#334155] overflow-hidden">
+      <div x-show="trades.length === 0" class="py-20 text-center">
+        <div class="text-3xl mb-3">📋</div>
+        <p class="text-slate-400">取引履歴がありません</p>
+      </div>
+      <div x-show="trades.length > 0" class="overflow-x-auto">
+        <table class="w-full tbl">
+          <thead>
+            <tr>
+              <th class="text-left">日付</th>
+              <th class="text-left">銘柄</th>
+              <th class="text-center">売買</th>
+              <th>株数</th>
+              <th>価格</th>
+              <th>手数料</th>
+              <th>約定金額</th>
+              <th>実現損益</th>
+              <th class="text-left">メモ</th>
+              <th class="text-center">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="t in trades" :key="t.id">
+              <tr>
+                <td class="text-slate-300 whitespace-nowrap" x-text="t.trade_date"></td>
+                <td class="font-bold text-white" x-text="t.ticker"></td>
+                <td class="text-center">
+                  <span class="badge"
+                        :class="t.trade_type === 'BUY' ? 'bg-blue-900/60 text-blue-300' : 'bg-orange-900/60 text-orange-300'"
+                        x-text="t.trade_type === 'BUY' ? '買' : '売'"></span>
+                </td>
+                <td class="text-right font-mono text-slate-300" x-text="num(t.shares)"></td>
+                <td class="text-right font-mono text-slate-300" x-text="yen(t.price)"></td>
+                <td class="text-right font-mono text-slate-500" x-text="t.fee > 0 ? yen(t.fee) : '—'"></td>
+                <td class="text-right font-mono text-white" x-text="yen(t.shares * t.price)"></td>
+                <td class="text-right font-mono">
+                  <template x-if="t.realized_pnl != null">
+                    <span :class="pnlColor(t.realized_pnl)" x-text="signYen(t.realized_pnl)"></span>
+                  </template>
+                  <span x-show="t.realized_pnl == null" class="muted">—</span>
+                </td>
+                <td class="text-slate-400 max-w-[100px] truncate text-xs" x-text="t.notes || ''"></td>
+                <td class="text-center">
+                  <button @click="confirmDeleteTrade(t.id)"
+                    class="px-2 py-1 bg-red-900/40 hover:bg-red-800 text-red-400 hover:text-red-200 rounded text-xs transition-colors">削除</button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WATCHLIST TAB ══ -->
+  <div x-show="activeTab === 'watchlist'" x-cloak>
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="font-semibold text-white text-sm flex items-center gap-2">
+        ウォッチリスト
+        <span class="text-slate-500 font-normal" x-text="watchlist.length ? '(' + watchlist.length + ')' : ''"></span>
+      </h2>
+      <button @click="openWatchlistModal()"
+        class="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white transition-colors">
+        + 追加
+      </button>
+    </div>
+    <div x-show="watchlist.length === 0"
+         class="bg-[#1e293b] rounded-xl border border-[#334155] py-20 text-center">
+      <div class="text-4xl mb-3">👀</div>
+      <p class="font-semibold text-slate-300">ウォッチリストは空です</p>
+      <p class="text-sm text-slate-500 mt-1">気になる銘柄を追加してください</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+      <template x-for="w in watchlist" :key="w.id">
+        <div class="bg-[#1e293b] rounded-xl border border-[#334155] p-4 hover:border-[#475569] transition-colors">
+          <div class="flex items-start justify-between mb-3">
+            <div class="min-w-0">
+              <p class="font-bold text-white" x-text="w.ticker"></p>
+              <p class="text-xs text-slate-400 truncate" x-text="w.name || ''"></p>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0 ml-2">
+              <template x-if="w.category">
+                <span class="badge" :class="categoryBadgeClass(w.category)" x-text="w.category"></span>
+              </template>
+              <button @click="confirmDeleteWatchlist(w.id)"
+                class="text-slate-500 hover:text-red-400 leading-none transition-colors text-lg px-1">✕</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <p class="text-[11px] text-slate-500 mb-0.5">現在値</p>
+              <p class="font-bold text-white" x-text="w.current_price != null ? yen(w.current_price) : '---'"></p>
+              <template x-if="w.day_change != null">
+                <p class="text-xs mt-0.5" :class="pnlColor(w.day_change)" x-text="pct(w.day_change_pct)"></p>
+              </template>
+            </div>
+            <div>
+              <p class="text-[11px] text-slate-500 mb-0.5">目標株価</p>
+              <p class="font-bold" :class="w.target_price ? 'text-slate-200' : 'text-slate-600'"
+                 x-text="w.target_price ? yen(w.target_price) : '未設定'"></p>
+              <template x-if="w.distance != null">
+                <p class="text-xs mt-0.5" :class="w.distance >= 0 ? 'gain' : 'loss'"
+                   x-text="(w.distance >= 0 ? '▲' : '▼') + Math.abs(w.distance_pct).toFixed(1) + '%'"></p>
+              </template>
+            </div>
+          </div>
+          <template x-if="w.notes">
+            <p class="text-xs text-slate-500 mt-3 border-t border-[#334155] pt-2.5 leading-relaxed" x-text="w.notes"></p>
+          </template>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- ══ EVENTS TAB ══ -->
+  <div x-show="activeTab === 'events'" x-cloak>
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="font-semibold text-white text-sm">イベントカレンダー</h2>
+      <button @click="openEventModal()"
+        class="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white transition-colors">
+        + イベント追加
+      </button>
+    </div>
+    <div x-show="upcomingEvents.length > 0" class="mb-5">
+      <div class="flex items-center gap-2 mb-2.5">
+        <span class="text-amber-400 text-sm">⚡</span>
+        <h3 class="text-sm font-semibold text-amber-300">
+          今後30日のイベント
+          <span class="text-amber-400/60 font-normal" x-text="'(' + upcomingEvents.length + '件)'"></span>
+        </h3>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <template x-for="e in upcomingEvents" :key="'up' + e.id">
+          <div class="flex items-center gap-2 bg-amber-900/20 border border-amber-700/30 rounded-lg px-3 py-1.5 text-xs">
+            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="eventDotClass(e.event_type)"></span>
+            <span class="font-semibold text-white" x-text="e.ticker"></span>
+            <span class="text-slate-400" x-text="e.event_type"></span>
+            <span class="text-amber-300 font-medium" x-text="e.event_date"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+    <div x-show="events.length === 0"
+         class="bg-[#1e293b] rounded-xl border border-[#334155] py-20 text-center">
+      <div class="text-4xl mb-3">📅</div>
+      <p class="font-semibold text-slate-300">イベントがありません</p>
+      <p class="text-sm text-slate-500 mt-1">決算・配当・優待などを追加してください</p>
+    </div>
+    <div class="space-y-6">
+      <template x-for="grp in groupedEvents" :key="grp.label">
+        <div>
+          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2.5 flex items-center gap-2">
+            <span class="w-0.5 h-4 bg-blue-500 rounded"></span>
+            <span x-text="grp.label"></span>
+          </h3>
+          <div class="space-y-2">
+            <template x-for="e in grp.events" :key="e.id">
+              <div class="bg-[#1e293b] rounded-xl border border-[#334155] hover:border-[#475569] transition-colors flex items-center gap-4 px-4 py-3">
+                <div class="text-center w-11 flex-shrink-0">
+                  <p class="text-[10px] text-slate-500" x-text="e.event_date.slice(5,7) + '月'"></p>
+                  <p class="text-xl font-bold text-white leading-tight" x-text="parseInt(e.event_date.slice(8,10))"></p>
+                </div>
+                <div class="w-px h-8 bg-[#334155] flex-shrink-0"></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-bold text-white" x-text="e.ticker"></span>
+                    <span class="badge" :class="eventBadgeClass(e.event_type)" x-text="e.event_type"></span>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-0.5 truncate" x-text="e.description || ''"></p>
+                </div>
+                <button @click="confirmDeleteEvent(e.id)"
+                  class="text-slate-500 hover:text-red-400 text-sm transition-colors px-1.5 py-1 flex-shrink-0">✕</button>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+</main>
+
+
+<!-- MODAL: Add/Edit Holding -->
+<div x-show="modals.holding" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+     @click.self="modals.holding = false" @keydown.escape.window="modals.holding = false">
+  <div class="bg-[#1e293b] border border-[#334155] rounded-2xl w-full max-w-md shadow-2xl" @click.stop>
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#334155]">
+      <h3 class="font-bold text-white" x-text="editingHolding ? '保有銘柄を編集' : '銘柄を追加'"></h3>
+      <button @click="modals.holding = false" class="text-slate-400 hover:text-white text-lg leading-none">✕</button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">銘柄コード <span class="text-red-400">*</span></label>
+        <div class="flex gap-2">
+          <input type="text" x-model="hf.ticker" placeholder="7203 または 7203.T"
+                 :readonly="!!editingHolding" :class="editingHolding ? 'opacity-50 cursor-not-allowed' : ''"
+                 @input.debounce.600ms="lookupStock('hf')"
+                 class="fi flex-1 uppercase" />
+          <button x-show="!editingHolding" @click="lookupStock('hf')"
+            class="px-3 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-xs transition-colors whitespace-nowrap">検索</button>
+        </div>
+        <p x-show="hf.stockName" class="text-xs text-emerald-400 mt-1" x-text="'✓ ' + hf.stockName"></p>
+        <p x-show="hf.stockErr" class="text-xs text-red-400 mt-1" x-text="hf.stockErr"></p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5">保有株数 <span class="text-red-400">*</span></label>
+          <input type="number" x-model.number="hf.shares" placeholder="100" class="fi" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5">取得単価 (円) <span class="text-red-400">*</span></label>
+          <input type="number" x-model.number="hf.avg_cost" placeholder="2500" class="fi" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">メモ</label>
+        <input type="text" x-model="hf.notes" placeholder="任意" class="fi" />
+      </div>
+      <div x-show="hf.shares && hf.avg_cost"
+           class="bg-[#0f172a] rounded-lg px-4 py-2.5 text-sm border border-[#334155] flex justify-between">
+        <span class="text-slate-400">投資額</span>
+        <span class="text-white font-semibold" x-text="yen((hf.shares||0) * (hf.avg_cost||0))"></span>
+      </div>
+    </div>
+    <div class="flex gap-3 px-5 py-4 border-t border-[#334155]">
+      <button @click="modals.holding = false"
+        class="flex-1 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-sm font-medium transition-colors">キャンセル</button>
+      <button @click="submitHolding()" :disabled="submitting"
+        class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white disabled:opacity-50 flex items-center justify-center gap-2">
+        <span x-show="submitting" class="spinner"></span>
+        <span x-text="editingHolding ? '更新する' : '追加する'"></span>
+      </button>
+    </div>
   </div>
 </div>
 
-<!-- Garden Screen -->
-<div id="garden-screen" class="screen hidden">
-  <div class="garden-header">
-    <button class="btn-back" id="btn-back">← もどる</button>
-    <div class="garden-title">🌿 わたしのにわ</div>
+<!-- MODAL: Record Trade -->
+<div x-show="modals.trade" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+     @click.self="modals.trade = false" @keydown.escape.window="modals.trade = false">
+  <div class="bg-[#1e293b] border border-[#334155] rounded-2xl w-full max-w-md shadow-2xl" @click.stop>
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#334155]">
+      <h3 class="font-bold text-white">取引を記録</h3>
+      <button @click="modals.trade = false" class="text-slate-400 hover:text-white text-lg leading-none">✕</button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">銘柄コード <span class="text-red-400">*</span></label>
+        <div class="flex gap-2">
+          <input type="text" x-model="tf.ticker" placeholder="7203"
+                 @input.debounce.600ms="lookupStock('tf')" class="fi flex-1 uppercase" />
+          <button @click="lookupStock('tf')"
+            class="px-3 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-xs transition-colors">検索</button>
+        </div>
+        <p x-show="tf.stockName" class="text-xs text-emerald-400 mt-1" x-text="'✓ ' + tf.stockName"></p>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">取引種別 <span class="text-red-400">*</span></label>
+        <div class="grid grid-cols-2 gap-2">
+          <button @click="tf.trade_type = 'BUY'"
+            class="py-2.5 rounded-lg text-sm font-semibold transition-all"
+            :class="tf.trade_type === 'BUY' ? 'bg-blue-600 text-white' : 'bg-[#0f172a] border border-[#334155] text-slate-400 hover:border-blue-500'">
+            買い (BUY)
+          </button>
+          <button @click="tf.trade_type = 'SELL'"
+            class="py-2.5 rounded-lg text-sm font-semibold transition-all"
+            :class="tf.trade_type === 'SELL' ? 'bg-orange-600 text-white' : 'bg-[#0f172a] border border-[#334155] text-slate-400 hover:border-orange-500'">
+            売り (SELL)
+          </button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5">株数 <span class="text-red-400">*</span></label>
+          <input type="number" x-model.number="tf.shares" placeholder="100" class="fi" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5">価格 (円) <span class="text-red-400">*</span></label>
+          <input type="number" x-model.number="tf.price" placeholder="2500" class="fi" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5">手数料 (円)</label>
+          <input type="number" x-model.number="tf.fee" placeholder="0" class="fi" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5">取引日 <span class="text-red-400">*</span></label>
+          <input type="date" x-model="tf.trade_date" class="fi" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">メモ</label>
+        <input type="text" x-model="tf.notes" placeholder="任意" class="fi" />
+      </div>
+      <div x-show="tf.shares && tf.price"
+           class="bg-[#0f172a] rounded-lg px-4 py-2.5 text-sm border border-[#334155] flex justify-between">
+        <span class="text-slate-400">約定金額</span>
+        <span class="text-white font-semibold" x-text="yen((tf.shares||0) * (tf.price||0))"></span>
+      </div>
+    </div>
+    <div class="flex gap-3 px-5 py-4 border-t border-[#334155]">
+      <button @click="modals.trade = false"
+        class="flex-1 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-sm font-medium transition-colors">キャンセル</button>
+      <button @click="submitTrade()" :disabled="submitting"
+        class="flex-1 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50 flex items-center justify-center gap-2"
+        :class="tf.trade_type === 'BUY' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-orange-600 hover:bg-orange-700'">
+        <span x-show="submitting" class="spinner"></span>
+        <span x-text="tf.trade_type === 'BUY' ? '買い取引を記録' : '売り取引を記録'"></span>
+      </button>
+    </div>
   </div>
-  <div class="garden-grid" id="garden-grid"></div>
 </div>
 
-<!-- Rainbow Special Screen -->
-<div id="rainbow-screen" class="screen hidden">
-  <div class="rainbow-title">🎉 すごい！！<br>にじのはなが さいたよ！</div>
-  <div class="rainbow-flower">🌈🌸</div>
-  <div style="font-size:28px; color:#fff; text-align:center;">6しょくぜんぶ<br>あつめたね！</div>
-  <button class="btn-rainbow-back" id="btn-rainbow-back">もう一度あそぶ</button>
+<!-- MODAL: Add Watchlist -->
+<div x-show="modals.watchlist" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+     @click.self="modals.watchlist = false" @keydown.escape.window="modals.watchlist = false">
+  <div class="bg-[#1e293b] border border-[#334155] rounded-2xl w-full max-w-md shadow-2xl" @click.stop>
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#334155]">
+      <h3 class="font-bold text-white">ウォッチリストに追加</h3>
+      <button @click="modals.watchlist = false" class="text-slate-400 hover:text-white text-lg leading-none">✕</button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">銘柄コード <span class="text-red-400">*</span></label>
+        <div class="flex gap-2">
+          <input type="text" x-model="wf.ticker" placeholder="7203"
+                 @input.debounce.600ms="lookupStock('wf')" class="fi flex-1 uppercase" />
+          <button @click="lookupStock('wf')"
+            class="px-3 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-xs transition-colors">検索</button>
+        </div>
+        <p x-show="wf.stockName" class="text-xs text-emerald-400 mt-1" x-text="'✓ ' + wf.stockName"></p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5">目標株価 (円)</label>
+          <input type="number" x-model.number="wf.target_price" placeholder="任意" class="fi" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5">カテゴリ</label>
+          <select x-model="wf.category" class="fi">
+            <option value="">選択</option>
+            <option>成長株</option><option>配当株</option><option>優待株</option>
+            <option>バリュー</option><option>テーマ</option><option>その他</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">メモ</label>
+        <textarea x-model="wf.notes" placeholder="注目理由など" rows="2" class="fi resize-none"></textarea>
+      </div>
+    </div>
+    <div class="flex gap-3 px-5 py-4 border-t border-[#334155]">
+      <button @click="modals.watchlist = false"
+        class="flex-1 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-sm font-medium transition-colors">キャンセル</button>
+      <button @click="submitWatchlist()" :disabled="submitting"
+        class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white disabled:opacity-50 flex items-center justify-center gap-2">
+        <span x-show="submitting" class="spinner"></span>
+        追加する
+      </button>
+    </div>
+  </div>
 </div>
 
-<!-- Celebration Overlay -->
-<div id="celebration">
-  <div class="celeb-flower" id="celeb-flower">🌸</div>
-  <div class="celeb-text">さいた！！</div>
+<!-- MODAL: Add Event -->
+<div x-show="modals.event" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+     @click.self="modals.event = false" @keydown.escape.window="modals.event = false">
+  <div class="bg-[#1e293b] border border-[#334155] rounded-2xl w-full max-w-md shadow-2xl" @click.stop>
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#334155]">
+      <h3 class="font-bold text-white">イベントを追加</h3>
+      <button @click="modals.event = false" class="text-slate-400 hover:text-white text-lg leading-none">✕</button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">銘柄コード <span class="text-red-400">*</span></label>
+        <input type="text" x-model="ef.ticker" placeholder="7203" class="fi uppercase" />
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5">イベント種別 <span class="text-red-400">*</span></label>
+          <select x-model="ef.event_type" class="fi">
+            <option>決算</option><option>配当</option><option>優待</option><option>その他</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5">日付 <span class="text-red-400">*</span></label>
+          <input type="date" x-model="ef.event_date" class="fi" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">説明</label>
+        <input type="text" x-model="ef.description" placeholder="例: 第3四半期決算発表" class="fi" />
+      </div>
+    </div>
+    <div class="flex gap-3 px-5 py-4 border-t border-[#334155]">
+      <button @click="modals.event = false"
+        class="flex-1 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-sm font-medium transition-colors">キャンセル</button>
+      <button @click="submitEvent()" :disabled="submitting"
+        class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white disabled:opacity-50 flex items-center justify-center gap-2">
+        <span x-show="submitting" class="spinner"></span>
+        追加する
+      </button>
+    </div>
+  </div>
 </div>
+
+<!-- MODAL: Price Chart -->
+<div x-show="modals.chart" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+     @click.self="closeChart()" @keydown.escape.window="closeChart()">
+  <div class="bg-[#1e293b] border border-[#334155] rounded-2xl w-full max-w-2xl shadow-2xl" @click.stop>
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#334155]">
+      <div>
+        <h3 class="font-bold text-white" x-text="chartData.ticker || ''"></h3>
+        <p class="text-xs text-slate-400 mt-0.5" x-text="chartData.name || ''"></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex gap-1">
+          <template x-for="p in ['1m','3m','6m','1y']" :key="p">
+            <button @click="loadChartPeriod(p)"
+              class="px-2.5 py-1 rounded text-xs font-medium transition-colors"
+              :class="chartPeriod === p ? 'bg-blue-600 text-white' : 'bg-[#334155] text-slate-400 hover:text-white'"
+              x-text="p"></button>
+          </template>
+        </div>
+        <button @click="closeChart()" class="text-slate-400 hover:text-white text-lg leading-none ml-1">✕</button>
+      </div>
+    </div>
+    <div class="p-5">
+      <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-4">
+        <div class="bg-[#0f172a] rounded-lg p-2 text-center">
+          <p class="text-[10px] text-slate-500 mb-0.5">現在値</p>
+          <p class="text-sm font-bold text-white" x-text="chartData.current_price != null ? yen(chartData.current_price) : '---'"></p>
+        </div>
+        <div class="bg-[#0f172a] rounded-lg p-2 text-center">
+          <p class="text-[10px] text-slate-500 mb-0.5">前日比</p>
+          <p class="text-sm font-bold" :class="pnlColor(chartData.day_change_pct)"
+             x-text="chartData.day_change_pct != null ? pct(chartData.day_change_pct) : '---'"></p>
+        </div>
+        <div class="bg-[#0f172a] rounded-lg p-2 text-center">
+          <p class="text-[10px] text-slate-500 mb-0.5">時価総額</p>
+          <p class="text-sm font-bold text-white" x-text="chartData.market_cap ? fmtLarge(chartData.market_cap) : '---'"></p>
+        </div>
+        <div class="bg-[#0f172a] rounded-lg p-2 text-center">
+          <p class="text-[10px] text-slate-500 mb-0.5">PER</p>
+          <p class="text-sm font-bold text-white" x-text="chartData.per ? chartData.per.toFixed(1) + '倍' : '---'"></p>
+        </div>
+        <div class="bg-[#0f172a] rounded-lg p-2 text-center">
+          <p class="text-[10px] text-slate-500 mb-0.5">配当利回</p>
+          <p class="text-sm font-bold text-white" x-text="chartData.dividend_yield ? chartData.dividend_yield.toFixed(2) + '%' : '---'"></p>
+        </div>
+        <div class="bg-[#0f172a] rounded-lg p-2 text-center">
+          <p class="text-[10px] text-slate-500 mb-0.5">52W H/L</p>
+          <p class="text-[11px] font-medium text-white leading-tight"
+             x-text="chartData.week52_high ? num(chartData.week52_high) + '/' + num(chartData.week52_low) : '---'"></p>
+        </div>
+      </div>
+      <div class="relative h-52">
+        <div x-show="chartLoading" class="absolute inset-0 flex items-center justify-center">
+          <div class="spinner spinner-lg"></div>
+        </div>
+        <div x-show="!chartLoading && chartEmpty" class="absolute inset-0 flex items-center justify-center text-slate-500 text-sm">
+          チャートデータが取得できませんでした
+        </div>
+        <canvas id="priceChart" class="w-full h-full" x-show="!chartEmpty"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Cloud Sync Settings -->
+<div x-show="modals.settings" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+     @click.self="modals.settings=false" @keydown.escape.window="modals.settings=false">
+  <div class="bg-[#1e293b] border border-[#334155] rounded-2xl w-full max-w-md shadow-2xl" @click.stop>
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#334155]">
+      <h3 class="font-bold text-white">☁️ クラウド同期設定</h3>
+      <button @click="modals.settings=false" class="text-slate-400 hover:text-white text-lg leading-none">✕</button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="bg-blue-950/50 border border-blue-800/40 rounded-xl px-4 py-3 text-xs text-blue-300 space-y-1.5 leading-relaxed">
+        <p class="font-semibold text-blue-200">GitHubトークンを1つ入力するだけで自動セットアップします</p>
+        <ol class="list-decimal list-inside space-y-1 text-blue-300/80">
+          <li><a href="https://github.com/settings/tokens/new?scopes=gist&description=portfolio-sync" target="_blank" class="underline text-blue-400 font-medium">← ここをクリック</a>してTokenを発行</li>
+          <li>ページ下部の「Generate token」→ コピー</li>
+          <li>下のフィールドに貼り付けて「自動セットアップ」</li>
+        </ol>
+        <p class="text-blue-400/70">※ Gistの作成・設定は自動で行います。Tokenはこのデバイスのみ保存。</p>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">GitHub Token（gistスコープ）</label>
+        <input type="password" x-model="sf.token" placeholder="ghp_..." class="fi font-mono text-sm" />
+      </div>
+      <div x-show="sf.testMsg" class="text-xs px-3 py-2 rounded-lg"
+           :class="sf.testOk ? 'bg-emerald-900/40 text-emerald-300 border border-emerald-700/40' : 'bg-red-900/40 text-red-300 border border-red-700/40'"
+           x-text="sf.testMsg"></div>
+      <div x-show="syncStatus!=='local'" class="bg-slate-800/50 border border-slate-700/40 rounded-xl px-4 py-2.5 text-xs text-slate-400 flex items-center justify-between">
+        <span>接続中 Gist: <span class="text-white font-mono" x-text="sf.savedGistId ? sf.savedGistId.slice(0,12)+'…' : ''"></span></span>
+        <button @click="disconnectSync()" class="text-red-400 hover:text-red-300 font-medium transition-colors">切断</button>
+      </div>
+    </div>
+    <div class="flex gap-3 px-5 py-4 border-t border-[#334155]">
+      <button @click="modals.settings=false"
+        class="px-4 py-2 bg-[#334155] hover:bg-[#475569] rounded-lg text-sm font-medium transition-colors">キャンセル</button>
+      <button @click="saveSettings()" :disabled="sf.testing||!sf.token"
+        class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white disabled:opacity-40 flex items-center justify-center gap-2">
+        <span x-show="sf.testing" class="spinner"></span>
+        <span x-text="sf.testing ? 'セットアップ中…' : '自動セットアップ開始'"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
 
 <script>
-// ===================== AUDIO ENGINE =====================
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let ctx;
-function getCtx() {
-  if (!ctx) ctx = new AudioCtx();
-  if (ctx.state === 'suspended') ctx.resume();
-  return ctx;
+// ════════════════════════════════════════
+// Cloud Sync (GitHub Gist — 永久無料)
+// ════════════════════════════════════════
+const CloudSync = {
+  get gistId() { return localStorage.getItem('cfg_gist')  || ''; },
+  get token()  { return localStorage.getItem('cfg_token') || ''; },
+  isReady()    { return !!(this.gistId && this.token); },
+  _file:       'portfolio.json',
+  _headers()   { return { 'Authorization': `token ${this.token}`, 'Accept': 'application/vnd.github+json' }; },
+
+  async pull() {
+    if (!this.isReady()) return false;
+    const ac = new AbortController();
+    const tid = setTimeout(()=>ac.abort(), 8000);
+    try {
+      const r = await fetch(`https://api.github.com/gists/${this.gistId}`, { headers: this._headers(), signal: ac.signal });
+      clearTimeout(tid);
+      if (!r.ok) return false;
+      const j = await r.json();
+      const content = j.files?.[this._file]?.content;
+      if (!content) return false;
+      const d = JSON.parse(content);
+      if (d.holdings) localStorage.setItem('pf_holdings', JSON.stringify(d.holdings));
+      if (d.trades)   localStorage.setItem('pf_trades',   JSON.stringify(d.trades));
+      if (d.watchlist)localStorage.setItem('pf_watchlist',JSON.stringify(d.watchlist));
+      if (d.events)   localStorage.setItem('pf_events',   JSON.stringify(d.events));
+      return true;
+    } catch(e) { clearTimeout(tid); return false; }
+  },
+
+  async push() {
+    if (!this.isReady()) return false;
+    const data = {
+      holdings: JSON.parse(localStorage.getItem('pf_holdings')||'[]'),
+      trades:   JSON.parse(localStorage.getItem('pf_trades')  ||'[]'),
+      watchlist:JSON.parse(localStorage.getItem('pf_watchlist')||'[]'),
+      events:   JSON.parse(localStorage.getItem('pf_events')  ||'[]'),
+    };
+    const ac = new AbortController();
+    const tid = setTimeout(()=>ac.abort(), 8000);
+    try {
+      const r = await fetch(`https://api.github.com/gists/${this.gistId}`, {
+        method: 'PATCH',
+        headers: { ...this._headers(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ files: { [this._file]: { content: JSON.stringify(data) } } }),
+        signal: ac.signal,
+      });
+      clearTimeout(tid);
+      return r.ok;
+    } catch(e) { clearTimeout(tid); return false; }
+  },
+
+  configure(gistId, token) {
+    localStorage.setItem('cfg_gist',  gistId);
+    localStorage.setItem('cfg_token', token);
+  },
+  disconnect() {
+    localStorage.removeItem('cfg_gist');
+    localStorage.removeItem('cfg_token');
+  },
+};
+
+// ════════════════════════════════════════
+// Utilities
+// ════════════════════════════════════════
+function todayISO() { return new Date().toISOString().slice(0, 10); }
+function nowISO()   { return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'); }
+function r2(v)      { return Math.round(v * 100) / 100; }
+
+function normalizeTicker(t) {
+  t = t.trim().toUpperCase();
+  if (t.includes('.')) return t;
+  if (/^\d{4}$/.test(t)) return t + '.T';
+  return t;
 }
 
-function playTone(freq, type = 'sine', dur = 0.15, vol = 0.3) {
-  const ac = getCtx();
-  const osc = ac.createOscillator();
-  const gain = ac.createGain();
-  osc.connect(gain);
-  gain.connect(ac.destination);
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, ac.currentTime);
-  gain.gain.setValueAtTime(vol, ac.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
-  osc.start();
-  osc.stop(ac.currentTime + dur);
-}
+// ════════════════════════════════════════
+// localStorage Store
+// ════════════════════════════════════════
+const Store = {
+  _g(k)      { try { return JSON.parse(localStorage.getItem('pf_'+k) || '[]'); } catch(e) { return []; } },
+  _s(k, v)   { localStorage.setItem('pf_'+k, JSON.stringify(v)); },
+  _id(k)     { const a = this._g(k); return a.length ? Math.max(...a.map(i=>i.id), 0)+1 : 1; },
 
-function playWaterSound() {
-  const ac = getCtx();
-  const buf = ac.createBuffer(1, ac.sampleRate * 0.2, ac.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < data.length; i++) {
-    data[i] = (Math.random() * 2 - 1) * Math.max(0, 1 - i / data.length);
-  }
-  const src = ac.createBufferSource();
-  const gain = ac.createGain();
-  const filter = ac.createBiquadFilter();
-  filter.type = 'bandpass';
-  filter.frequency.value = 800;
-  filter.Q.value = 0.5;
-  src.buffer = buf;
-  src.connect(filter);
-  filter.connect(gain);
-  gain.connect(ac.destination);
-  gain.gain.value = 0.2;
-  src.start();
-}
+  getHoldings()       { return this._g('holdings'); },
+  getHoldingByTicker(t) { return this.getHoldings().find(h=>h.ticker===t) || null; },
+  addHolding(h)       { const a=this.getHoldings(), item={...h,id:this._id('holdings'),created_at:nowISO(),updated_at:nowISO()}; a.push(item); this._s('holdings',a); return item; },
+  updateHolding(id,u) { const a=this.getHoldings().map(h=>h.id===id?{...h,...u,updated_at:nowISO()}:h); this._s('holdings',a); return a.find(h=>h.id===id); },
+  deleteHolding(id)   { this._s('holdings', this.getHoldings().filter(h=>h.id!==id)); },
 
-function playCountSound(n) {
-  const notes = [523, 587, 659, 698, 784];
-  playTone(notes[n - 1], 'triangle', 0.2, 0.35);
-}
-
-function playCelebSound() {
-  const ac = getCtx();
-  [523, 659, 784, 1047].forEach((f, i) => {
-    setTimeout(() => playTone(f, 'triangle', 0.3, 0.4), i * 80);
-  });
-}
-
-function playRainbowSound() {
-  [523, 587, 659, 784, 880, 1047, 1175].forEach((f, i) => {
-    setTimeout(() => playTone(f, 'sine', 0.4, 0.35), i * 100);
-  });
-}
-
-// ===================== PARTICLE ENGINE =====================
-const canvas = document.getElementById('particle-canvas');
-const pctx = canvas.getContext('2d');
-let particles = [];
-
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-function spawnParticles(x, y, colors, count = 30) {
-  for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 3 + Math.random() * 6;
-    particles.push({
-      x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 4,
-      size: 8 + Math.random() * 12,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      alpha: 1,
-      emoji: ['⭐','✨','💫','🌟'][Math.floor(Math.random() * 4)],
-      life: 1,
-    });
-  }
-}
-
-function animParticles() {
-  pctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles = particles.filter(p => p.alpha > 0.02);
-  particles.forEach(p => {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vy += 0.3;
-    p.alpha -= 0.022;
-    pctx.globalAlpha = p.alpha;
-    pctx.font = `${p.size}px serif`;
-    pctx.fillText(p.emoji, p.x, p.y);
-  });
-  pctx.globalAlpha = 1;
-  requestAnimationFrame(animParticles);
-}
-animParticles();
-
-// ===================== RIPPLE =====================
-function createRipple(x, y) {
-  const r = document.createElement('div');
-  r.className = 'ripple';
-  const size = 60;
-  r.style.cssText = `width:${size}px;height:${size}px;left:${x - size/2}px;top:${y - size/2}px`;
-  document.body.appendChild(r);
-  setTimeout(() => r.remove(), 600);
-}
-
-// ===================== GAME STATE =====================
-const PLANTS = [
-  { name: 'あか',  stages: ['🌱','🌿','🌷'], bloom: '🌷', color: '#f48fb1' },
-  { name: 'きいろ',stages: ['🌱','🌿','🌻'], bloom: '🌻', color: '#fff176' },
-  { name: 'ピンク',stages: ['🌱','🌿','🌸'], bloom: '🌸', color: '#f8bbd9' },
-  { name: 'しろ',  stages: ['🌱','🌿','🌼'], bloom: '🌼', color: '#e0e0e0' },
-  { name: 'オレンジ',stages:['🌱','🌿','🌺'], bloom: '🌺', color: '#ffcc80' },
-  { name: 'むらさき',stages:['🌱','🌿','💜'], bloom: '💐', color: '#ce93d8' },
-];
-
-let garden = JSON.parse(localStorage.getItem('ppg_garden') || '[]');
-let currentPlantIdx = 0;
-let waterCount = 0;
-const WATER_TO_BLOOM = 5;
-
-function saveGarden() {
-  localStorage.setItem('ppg_garden', JSON.stringify(garden));
-}
-
-function nextUnbloomed() {
-  for (let i = 0; i < PLANTS.length; i++) {
-    if (!garden.includes(i)) return i;
-  }
-  return -1;
-}
-
-// ===================== UI HELPERS =====================
-function getScreen(id) { return document.getElementById(id); }
-
-function showScreen(id) {
-  ['title-screen','game-screen','garden-screen','rainbow-screen'].forEach(s => {
-    getScreen(s).classList.toggle('hidden', s !== id);
-  });
-}
-
-function updatePlantDisplay() {
-  const plant = PLANTS[currentPlantIdx];
-  const el = document.getElementById('plant-display');
-  const stage = waterCount < 2 ? 0 : waterCount < 4 ? 1 : 1;
-  el.textContent = plant.stages[stage];
-  document.getElementById('color-label').textContent = plant.name;
-  updateDrops();
-
-  const msgs = [
-    'みずをあげてね！',
-    'もう1かい！',
-    'いい感じ！',
-    'もうすぐ！',
-    'あと1かい！',
-  ];
-  document.getElementById('count-text').textContent = msgs[waterCount] || '';
-}
-
-function updateDrops() {
-  const row = document.getElementById('progress-drops');
-  row.innerHTML = '';
-  for (let i = 0; i < WATER_TO_BLOOM; i++) {
-    const d = document.createElement('span');
-    d.className = 'drop' + (i < waterCount ? ' filled' : '');
-    d.textContent = i < waterCount ? '💧' : '🩶';
-    row.appendChild(d);
-  }
-}
-
-function renderGarden() {
-  const grid = document.getElementById('garden-grid');
-  grid.innerHTML = '';
-  PLANTS.forEach((p, i) => {
-    const slot = document.createElement('div');
-    slot.className = 'garden-slot' + (garden.includes(i) ? ' bloomed' : '');
-    if (garden.includes(i)) {
-      slot.innerHTML = `<span class="slot-flower">${p.bloom}</span><span class="slot-label">${p.name}</span>`;
-    } else {
-      slot.innerHTML = `<span class="slot-empty">🌱</span>`;
+  upsertFromTrade(ticker, shares, price, type) {
+    const ex = this.getHoldingByTicker(ticker);
+    if (!ex) {
+      if (type==='BUY') this.addHolding({ticker, name:ticker, shares, avg_cost:price, notes:null});
+      return;
     }
-    grid.appendChild(slot);
-  });
-}
+    if (type==='BUY') {
+      const ns = r2(ex.shares + shares);
+      const na = r2((ex.avg_cost * ex.shares + price * shares) / ns);
+      this.updateHolding(ex.id, {shares:ns, avg_cost:na});
+    } else {
+      const ns = r2(ex.shares - shares);
+      ns <= 0 ? this.deleteHolding(ex.id) : this.updateHolding(ex.id, {shares:ns});
+    }
+  },
 
-// ===================== CELEBRATION =====================
-function showCelebration(flowerEmoji, colorArr) {
-  const celeb = document.getElementById('celebration');
-  document.getElementById('celeb-flower').textContent = flowerEmoji;
-  celeb.classList.add('show');
+  getTrades()         { return this._g('trades').sort((a,b)=>b.trade_date.localeCompare(a.trade_date)); },
+  addTrade(t)         { const a=this._g('trades'), item={...t,id:this._id('trades'),created_at:nowISO()}; a.push(item); this._s('trades',a); return item; },
+  deleteTrade(id)     { this._s('trades', this._g('trades').filter(i=>i.id!==id)); },
 
-  const cx = window.innerWidth / 2;
-  const cy = window.innerHeight / 2;
-  spawnParticles(cx, cy, colorArr, 50);
-  playCelebSound();
+  getWatchlist()      { return this._g('watchlist'); },
+  addWatchlist(w)     { const a=this.getWatchlist(), item={...w,id:this._id('watchlist'),created_at:nowISO()}; a.push(item); this._s('watchlist',a); return item; },
+  deleteWatchlist(id) { this._s('watchlist', this.getWatchlist().filter(i=>i.id!==id)); },
 
-  setTimeout(() => {
-    celeb.classList.remove('show');
-  }, 1800);
-}
+  getEvents()         { return this._g('events').sort((a,b)=>a.event_date.localeCompare(b.event_date)); },
+  getUpcoming(days=30){ const t=todayISO(), lim=new Date(); lim.setDate(lim.getDate()+days); const ls=lim.toISOString().slice(0,10); return this.getEvents().filter(e=>e.event_date>=t&&e.event_date<=ls); },
+  addEvent(e)         { const a=this._g('events'), item={...e,id:this._id('events'),created_at:nowISO()}; a.push(item); this._s('events',a); return item; },
+  deleteEvent(id)     { this._s('events', this._g('events').filter(i=>i.id!==id)); },
 
-// ===================== WATER ACTION =====================
-function waterPlant(evt) {
-  const x = evt ? (evt.changedTouches ? evt.changedTouches[0].clientX : evt.clientX) : window.innerWidth / 2;
-  const y = evt ? (evt.changedTouches ? evt.changedTouches[0].clientY : evt.clientY) : window.innerHeight / 2;
+  exportAll() {
+    return JSON.stringify({holdings:this.getHoldings(), trades:this._g('trades'), watchlist:this.getWatchlist(), events:this.getEvents(), exported_at:nowISO()}, null, 2);
+  },
+  importAll(json) {
+    const d = JSON.parse(json);
+    if (d.holdings) this._s('holdings', d.holdings);
+    if (d.trades)   this._s('trades', d.trades);
+    if (d.watchlist)this._s('watchlist', d.watchlist);
+    if (d.events)   this._s('events', d.events);
+  },
+};
 
-  createRipple(x, y);
-  spawnParticles(x, y - 60, ['💧','🩵','🌊'], 12);
-  playWaterSound();
+// ════════════════════════════════════════
+// Yahoo Finance API (direct browser fetch)
+// ════════════════════════════════════════
+const StockAPI = {
+  _c: {},
+  _TTL: 5 * 60 * 1000,
 
-  waterCount++;
-  playCountSound(waterCount);
+  _hit(k) { const e=this._c[k]; return e&&(Date.now()-e.ts<this._TTL)?e.d:null; },
+  _put(k,d){ this._c[k]={d,ts:Date.now()}; },
 
-  const plantEl = document.getElementById('plant-display');
-  plantEl.classList.remove('pop');
-  void plantEl.offsetWidth;
-  plantEl.classList.add('pop');
-  setTimeout(() => plantEl.classList.remove('pop'), 300);
+  _blank(ticker) {
+    return {ticker,name:null,current_price:null,previous_close:null,day_change:null,
+            day_change_pct:null,volume:null,market_cap:null,per:null,
+            dividend_yield:null,week52_high:null,week52_low:null,currency:'JPY'};
+  },
 
-  if (waterCount >= WATER_TO_BLOOM) {
-    const plant = PLANTS[currentPlantIdx];
-    plantEl.textContent = plant.bloom;
+  async getInfo(ticker) {
+    ticker = normalizeTicker(ticker);
+    const ck = 'i:'+ticker;
+    const hit = this._hit(ck);
+    if (hit) return hit;
 
-    setTimeout(() => {
-      showCelebration(plant.bloom, ['⭐','✨','💫','🌟','🎉']);
-      garden.push(currentPlantIdx);
-      saveGarden();
-
-      setTimeout(() => {
-        if (garden.length >= PLANTS.length) {
-          playRainbowSound();
-          showScreen('rainbow-screen');
-        } else {
-          waterCount = 0;
-          currentPlantIdx = nextUnbloomed();
-          updatePlantDisplay();
+    // Try v7 quote (has PER, market cap, etc.)
+    try {
+      const ac = new AbortController();
+      const tid = setTimeout(()=>ac.abort(), 8000);
+      const r = await fetch(`https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(ticker)}`, {signal:ac.signal});
+      clearTimeout(tid);
+      if (r.ok) {
+        const j = await r.json();
+        const q = j?.quoteResponse?.result?.[0];
+        if (q && q.regularMarketPrice != null) {
+          const pr=q.regularMarketPrice, pc=q.regularMarketPreviousClose;
+          const data = {
+            ticker,
+            name: q.longName||q.shortName||ticker,
+            current_price: pr,
+            previous_close: pc??null,
+            day_change: pc!=null ? r2(pr-pc) : null,
+            day_change_pct: pc!=null&&pc!==0 ? r2((pr-pc)/pc*100) : null,
+            volume: q.regularMarketVolume??null,
+            market_cap: q.marketCap??null,
+            per: q.trailingPE??q.forwardPE??null,
+            dividend_yield: q.trailingAnnualDividendYield!=null ? r2(q.trailingAnnualDividendYield*100) : null,
+            week52_high: q.fiftyTwoWeekHigh??null,
+            week52_low: q.fiftyTwoWeekLow??null,
+            currency: q.currency||'JPY',
+          };
+          this._put(ck, data);
+          return data;
         }
-      }, 2000);
-    }, 400);
-  } else {
-    updatePlantDisplay();
-  }
-}
+      }
+    } catch(e) {}
 
-// ===================== EVENT LISTENERS =====================
-document.getElementById('btn-start').addEventListener('click', (e) => {
-  playTone(659, 'triangle', 0.2, 0.4);
-  waterCount = 0;
-  currentPlantIdx = nextUnbloomed();
-  if (currentPlantIdx === -1) {
-    garden = [];
-    saveGarden();
-    currentPlantIdx = 0;
-  }
-  updatePlantDisplay();
-  showScreen('game-screen');
-});
+    // Fallback: v8 chart meta
+    try {
+      const ac = new AbortController();
+      const tid = setTimeout(()=>ac.abort(), 8000);
+      const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=5d`, {signal:ac.signal});
+      clearTimeout(tid);
+      if (r.ok) {
+        const j = await r.json();
+        const meta = j?.chart?.result?.[0]?.meta;
+        if (meta && meta.regularMarketPrice != null) {
+          const pr=meta.regularMarketPrice, pc=meta.chartPreviousClose||meta.previousClose;
+          const data = {
+            ...this._blank(ticker),
+            name: meta.longName||meta.shortName||meta.symbol||ticker,
+            current_price: pr,
+            previous_close: pc??null,
+            day_change: pc!=null ? r2(pr-pc) : null,
+            day_change_pct: pc!=null&&pc!==0 ? r2((pr-pc)/pc*100) : null,
+            currency: meta.currency||'JPY',
+          };
+          this._put(ck, data);
+          return data;
+        }
+      }
+    } catch(e) {}
 
-document.getElementById('can-btn').addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  waterPlant(e);
-}, { passive: false });
-document.getElementById('can-btn').addEventListener('click', (e) => {
-  waterPlant(e);
-});
+    const blank = this._blank(ticker);
+    this._put(ck, blank);
+    return blank;
+  },
 
-document.getElementById('btn-garden').addEventListener('click', () => {
-  playTone(523, 'triangle', 0.15, 0.3);
-  renderGarden();
-  showScreen('garden-screen');
-});
+  async getHistory(ticker, period) {
+    ticker = normalizeTicker(ticker);
+    const ck = 'h:'+ticker+':'+period;
+    const hit = this._hit(ck);
+    if (hit) return hit;
 
-document.getElementById('btn-back').addEventListener('click', () => {
-  playTone(440, 'triangle', 0.15, 0.3);
-  showScreen('game-screen');
-});
+    const rm = {'1m':'1mo','3m':'3mo','6m':'6mo','1y':'1y'};
+    try {
+      const ac = new AbortController();
+      const tid = setTimeout(()=>ac.abort(), 10000);
+      const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=${rm[period]||'3mo'}`, {signal:ac.signal});
+      clearTimeout(tid);
+      if (r.ok) {
+        const j = await r.json();
+        const res = j?.chart?.result?.[0];
+        if (res?.timestamp) {
+          const ts=res.timestamp, cl=res.indicators?.quote?.[0]?.close||[];
+          const dates=[], prices=[];
+          for (let i=0;i<ts.length;i++) {
+            if (cl[i]!=null) {
+              dates.push(new Date(ts[i]*1000).toISOString().slice(0,10));
+              prices.push(r2(cl[i]));
+            }
+          }
+          const data={dates,prices};
+          this._put(ck,data);
+          return data;
+        }
+      }
+    } catch(e) {}
+    return {dates:[],prices:[]};
+  },
+};
 
-document.getElementById('btn-rainbow-back').addEventListener('click', () => {
-  garden = [];
-  saveGarden();
-  waterCount = 0;
-  currentPlantIdx = 0;
-  updatePlantDisplay();
-  showScreen('game-screen');
-});
+// ════════════════════════════════════════
+// Alpine.js App
+// ════════════════════════════════════════
+function portfolioApp() {
+  return {
+    activeTab: 'portfolio',
+    tabs: [
+      {id:'portfolio', label:'📊 ポートフォリオ'},
+      {id:'trades',    label:'📋 売買履歴'},
+      {id:'watchlist', label:'👀 ウォッチリスト'},
+      {id:'events',    label:'📅 イベント'},
+    ],
+    holdings:[], summary:null, trades:[], watchlist:[], events:[], upcomingEvents:[],
+    loading:false, submitting:false, lastUpdated:'', autoRefresh:false, _arTimer:null, toasts:[],
+    syncStatus: CloudSync.isReady() ? 'synced' : 'local',
+    modals:{holding:false,trade:false,watchlist:false,event:false,chart:false,settings:false},
+    sf:{gistId:'',token:'',testing:false,testOk:false,testMsg:'',savedGistId:CloudSync.gistId},
+    editingHolding:null,
+    hf:{ticker:'',shares:null,avg_cost:null,notes:'',stockName:'',stockErr:''},
+    tf:{ticker:'',trade_type:'BUY',shares:null,price:null,fee:0,trade_date:todayISO(),notes:'',stockName:''},
+    wf:{ticker:'',target_price:null,category:'',notes:'',stockName:''},
+    ef:{ticker:'',event_type:'決算',event_date:todayISO(),description:''},
+    chartData:{}, chartPeriod:'3m', chartLoading:false, chartEmpty:false, _chartInst:null,
 
-// Prevent zoom on double-tap
-document.addEventListener('dblclick', e => e.preventDefault());
-document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+    async boot() {
+      if (CloudSync.isReady()) {
+        this.syncStatus = 'syncing';
+        const ok = await CloudSync.pull();
+        this.syncStatus = ok ? 'synced' : 'error';
+      }
+      await Promise.all([this.fetchHoldings(), this.fetchSummary()]);
+      this.fetchTrades(); this.fetchWatchlist(); this.fetchEvents();
+    },
 
-// PWA Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
+    async _syncPush() {
+      if (!CloudSync.isReady()) return;
+      this.syncStatus = 'syncing';
+      const ok = await CloudSync.push();
+      this.syncStatus = ok ? 'synced' : 'error';
+      if (!ok) this.toast('クラウド同期に失敗しました','error');
+    },
+
+    async switchTab(id) {
+      this.activeTab = id;
+      if (id==='portfolio') await Promise.all([this.fetchHoldings(), this.fetchSummary()]);
+      else if (id==='trades') await this.fetchTrades();
+      else if (id==='watchlist') await this.fetchWatchlist();
+      else if (id==='events') await this.fetchEvents();
+    },
+
+    async refreshCurrent() {
+      StockAPI._c = {};
+      this.loading = true;
+      try {
+        if (this.activeTab==='portfolio') await Promise.all([this.fetchHoldings(), this.fetchSummary()]);
+        else if (this.activeTab==='trades') await this.fetchTrades();
+        else if (this.activeTab==='watchlist') await this.fetchWatchlist();
+        else if (this.activeTab==='events') await this.fetchEvents();
+        this.toast('データを更新しました','success');
+      } catch(e) { this.toast('更新に失敗しました','error'); }
+      finally { this.loading = false; }
+    },
+
+    toggleAutoRefresh() {
+      this.autoRefresh = !this.autoRefresh;
+      if (this.autoRefresh) {
+        this._arTimer = setInterval(()=>{ StockAPI._c={}; this.fetchHoldings(); this.fetchSummary(); if(this.activeTab==='watchlist')this.fetchWatchlist(); }, 5*60*1000);
+        this.toast('自動更新を開始しました (5分毎)','info');
+      } else {
+        clearInterval(this._arTimer);
+        this.toast('自動更新を停止しました','info');
+      }
+    },
+
+    // ── enrich ──
+    async _enrich(h) {
+      const info = await StockAPI.getInfo(h.ticker);
+      const pr = info.current_price;
+      const cb = r2(h.avg_cost * h.shares);
+      const cv = pr!=null ? r2(pr * h.shares) : null;
+      const pnl = cv!=null ? r2(cv - cb) : null;
+      const pp  = pnl!=null && cb!==0 ? r2(pnl/cb*100) : null;
+      return {...h, name:(h.name&&h.name!==h.ticker)?h.name:(info.name||h.ticker),
+              current_price:pr, current_value:cv, cost_basis:cb, pnl, pnl_pct:pp,
+              day_change:info.day_change, day_change_pct:info.day_change_pct};
+    },
+
+    // ── fetch ──
+    async fetchHoldings() {
+      this.loading = true;
+      try {
+        this.holdings = await Promise.all(Store.getHoldings().map(h=>this._enrich(h)));
+        this.lastUpdated = new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+      } catch(e) { this.toast('取得失敗: '+e.message,'error'); }
+      finally { this.loading = false; }
+    },
+
+    async fetchSummary() {
+      const en = this.holdings.length ? this.holdings
+               : await Promise.all(Store.getHoldings().map(h=>this._enrich(h)));
+      const tc = en.reduce((s,h)=>s+h.cost_basis, 0);
+      const pr = en.filter(h=>h.current_value!=null);
+      let tv=null, tpnl=null, tpp=null;
+      if (pr.length) {
+        tv = r2(pr.reduce((s,h)=>s+h.current_value, 0));
+        const pc2 = pr.reduce((s,h)=>s+h.cost_basis, 0);
+        tpnl = r2(tv - pc2);
+        tpp  = pc2!==0 ? r2(tpnl/pc2*100) : 0;
+      }
+      const dp = en.filter(h=>h.day_change!=null);
+      const dc = dp.length ? r2(dp.reduce((s,h)=>s+h.day_change*h.shares,0)) : null;
+      this.summary = {total_cost:r2(tc), total_value:tv, total_pnl:tpnl, total_pnl_pct:tpp, day_change_total:dc, count:en.length};
+    },
+
+    async fetchTrades() {
+      this.loading = true;
+      try { this.trades = Store.getTrades(); } catch(e) {}
+      finally { this.loading = false; }
+    },
+
+    async fetchWatchlist() {
+      this.loading = true;
+      try {
+        this.watchlist = await Promise.all(Store.getWatchlist().map(async w=>{
+          const info = await StockAPI.getInfo(w.ticker);
+          const pr=info.current_price, tg=w.target_price;
+          return {...w, name:(w.name&&w.name!==w.ticker)?w.name:(info.name||w.ticker),
+                  current_price:pr, day_change:info.day_change, day_change_pct:info.day_change_pct,
+                  distance:(pr&&tg)?r2(tg-pr):null, distance_pct:(pr&&tg)?r2((tg-pr)/pr*100):null};
+        }));
+      } catch(e) {}
+      finally { this.loading = false; }
+    },
+
+    async fetchEvents() {
+      this.loading = true;
+      try { this.events = Store.getEvents(); this.upcomingEvents = Store.getUpcoming(30); } catch(e) {}
+      finally { this.loading = false; }
+    },
+
+    // ── Holding CRUD ──
+    openHoldingModal() {
+      this.editingHolding = null;
+      this.hf = {ticker:'',shares:null,avg_cost:null,notes:'',stockName:'',stockErr:''};
+      this.modals.holding = true;
+    },
+    openEditHoldingModal(h) {
+      this.editingHolding = h;
+      this.hf = {ticker:h.ticker, shares:h.shares, avg_cost:h.avg_cost, notes:h.notes||'', stockName:h.name||'', stockErr:''};
+      this.modals.holding = true;
+    },
+    async submitHolding() {
+      const f = this.hf;
+      if (!f.ticker.trim()) return this.toast('銘柄コードを入力してください','error');
+      if (!f.shares||f.shares<=0) return this.toast('株数を正しく入力してください','error');
+      if (!f.avg_cost||f.avg_cost<=0) return this.toast('取得単価を正しく入力してください','error');
+      this.submitting = true;
+      try {
+        const ticker = normalizeTicker(f.ticker.trim());
+        if (this.editingHolding) {
+          Store.updateHolding(this.editingHolding.id, {shares:f.shares, avg_cost:f.avg_cost, notes:f.notes||null});
+          this.toast('保有銘柄を更新しました','success');
+        } else {
+          if (Store.getHoldingByTicker(ticker)) return this.toast(`${ticker} は既に保有リストにあります`,'error');
+          const info = await StockAPI.getInfo(ticker);
+          Store.addHolding({ticker, name:info.name||ticker, shares:f.shares, avg_cost:f.avg_cost, notes:f.notes||null});
+          this.toast('銘柄を追加しました','success');
+        }
+        this.modals.holding = false;
+        await Promise.all([this.fetchHoldings(), this.fetchSummary()]);
+        this._syncPush();
+      } catch(e) { this.toast(e.message,'error'); }
+      finally { this.submitting = false; }
+    },
+    async confirmDeleteHolding(id) {
+      if (!confirm('この保有銘柄を削除しますか？')) return;
+      Store.deleteHolding(id);
+      this.toast('削除しました','success');
+      await Promise.all([this.fetchHoldings(), this.fetchSummary()]);
+      this._syncPush();
+    },
+
+    // ── Trade CRUD ──
+    openTradeModal() {
+      this.tf = {ticker:'',trade_type:'BUY',shares:null,price:null,fee:0,trade_date:todayISO(),notes:'',stockName:''};
+      this.modals.trade = true;
+    },
+    async submitTrade() {
+      const f = this.tf;
+      if (!f.ticker.trim()) return this.toast('銘柄コードを入力してください','error');
+      if (!f.shares||f.shares<=0) return this.toast('株数を正しく入力してください','error');
+      if (!f.price||f.price<=0) return this.toast('価格を正しく入力してください','error');
+      if (!f.trade_date) return this.toast('取引日を入力してください','error');
+      this.submitting = true;
+      try {
+        const ticker = normalizeTicker(f.ticker.trim());
+        let rpnl = null;
+        if (f.trade_type==='SELL') {
+          const ex = Store.getHoldingByTicker(ticker);
+          rpnl = ex ? r2((f.price - ex.avg_cost) * f.shares - (f.fee||0)) : 0;
+        }
+        Store.addTrade({ticker, trade_type:f.trade_type, shares:f.shares, price:f.price, fee:f.fee||0, trade_date:f.trade_date, notes:f.notes||null, realized_pnl:rpnl});
+        Store.upsertFromTrade(ticker, f.shares, f.price, f.trade_type);
+        let msg = '取引を記録しました';
+        if (rpnl!=null) msg += ` (実現損益: ${rpnl>=0?'+':''}${this.yen(rpnl)})`;
+        this.modals.trade = false;
+        this.toast(msg,'success');
+        await Promise.all([this.fetchTrades(), this.fetchHoldings(), this.fetchSummary()]);
+        this._syncPush();
+      } catch(e) { this.toast(e.message,'error'); }
+      finally { this.submitting = false; }
+    },
+    async confirmDeleteTrade(id) {
+      if (!confirm('この取引記録を削除しますか？')) return;
+      Store.deleteTrade(id); this.toast('削除しました','success');
+      await this.fetchTrades();
+      this._syncPush();
+    },
+
+    // ── Watchlist CRUD ──
+    openWatchlistModal() {
+      this.wf = {ticker:'',target_price:null,category:'',notes:'',stockName:''};
+      this.modals.watchlist = true;
+    },
+    async submitWatchlist() {
+      if (!this.wf.ticker.trim()) return this.toast('銘柄コードを入力してください','error');
+      this.submitting = true;
+      try {
+        const ticker = normalizeTicker(this.wf.ticker.trim());
+        const info = await StockAPI.getInfo(ticker);
+        Store.addWatchlist({ticker, name:info.name||ticker, target_price:this.wf.target_price||null, category:this.wf.category||null, notes:this.wf.notes||null});
+        this.modals.watchlist = false;
+        this.toast('ウォッチリストに追加しました','success');
+        await this.fetchWatchlist();
+        this._syncPush();
+      } catch(e) { this.toast(e.message,'error'); }
+      finally { this.submitting = false; }
+    },
+    async confirmDeleteWatchlist(id) {
+      if (!confirm('ウォッチリストから削除しますか？')) return;
+      Store.deleteWatchlist(id); this.toast('削除しました','success');
+      await this.fetchWatchlist();
+      this._syncPush();
+    },
+
+    // ── Event CRUD ──
+    openEventModal() {
+      this.ef = {ticker:'',event_type:'決算',event_date:todayISO(),description:''};
+      this.modals.event = true;
+    },
+    async submitEvent() {
+      if (!this.ef.ticker.trim()) return this.toast('銘柄コードを入力してください','error');
+      if (!this.ef.event_date) return this.toast('日付を入力してください','error');
+      this.submitting = true;
+      try {
+        Store.addEvent({ticker:normalizeTicker(this.ef.ticker.trim()), event_type:this.ef.event_type, event_date:this.ef.event_date, description:this.ef.description||null});
+        this.modals.event = false;
+        this.toast('イベントを追加しました','success');
+        await this.fetchEvents();
+        this._syncPush();
+      } catch(e) { this.toast(e.message,'error'); }
+      finally { this.submitting = false; }
+    },
+    async confirmDeleteEvent(id) {
+      if (!confirm('このイベントを削除しますか？')) return;
+      Store.deleteEvent(id); this.toast('削除しました','success');
+      await this.fetchEvents();
+      this._syncPush();
+    },
+
+    // ── Ticker lookup ──
+    async lookupStock(fk) {
+      const f = this[fk], ticker = (f.ticker||'').trim();
+      if (!ticker||ticker.length<2) return;
+      if (fk==='hf') { f.stockName=''; f.stockErr=''; }
+      try {
+        const data = await StockAPI.getInfo(normalizeTicker(ticker));
+        const name = data.name&&data.name!==ticker ? data.name : null;
+        if (fk==='hf') { f.stockName=name||''; f.stockErr=name?'':'銘柄名を取得できませんでした'; }
+        else f.stockName = name||'';
+        if (fk==='tf' && data.current_price) f.price = data.current_price;
+      } catch(e) {
+        if (fk==='hf') { f.stockName=''; f.stockErr='銘柄が見つかりません'; }
+        else f.stockName='';
+      }
+    },
+
+    // ── Chart ──
+    async openChartModal(h) {
+      this.chartData = {ticker:h.ticker, name:h.name||''};
+      this.chartPeriod = '3m'; this.chartEmpty = false;
+      this.modals.chart = true;
+      await this._loadChart('3m', h.ticker);
+    },
+    async loadChartPeriod(p) { await this._loadChart(p, this.chartData.ticker); },
+    async _loadChart(period, ticker) {
+      this.chartPeriod = period; this.chartLoading = true; this.chartEmpty = false;
+      if (this._chartInst) { this._chartInst.destroy(); this._chartInst = null; }
+      try {
+        const [info, hist] = await Promise.all([StockAPI.getInfo(ticker), StockAPI.getHistory(ticker, period)]);
+        this.chartData = {...this.chartData, ...info};
+        if (!hist.dates||hist.dates.length===0) { this.chartEmpty = true; }
+        else { await this.$nextTick(); this._buildChart(hist.dates, hist.prices); }
+      } catch(e) { this.chartEmpty = true; }
+      finally { this.chartLoading = false; }
+    },
+    _buildChart(dates, prices) {
+      const canvas = document.getElementById('priceChart');
+      if (!canvas) return;
+      const up = prices.length>1 && prices[prices.length-1]>=prices[0];
+      const lc = up ? '#10b981' : '#ef4444';
+      const fc = up ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)';
+      this._chartInst = new Chart(canvas, {
+        type:'line',
+        data:{labels:dates, datasets:[{data:prices, borderColor:lc, backgroundColor:fc, borderWidth:1.8, fill:true, pointRadius:0, pointHoverRadius:4, pointHoverBackgroundColor:lc, tension:0.25}]},
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          interaction:{mode:'index',intersect:false},
+          plugins:{legend:{display:false}, tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,titleColor:'#94a3b8',bodyColor:'#f8fafc',padding:10,callbacks:{label:ctx=>'  ¥'+ctx.parsed.y.toLocaleString('ja-JP',{maximumFractionDigits:2})}}},
+          scales:{
+            x:{grid:{color:'#0f172a'},border:{color:'#1e293b'},ticks:{color:'#475569',maxTicksLimit:7,maxRotation:0,callback(v){const l=this.getLabelForValue(v);return l?l.slice(5):''}}},
+            y:{position:'right',grid:{color:'#132030'},border:{color:'#1e293b'},ticks:{color:'#475569',callback:v=>'¥'+v.toLocaleString('ja-JP')}}
+          }
+        }
+      });
+    },
+    closeChart() {
+      this.modals.chart = false;
+      if (this._chartInst) { this._chartInst.destroy(); this._chartInst = null; }
+    },
+
+    // ── Settings / Cloud Sync ──
+    openSettings() {
+      this.sf.token  = CloudSync.token;
+      this.sf.testMsg = ''; this.sf.testOk = false;
+      this.sf.savedGistId = CloudSync.gistId;
+      this.modals.settings = true;
+    },
+    async saveSettings() {
+      const token = this.sf.token.trim();
+      if (!token) return;
+      this.sf.testing = true; this.sf.testMsg = '';
+      try {
+        // Verify token is valid
+        const meRes = await fetch('https://api.github.com/user', {
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' },
+        });
+        if (!meRes.ok) {
+          this.sf.testOk = false;
+          this.sf.testMsg = `✗ Tokenが無効です (${meRes.status}) — gistスコープ付きのTokenを確認してください`;
+          return;
+        }
+
+        let gistId = CloudSync.gistId;
+
+        // Auto-create Gist if not yet configured
+        if (!gistId) {
+          const createRes = await fetch('https://api.github.com/gists', {
+            method: 'POST',
+            headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              description: '株式ポートフォリオデータ (auto-created by portfolio app)',
+              public: false,
+              files: { 'portfolio.json': { content: JSON.stringify({ holdings:[], trades:[], watchlist:[], events:[] }) } },
+            }),
+          });
+          if (!createRes.ok) {
+            this.sf.testOk = false;
+            this.sf.testMsg = `✗ Gist作成失敗 (${createRes.status}) — TokenにGistスコープがあるか確認してください`;
+            return;
+          }
+          const created = await createRes.json();
+          gistId = created.id;
+        }
+
+        CloudSync.configure(gistId, token);
+        this.sf.savedGistId = gistId;
+        this.sf.testOk = true;
+        this.sf.testMsg = `✓ Gist ID: ${gistId.slice(0,8)}… — セットアップ完了！`;
+        this.modals.settings = false;
+        this.syncStatus = 'syncing';
+        this.toast('セットアップ完了。クラウドからデータを取得中…', 'info');
+        const ok = await CloudSync.pull();
+        this.syncStatus = ok ? 'synced' : 'error';
+        if (ok) {
+          this.toast('GitHubと同期しました', 'success');
+          await this.boot();
+        } else {
+          this.toast('同期失敗。しばらく後に再試行してください', 'error');
+        }
+      } catch(e) {
+        this.sf.testOk = false;
+        this.sf.testMsg = '✗ エラー: ' + e.message;
+      } finally { this.sf.testing = false; }
+    },
+    disconnectSync() {
+      CloudSync.disconnect();
+      this.syncStatus = 'local';
+      this.sf.savedGistId = '';
+      this.modals.settings = false;
+      this.toast('クラウド同期を切断しました','info');
+    },
+
+    // ── Export / Import ──
+    doExport() {
+      const json = Store.exportAll();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([json],{type:'application/json'}));
+      a.download = 'portfolio_' + todayISO() + '.json';
+      a.click();
+      this.toast('エクスポートしました','success');
+    },
+    doImport(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async e => {
+        try {
+          Store.importAll(e.target.result);
+          this.toast('インポートしました','success');
+          await this.boot();
+        } catch(err) {
+          this.toast('JSONが正しくありません: '+err.message,'error');
+        }
+      };
+      reader.readAsText(file);
+      evt.target.value = '';
+    },
+
+    // ── Computed ──
+    get totalRealizedPnl() {
+      return this.trades.filter(t=>t.trade_type==='SELL'&&t.realized_pnl!=null).reduce((s,t)=>s+t.realized_pnl,0);
+    },
+    get groupedEvents() {
+      const m={};
+      for (const e of this.events) { const k=e.event_date.slice(0,7); if(!m[k])m[k]=[]; m[k].push(e); }
+      return Object.entries(m).sort(([a],[b])=>a.localeCompare(b)).map(([k,events])=>{
+        const [y,mo]=k.split('-');
+        return {label:`${y}年 ${parseInt(mo)}月`, events};
+      });
+    },
+
+    // ── Formatters ──
+    yen(v)    { if(v==null)return'---'; return'¥'+Number(v).toLocaleString('ja-JP',{maximumFractionDigits:0}); },
+    signYen(v){ if(v==null)return'---'; return(v>=0?'+¥':'-¥')+Math.abs(Number(v)).toLocaleString('ja-JP',{maximumFractionDigits:0}); },
+    sign(v)   { if(v==null)return'---'; return(v>=0?'+':'')+Number(v).toLocaleString('ja-JP',{maximumFractionDigits:2}); },
+    num(v)    { if(v==null)return'---'; return Number(v).toLocaleString('ja-JP',{maximumFractionDigits:2}); },
+    pct(v)    { if(v==null)return'---'; return(v>=0?'+':'')+Number(v).toFixed(2)+'%'; },
+    fmtLarge(v){ if(!v)return'---'; if(v>=1e12)return(v/1e12).toFixed(1)+'兆円'; if(v>=1e8)return(v/1e8).toFixed(0)+'億円'; if(v>=1e4)return(v/1e4).toFixed(0)+'万円'; return v.toLocaleString('ja-JP')+'円'; },
+    pnlColor(v){ if(v==null)return'muted'; return v>0?'gain':v<0?'loss':'muted'; },
+    categoryBadgeClass(c){ const m={'成長株':'bg-purple-900/60 text-purple-300','配当株':'bg-emerald-900/60 text-emerald-300','優待株':'bg-blue-900/60 text-blue-300','バリュー':'bg-yellow-900/60 text-yellow-300','テーマ':'bg-pink-900/60 text-pink-300'}; return m[c]||'bg-slate-700 text-slate-400'; },
+    eventBadgeClass(t){ const m={'決算':'bg-purple-900/60 text-purple-300','配当':'bg-emerald-900/60 text-emerald-300','優待':'bg-blue-900/60 text-blue-300'}; return m[t]||'bg-slate-700 text-slate-400'; },
+    eventDotClass(t){ const m={'決算':'bg-purple-400','配当':'bg-emerald-400','優待':'bg-blue-400'}; return m[t]||'bg-slate-500'; },
+
+    toast(message, type='info') {
+      const id = Date.now()+Math.random();
+      this.toasts.push({id,message,type});
+      setTimeout(()=>{ this.toasts=this.toasts.filter(t=>t.id!==id); }, 4000);
+    },
+  };
 }
 </script>
 </body>
