@@ -1,0 +1,16 @@
+# Environment files (never commit secrets)
+.env
+*.env.local
+**/.env
+
+# Expo / React Native
+stock-app/node_modules/
+stock-app/.expo/
+stock-app/dist/
+stock-app/web-build/
+stock-app/android/
+stock-app/ios/
+
+# OS
+.DS_Store
+Thumbs.db
