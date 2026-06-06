@@ -24,23 +24,28 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// ---------- Profile ----------
-async function loadProfile() {
-  const res = await fetch('/api/profile');
-  const p = await res.json();
-  if (p.age) document.getElementById('age').value = p.age;
-  if (p.height) document.getElementById('height').value = p.height;
-  if (p.weight) document.getElementById('weight').value = p.weight;
-  if (p.body_note) document.getElementById('body-note').value = p.body_note;
+// ---------- Profile (localStorage) ----------
+const DEFAULT_PROFILE = {
+  age: '38', height: '178', weight: '80',
+  budget: 'high', family: 'children_small',
+  body_note: 'スポーツ体型で太ももが太め。市販のパンツは太もも周りがきつくなりやすい。',
+};
+
+function loadProfile() {
+  const stored = localStorage.getItem('wc_profile');
+  const p = stored ? JSON.parse(stored) : DEFAULT_PROFILE;
+  document.getElementById('age').value = p.age || '';
+  document.getElementById('height').value = p.height || '';
+  document.getElementById('weight').value = p.weight || '';
+  document.getElementById('body-note').value = p.body_note || '';
   const bRadio = document.querySelector(`input[name="budget"][value="${p.budget || 'high'}"]`);
   if (bRadio) bRadio.checked = true;
   const fRadio = document.querySelector(`input[name="family"][value="${p.family || 'children_small'}"]`);
   if (fRadio) fRadio.checked = true;
 }
 
-document.getElementById('profile-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  const data = {
+function getProfileFromForm() {
+  return {
     age: document.getElementById('age').value,
     height: document.getElementById('height').value,
     weight: document.getElementById('weight').value,
@@ -48,24 +53,25 @@ document.getElementById('profile-form').addEventListener('submit', async e => {
     family: document.querySelector('input[name="family"]:checked')?.value || 'children_small',
     body_note: document.getElementById('body-note').value.trim(),
   };
-  await fetch('/api/profile', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
+}
+
+document.getElementById('profile-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const data = getProfileFromForm();
+  localStorage.setItem('wc_profile', JSON.stringify(data));
   const msg = document.getElementById('profile-saved');
   msg.classList.remove('hidden');
   setTimeout(() => msg.classList.add('hidden'), 2500);
 });
 
-// ---------- Wardrobe ----------
-let items = [];
+// ---------- Wardrobe (localStorage) ----------
+function loadItems() {
+  const stored = localStorage.getItem('wc_wardrobe');
+  return stored ? JSON.parse(stored) : [];
+}
 
-async function loadWardrobe() {
-  const res = await fetch('/api/wardrobe');
-  const data = await res.json();
-  items = data.items || [];
-  renderWardrobe();
+function saveItems(arr) {
+  localStorage.setItem('wc_wardrobe', JSON.stringify(arr));
 }
 
 function esc(str) {
@@ -75,6 +81,7 @@ function esc(str) {
 }
 
 function renderWardrobe() {
+  const items = loadItems();
   const list = document.getElementById('wardrobe-list');
   if (items.length === 0) {
     list.innerHTML = '<div class="empty-state">まだアイテムが登録されていません</div>';
@@ -95,18 +102,11 @@ function renderWardrobe() {
 
   list.querySelectorAll('.btn-del').forEach(btn => {
     btn.addEventListener('click', () => {
-      items.splice(Number(btn.dataset.i), 1);
-      saveWardrobe();
+      const arr = loadItems();
+      arr.splice(Number(btn.dataset.i), 1);
+      saveItems(arr);
       renderWardrobe();
     });
-  });
-}
-
-async function saveWardrobe() {
-  await fetch('/api/wardrobe', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items }),
   });
 }
 
@@ -114,12 +114,13 @@ document.getElementById('add-item-form').addEventListener('submit', e => {
   e.preventDefault();
   const name = document.getElementById('item-name').value.trim();
   if (!name) return;
-  items.push({
+  const arr = loadItems();
+  arr.push({
     name,
     category: document.getElementById('item-category').value,
     color: document.getElementById('item-color').value.trim(),
   });
-  saveWardrobe();
+  saveItems(arr);
   renderWardrobe();
   document.getElementById('item-name').value = '';
   document.getElementById('item-color').value = '';
@@ -129,7 +130,6 @@ document.getElementById('add-item-form').addEventListener('submit', e => {
 // ---------- Recommend ----------
 let selectedSeason = currentSeason();
 
-// 起動時に今のシーズンを自動選択＋「今」バッジを表示
 document.querySelectorAll('.season-btn').forEach(btn => {
   const isCurrent = btn.dataset.season === selectedSeason;
   btn.classList.toggle('active', isCurrent);
@@ -157,11 +157,16 @@ document.getElementById('recommend-btn').addEventListener('click', async () => {
   output.classList.add('hidden');
   content.innerHTML = '';
 
+  // プロフィールと手持ちをリクエストに含める（サーバー再起動後もデータが使われる）
+  const stored = localStorage.getItem('wc_profile');
+  const profile = stored ? JSON.parse(stored) : DEFAULT_PROFILE;
+  const wardrobeItems = loadItems();
+
   try {
     const res = await fetch('/api/recommend', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ season: selectedSeason }),
+      body: JSON.stringify({ season: selectedSeason, profile, wardrobe_items: wardrobeItems }),
     });
 
     if (!res.ok) throw new Error('API error');
@@ -177,11 +182,9 @@ document.getElementById('recommend-btn').addEventListener('click', async () => {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop();
-
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const payload = line.slice(6);
@@ -205,4 +208,4 @@ document.getElementById('recommend-btn').addEventListener('click', async () => {
 
 // ---------- Init ----------
 loadProfile();
-loadWardrobe();
+renderWardrobe();

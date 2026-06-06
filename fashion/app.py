@@ -122,10 +122,10 @@ def wardrobe():
 def recommend():
     data = request.json
     season = data.get("season", "spring")
-    profile = load_json(PROFILE_FILE, DEFAULT_PROFILE)
-    wardrobe = load_json(WARDROBE_FILE, {"items": []})
+    # クライアント（localStorage）から送られたデータを優先し、なければサーバー側のデフォルトを使う
+    profile = data.get("profile") or load_json(PROFILE_FILE, DEFAULT_PROFILE)
+    wardrobe_items = data.get("wardrobe_items") or []
 
-    wardrobe_items = wardrobe.get("items", [])
     if wardrobe_items:
         wardrobe_text = "\n".join(
             f"- {item['name']}（{item.get('category', 'その他')}・{item.get('color', '色未設定')}）"
