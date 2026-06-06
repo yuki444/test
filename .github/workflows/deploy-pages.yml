@@ -6,6 +6,7 @@ on:
     paths:
       - 'static/**'
       - 'financial-planner/**'
+      - 'pokapoka-garden/**'
   workflow_dispatch:
 
 permissions:
@@ -32,6 +33,7 @@ jobs:
           mkdir _deploy
           cp static/index.html _deploy/index.html
           cp -r financial-planner _deploy/financial-planner
+          cp -r pokapoka-garden _deploy/pokapoka-garden
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
