@@ -1,10 +1,10 @@
-name: Deploy Financial Planner to GitHub Pages
+name: Deploy Portfolio App to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
-      - 'financial-planner/**'
+      - 'static/**'
   workflow_dispatch:
 
 permissions:
@@ -32,7 +32,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: financial-planner/
+          path: static/
 
       - name: Deploy to GitHub Pages
         id: deployment
