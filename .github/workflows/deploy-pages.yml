@@ -1,10 +1,11 @@
-name: Deploy Portfolio App to GitHub Pages
+name: Deploy Apps to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
       - 'static/**'
+      - 'financial-planner/**'
   workflow_dispatch:
 
 permissions:
@@ -26,13 +27,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare deploy directory
+        run: |
+          mkdir _deploy
+          cp static/index.html _deploy/index.html
+          cp -r financial-planner _deploy/financial-planner
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: static/
+          path: _deploy/
 
       - name: Deploy to GitHub Pages
         id: deployment
