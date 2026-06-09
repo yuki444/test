@@ -2538,7 +2538,7 @@ function renderSimulation(){
     <div class="summary-card"><div class="label">現在の純資産</div><div class="value value-neutral">${fmtM(totalA-totalD)}</div><div class="sub">資産${fmtM(totalA)} 負債${fmtM(totalD)}</div></div>
     <div class="summary-card"><div class="label">退職時純資産見込み</div><div class="value ${retireRow.netWorth>=0?'value-positive':'value-negative'}">${fmtM(retireRow.netWorth)}</div><div class="sub">${retireRow.age}歳・${retireRow.year}年</div></div>
     <div class="summary-card"><div class="label">${lastRow.age}歳時純資産</div><div class="value ${lastRow.netWorth>=0?'value-positive':'value-negative'}">${fmtM(lastRow.netWorth)}</div><div class="sub">${lastRow.year}年時点</div></div>
-    <div class="summary-card"><div class="label">資産枯渇リスク</div><div class="value ${depletionRow?'value-negative':'value-positive'}">${depletionRow?depletionRow.age+'歳頃':'問題なし'}</div><div class="sub">${depletionRow?'資産がマイナスに':'90歳まで持続'}</div></div>`;
+    <div class="summary-card"><div class="label">資産枯渇リスク</div><div class="value ${depletionRow?'value-negative':'value-positive'}">${depletionRow?depletionRow.age+'歳頃':'問題なし'}</div><div class="sub">${depletionRow?'資産がマイナスに':data.settings.endAge+'歳まで持続'} <span style="font-size:10px;opacity:.7">(${(irOverride!==null?irOverride:data.settings.investReturn).toFixed(1)}%)</span></div></div>`;
 
   // Legend
   document.getElementById('sim-legend').innerHTML=allSims.map(s=>`
@@ -2625,7 +2625,7 @@ function renderTable(){
   const planId=getSelectedPlanId();
   const plan=data.plans.find(p=>p.id===planId);
   if(!plan) return;
-  const rows=simulate(plan);
+  const rows=simulate(plan,_simIrOverride);
   document.getElementById('cashflow-tbody').innerHTML=rows.map(r=>{
     const badge=r.isRetired&&r.age===data.settings.retireAge?' 🎉退職':'';
     return `<tr class="${r.isRetired?'retire-row':''}">
@@ -2645,7 +2645,7 @@ function renderDetailTable(){
   const planId=getSelectedPlanId();
   const plan=data.plans.find(p=>p.id===planId);
   if(!plan) return;
-  const rows=simulate(plan);
+  const rows=simulate(plan,_simIrOverride);
 
   const COLS=[
     {fn:r=>r.d.inc.selfSalary,    label:'本人給与',    group:'income',       type:'inc'},
