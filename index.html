@@ -345,6 +345,58 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
+/* Result banner */
+.result-banner { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; }
+.result-banner.completed { border-color: rgba(63,185,80,0.5); }
+.result-banner.pending { border-style: dashed; }
+.result-banner-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.result-label { font-size: 12px; font-weight: 700; letter-spacing: 0.4px; }
+.result-label.done { color: var(--success); }
+.result-label.pend { color: var(--text-muted); }
+.result-stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--text-muted); }
+.result-stats b { color: var(--text); }
+.result-notables { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.result-chip { padding: 4px 10px; border-radius: 20px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.result-chip.hit { background: rgba(63,185,80,0.12); border: 1px solid rgba(63,185,80,0.45); }
+.result-chip.miss { background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.35); }
+.result-chip.unset { background: var(--bg3); border: 1px solid var(--border); }
+.result-verdict { font-size: 11px; font-weight: 700; }
+.result-verdict.hit { color: var(--success); }
+.result-verdict.miss { color: var(--danger); }
+
+/* Finish position badges */
+.fp { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 22px; border-radius: 4px; font-size: 12px; font-weight: 700; padding: 0 4px; }
+.fp-1 { background: #ffd700; color: #000; }
+.fp-2 { background: #c0c0c0; color: #000; }
+.fp-3 { background: #cd7f32; color: #fff; }
+.fp-x { background: var(--bg3); color: var(--text-muted); }
+
+/* Bet simulation */
+.bet-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.sec-title { font-size: 15px; font-weight: 600; }
+.pl-bar { display: flex; gap: 24px; flex-wrap: wrap; padding: 10px 0; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.pl-lbl { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.pl-val { font-size: 18px; font-weight: 700; font-family: monospace; }
+.pl-pos { color: var(--success); }
+.pl-neg { color: var(--danger); }
+.pl-neu { color: var(--text); }
+.bet-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.bet-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--bg3); border-radius: 6px; flex-wrap: wrap; }
+.bet-type-tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(212,160,23,0.2); color: var(--accent); white-space: nowrap; }
+.bet-desc { flex: 1; font-size: 13px; min-width: 60px; }
+.bet-nums { font-size: 13px; color: var(--text-muted); white-space: nowrap; font-family: monospace; }
+.bet-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+.bet-hit { background: rgba(63,185,80,0.2); color: var(--success); }
+.bet-miss { background: rgba(248,81,73,0.1); color: var(--danger); }
+.bet-form { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-top: 10px; display: none; }
+.bet-form-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.bet-form-row3 { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end; }
+
+/* Reflection */
+.reflection-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.reflection-ta { width: 100%; background: transparent; border: none; color: var(--text); font-size: 14px; resize: vertical; min-height: 90px; outline: none; font-family: inherit; line-height: 1.6; }
+
 /* Responsive */
 @media (max-width: 640px) {
   .header { padding: 10px 12px; }
@@ -510,6 +562,45 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
   </div>
 </div>
 
+<!-- Result Modal -->
+<div class="modal-overlay" id="modal-result">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📋 レース結果入力</span>
+      <button class="modal-close" onclick="closeModal('modal-result')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="f-result-race-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">天候</label>
+          <select class="form-select" id="f-result-weather">
+            <option value="">-</option>
+            <option>晴</option><option>曇</option><option>雨</option><option>小雨</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">馬場状態</label>
+          <select class="form-select" id="f-result-condition">
+            <option value="">-</option>
+            <option>良</option><option>稍重</option><option>重</option><option>不良</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">勝ちタイム</label>
+        <input class="form-input" id="f-result-time" placeholder="例: 2:21.9">
+      </div>
+      <div id="result-entries-label" style="font-size:12px;color:var(--text-muted);margin-bottom:8px"></div>
+      <div id="f-result-entries"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-result')">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveResult()">結果を保存</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -547,12 +638,19 @@ function sampleData() {
       date: '2026-06-01', time: '15:40', venue: '東京',
       distance: 2400, surface: '芝',
       memo: '3歳クラシック最大の一戦。今年は混戦模様で波乱もあり得る。',
+      raceResult: { completed: true, weather: '晴', trackCondition: '良', winnerTime: '2:21.9' },
+      reflection: '1番人気が本命通りに勝利。フォレストキングは晴れ・良馬場で3着。「雨なら」という条件付き評価のまま本命に組み込んでしまったのが反省点。次回は天候確定後に最終判断を行うルールを徹底する。馬連的中で収支プラスだが、三連単のフォーメーションが甘かった。',
+      bets: [
+        { id: 'b1', betType: '単勝', description: 'ダービーホース (1番)', stake: 2000, returns: 5000, hit: true },
+        { id: 'b2', betType: '馬連', description: 'ダービーホース - サニーデイ (1-2)', stake: 1000, returns: 3200, hit: true },
+        { id: 'b3', betType: '三連単', description: '1→3→2 フォーメーション', stake: 1500, returns: 0, hit: false }
+      ],
       entries: [
-        { id: 'e1', number: 1, gate: 1, name: 'ダービーホース', jockey: '横山武史', trainer: '鹿戸雄一', weight: 468, lastResult: '1着 (皐月賞)', odds: 2.5, popularity: 1, notable: true, memo: '前走皐月賞圧勝。距離延長も問題なし。末脚が鋭い。' },
-        { id: 'e2', number: 2, gate: 1, name: 'サニーデイ', jockey: 'C.ルメール', trainer: '手塚貴久', weight: 476, lastResult: '2着 (皐月賞)', odds: 4.2, popularity: 2, notable: false, memo: '' },
-        { id: 'e3', number: 3, gate: 2, name: 'フォレストキング', jockey: '戸崎圭太', trainer: '堀宣行', weight: 480, lastResult: '1着 (青葉賞)', odds: 6.8, popularity: 3, notable: true, memo: '叩き良化型。雨なら更に好走期待。' },
-        { id: 'e4', number: 4, gate: 2, name: 'ライジングスター', jockey: '川田将雅', trainer: '池江泰寿', weight: 464, lastResult: '3着 (皐月賞)', odds: 9.1, popularity: 4, notable: false, memo: '' },
-        { id: 'e5', number: 5, gate: 3, name: 'ウィンドウォーリア', jockey: '岩田康誠', trainer: '安田隆行', weight: 472, lastResult: '1着 (NHKマイルC)', odds: 12.3, popularity: 5, notable: false, memo: '距離延長が鍵。' }
+        { id: 'e1', number: 1, gate: 1, name: 'ダービーホース', jockey: '横山武史', trainer: '鹿戸雄一', weight: 468, lastResult: '1着 (皐月賞)', odds: 2.5, popularity: 1, notable: true, memo: '前走皐月賞圧勝。距離延長も問題なし。末脚が鋭い。', finishPos: 1 },
+        { id: 'e2', number: 2, gate: 1, name: 'サニーデイ', jockey: 'C.ルメール', trainer: '手塚貴久', weight: 476, lastResult: '2着 (皐月賞)', odds: 4.2, popularity: 2, notable: false, memo: '', finishPos: 2 },
+        { id: 'e3', number: 3, gate: 2, name: 'フォレストキング', jockey: '戸崎圭太', trainer: '堀宣行', weight: 480, lastResult: '1着 (青葉賞)', odds: 6.8, popularity: 3, notable: true, memo: '叩き良化型。雨なら更に好走期待。', finishPos: 3 },
+        { id: 'e4', number: 4, gate: 2, name: 'ライジングスター', jockey: '川田将雅', trainer: '池江泰寿', weight: 464, lastResult: '3着 (皐月賞)', odds: 9.1, popularity: 4, notable: false, memo: '', finishPos: 5 },
+        { id: 'e5', number: 5, gate: 3, name: 'ウィンドウォーリア', jockey: '岩田康誠', trainer: '安田隆行', weight: 472, lastResult: '1着 (NHKマイルC)', odds: 12.3, popularity: 5, notable: false, memo: '距離延長が鍵。', finishPos: 4 }
       ]
     },
     {
@@ -560,6 +658,9 @@ function sampleData() {
       date: '2026-06-07', time: '15:40', venue: '東京',
       distance: 1600, surface: '芝',
       memo: 'マイル王決定戦。海外馬の参戦も注目。',
+      raceResult: { completed: false, weather: '', trackCondition: '', winnerTime: '' },
+      reflection: '',
+      bets: [],
       entries: []
     },
     {
@@ -567,6 +668,9 @@ function sampleData() {
       date: '2026-06-14', time: '15:35', venue: '東京',
       distance: 1800, surface: '芝',
       memo: '',
+      raceResult: { completed: false, weather: '', trackCondition: '', winnerTime: '' },
+      reflection: '',
+      bets: [],
       entries: []
     },
     {
@@ -574,6 +678,9 @@ function sampleData() {
       date: '2026-06-28', time: '15:40', venue: '阪神',
       distance: 2200, surface: '芝',
       memo: '上半期グランプリ。古馬の総決算。',
+      raceResult: { completed: false, weather: '', trackCondition: '', winnerTime: '' },
+      reflection: '',
+      bets: [],
       entries: []
     }
   ];
@@ -737,9 +844,122 @@ function calToday() {
 }
 
 // --- Detail ---
+function renderFinishPos(pos) {
+  if (pos == null) return '<span style="color:var(--text-muted)">-</span>';
+  const cls = pos === 1 ? 'fp-1' : pos === 2 ? 'fp-2' : pos === 3 ? 'fp-3' : 'fp-x';
+  return `<span class="fp ${cls}">${pos}着</span>`;
+}
+
+function renderResultBanner(race) {
+  const rr = race.raceResult || {};
+  const completed = rr.completed;
+  const stats = [
+    rr.weather ? `天候: <b>${esc(rr.weather)}</b>` : '',
+    rr.trackCondition ? `馬場: <b>${esc(rr.trackCondition)}</b>` : '',
+    rr.winnerTime ? `勝ちタイム: <b>${esc(rr.winnerTime)}</b>` : ''
+  ].filter(Boolean).join(' &nbsp;|&nbsp; ');
+
+  const notables = race.entries.filter(e => e.notable);
+  const chips = notables.map(e => {
+    if (e.finishPos == null) return `<span class="result-chip unset">${esc(e.name)} <span style="color:var(--text-muted);font-size:11px">着順未入力</span></span>`;
+    const hit = e.finishPos <= 3;
+    return `<span class="result-chip ${hit?'hit':'miss'}">${esc(e.name)} ${renderFinishPos(e.finishPos)} <span class="result-verdict ${hit?'hit':'miss'}">${hit?'◎的中':'✗圏外'}</span></span>`;
+  }).join('');
+
+  return `
+    <div class="result-banner ${completed?'completed':'pending'}">
+      <div class="result-banner-top">
+        <span class="result-label ${completed?'done':'pend'}">${completed ? '✓ 結果入力済み' : '⚠ 結果未入力'}</span>
+        <button class="btn btn-secondary btn-sm" onclick="openResultModal('${race.id}')">${completed ? '結果を修正' : '📋 結果を入力'}</button>
+      </div>
+      ${completed && stats ? `<div class="result-stats">${stats}</div>` : ''}
+      ${chips ? `<div class="result-notables">${chips}</div>` : ''}
+    </div>`;
+}
+
+function renderReflectionSection(race) {
+  return `
+    <div class="reflection-section">
+      <div class="sec-head">
+        <span class="sec-title">💬 振り返り・反省</span>
+      </div>
+      <textarea class="reflection-ta" placeholder="レース後の反省点、気づき、次回への改善点..."
+        onchange="updateReflection('${race.id}', this.value)">${esc(race.reflection || '')}</textarea>
+    </div>`;
+}
+
+function renderBetSection(race) {
+  const bets = race.bets || [];
+  const totalStake = bets.reduce((s, b) => s + (b.stake || 0), 0);
+  const totalReturns = bets.reduce((s, b) => s + (b.hit ? (b.returns || 0) : 0), 0);
+  const pl = totalReturns - totalStake;
+  const plCls = pl > 0 ? 'pl-pos' : pl < 0 ? 'pl-neg' : 'pl-neu';
+
+  const betRows = bets.map(b => `
+    <div class="bet-row">
+      <span class="bet-type-tag">${esc(b.betType)}</span>
+      <span class="bet-desc">${esc(b.description || '-')}</span>
+      <span class="bet-nums">¥${(b.stake||0).toLocaleString()} → ${b.hit ? '¥'+(b.returns||0).toLocaleString() : '-'}</span>
+      <span class="bet-tag ${b.hit?'bet-hit':'bet-miss'}">${b.hit?'的中':'ハズレ'}</span>
+      <button class="btn btn-danger btn-sm" onclick="deleteBet('${race.id}','${b.id}')">✕</button>
+    </div>`).join('');
+
+  return `
+    <div class="bet-section">
+      <div class="sec-head">
+        <span class="sec-title">🎯 馬券シミュレーション</span>
+        <button class="btn btn-secondary btn-sm" onclick="toggleBetForm('${race.id}')">＋ 馬券追加</button>
+      </div>
+      ${bets.length ? `
+        <div class="pl-bar">
+          <div><div class="pl-lbl">購入合計</div><div class="pl-val pl-neu">¥${totalStake.toLocaleString()}</div></div>
+          <div><div class="pl-lbl">払戻合計</div><div class="pl-val pl-neu">¥${totalReturns.toLocaleString()}</div></div>
+          <div><div class="pl-lbl">収支</div><div class="pl-val ${plCls}">${pl>=0?'+':''}¥${pl.toLocaleString()}</div></div>
+        </div>
+        <div class="bet-list">${betRows}</div>
+      ` : '<p style="font-size:13px;color:var(--text-muted);margin-bottom:10px">馬券が登録されていません</p>'}
+      <div class="bet-form" id="bet-form-${race.id}">
+        <div class="bet-form-row2">
+          <div class="form-group" style="margin:0">
+            <label class="form-label">馬券種別</label>
+            <select class="form-select" id="bf-type-${race.id}">
+              <option>単勝</option><option>複勝</option><option>馬連</option>
+              <option>馬単</option><option>ワイド</option><option>三連複</option>
+              <option>三連単</option><option>その他</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label">内容・対象馬</label>
+            <input class="form-input" id="bf-desc-${race.id}" placeholder="例: ダービーホース 単勝">
+          </div>
+        </div>
+        <div class="bet-form-row3">
+          <div class="form-group" style="margin:0">
+            <label class="form-label">購入金額 (円)</label>
+            <input class="form-input" id="bf-stake-${race.id}" type="number" min="100" step="100" placeholder="1000">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label">払戻金額 (円)</label>
+            <input class="form-input" id="bf-returns-${race.id}" type="number" min="0" step="10" placeholder="0">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="visibility:hidden">的中</label>
+            <div class="form-check"><input type="checkbox" id="bf-hit-${race.id}"><label for="bf-hit-${race.id}">的中</label></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-secondary btn-sm" onclick="toggleBetForm('${race.id}')">キャンセル</button>
+          <button class="btn btn-primary btn-sm" onclick="addBet('${race.id}')">追加</button>
+        </div>
+      </div>
+    </div>`;
+}
+
 function renderDetail() {
   const race = db.races.find(r => r.id === state.raceId);
   if (!race) return '<p style="padding:20px">レースが見つかりません</p>';
+
+  const isPast = race.date < todayStr();
 
   let entries = [...race.entries];
   if (state.sortField) {
@@ -774,6 +994,7 @@ function renderDetail() {
         ? `<span class="pop-badge ${e.popularity <= 3 ? 'pop-' + e.popularity : 'pop-other'}">${e.popularity}</span>`
         : '-'}
       </td>
+      <td>${renderFinishPos(e.finishPos)}</td>
       <td>
         <span class="notable-star" onclick="toggleNotable('${race.id}','${e.id}')"
           title="${e.notable ? '注目解除' : '注目マーク'}">${e.notable ? '⭐' : '☆'}</span>
@@ -783,7 +1004,7 @@ function renderDetail() {
         <button class="btn btn-danger btn-sm" onclick="confirmDeleteEntry('${race.id}','${e.id}')" style="margin-left:2px">✕</button>
       </td>
     </tr>
-  `).join('') : `<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text-muted)">出馬が登録されていません</td></tr>`;
+  `).join('') : `<tr><td colspan="12" style="text-align:center;padding:32px;color:var(--text-muted)">出馬が登録されていません</td></tr>`;
 
   const notables = entries.filter(e => e.notable);
   const notableSummary = notables.length ? `
@@ -821,11 +1042,14 @@ function renderDetail() {
         <button class="btn btn-secondary btn-sm" onclick="openEditRaceModal('${race.id}')">レース情報編集</button>
         <button class="btn btn-primary btn-sm" onclick="openAddEntryModal('${race.id}')">＋ 出馬追加</button>
         <button class="btn btn-secondary btn-sm" onclick="openQuickUpdate('${race.id}')">📊 オッズ一括更新</button>
+        ${isPast ? `<button class="btn btn-secondary btn-sm" onclick="openResultModal('${race.id}')">📋 結果入力</button>` : ''}
       </div>
     </div>
 
+    ${isPast ? renderResultBanner(race) : ''}
+
     <div class="memo-box">
-      <div class="memo-label">📝 レースメモ</div>
+      <div class="memo-label">📝 レースメモ（事前展望）</div>
       <textarea class="memo-textarea" id="race-memo-ta"
         onchange="updateRaceMemo('${race.id}', this.value)"
         placeholder="レース展望、注目ポイント...">${esc(race.memo||'')}</textarea>
@@ -841,6 +1065,7 @@ function renderDetail() {
           <button class="filter-btn ${!state.sortField?'active':''}" onclick="toggleSort(null)">馬番</button>
           <button class="filter-btn ${state.sortField==='popularity'?'active':''}" onclick="toggleSort('popularity')">人気順</button>
           <button class="filter-btn ${state.sortField==='odds'?'active':''}" onclick="toggleSort('odds')">オッズ</button>
+          <button class="filter-btn ${state.sortField==='finishPos'?'active':''}" onclick="toggleSort('finishPos')">着順</button>
         </div>
       </div>
       <div style="overflow-x:auto">
@@ -856,6 +1081,7 @@ function renderDetail() {
               <th>前走</th>
               ${th('オッズ','odds')}
               ${th('人気','popularity')}
+              ${th('着順','finishPos')}
               <th>注目</th>
               <th>操作</th>
             </tr>
@@ -864,6 +1090,9 @@ function renderDetail() {
         </table>
       </div>
     </div>
+
+    ${isPast ? renderReflectionSection(race) : ''}
+    ${renderBetSection(race)}
   `;
 }
 
@@ -1108,6 +1337,95 @@ function setFields(map) {
     const el = document.getElementById(id);
     if (el) el.value = v;
   });
+}
+
+// ── Result ─────────────────────────────────────────────
+function openResultModal(raceId) {
+  const race = db.races.find(r => r.id === raceId);
+  if (!race) return;
+  document.getElementById('f-result-race-id').value = raceId;
+  const rr = race.raceResult || {};
+  document.getElementById('f-result-weather').value = rr.weather || '';
+  document.getElementById('f-result-condition').value = rr.trackCondition || '';
+  document.getElementById('f-result-time').value = rr.winnerTime || '';
+
+  const sorted = [...race.entries].sort((a, b) => (a.number || 99) - (b.number || 99));
+  const lbl = document.getElementById('result-entries-label');
+  if (!sorted.length) {
+    lbl.textContent = '出馬が登録されていないため着順入力はスキップされます。';
+    document.getElementById('f-result-entries').innerHTML = '';
+  } else {
+    lbl.textContent = '各馬の着順を入力してください（未入力はそのまま保存されません）';
+    document.getElementById('f-result-entries').innerHTML = sorted.map(e => `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="min-width:150px;font-size:13px"><strong>${e.number||'?'}</strong>. ${esc(e.name)}</span>
+        <input class="form-input" type="number" min="1" max="18"
+          value="${e.finishPos != null ? e.finishPos : ''}" placeholder="着順"
+          style="width:80px" data-entry-id="${e.id}">
+      </div>`).join('');
+  }
+  openModal('modal-result');
+}
+
+function saveResult() {
+  const raceId = val('f-result-race-id');
+  const race = db.races.find(r => r.id === raceId);
+  if (!race) return;
+  if (!race.raceResult) race.raceResult = {};
+  race.raceResult.weather = document.getElementById('f-result-weather').value;
+  race.raceResult.trackCondition = document.getElementById('f-result-condition').value;
+  race.raceResult.winnerTime = val('f-result-time');
+  race.raceResult.completed = true;
+
+  document.querySelectorAll('#f-result-entries input[data-entry-id]').forEach(inp => {
+    const entry = race.entries.find(e => e.id === inp.dataset.entryId);
+    if (!entry) return;
+    const v = parseInt(inp.value);
+    entry.finishPos = inp.value === '' ? null : (isNaN(v) ? null : v);
+  });
+
+  saveDB(); closeModal('modal-result'); render();
+  toast('結果を保存しました');
+}
+
+// ── Reflection ─────────────────────────────────────────
+function updateReflection(raceId, value) {
+  const race = db.races.find(r => r.id === raceId);
+  if (race) { race.reflection = value; saveDB(); }
+}
+
+// ── Bets ───────────────────────────────────────────────
+function toggleBetForm(raceId) {
+  const f = document.getElementById('bet-form-' + raceId);
+  if (!f) return;
+  const isHidden = f.style.display === 'none' || f.style.display === '';
+  f.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    const d = document.getElementById('bf-desc-' + raceId);
+    if (d) d.focus();
+  }
+}
+
+function addBet(raceId) {
+  const race = db.races.find(r => r.id === raceId);
+  if (!race) return;
+  const betType = document.getElementById('bf-type-' + raceId).value;
+  const description = (document.getElementById('bf-desc-' + raceId).value || '').trim();
+  const stake = parseInt(document.getElementById('bf-stake-' + raceId).value) || 0;
+  const returns = parseInt(document.getElementById('bf-returns-' + raceId).value) || 0;
+  const hit = document.getElementById('bf-hit-' + raceId).checked;
+  if (!race.bets) race.bets = [];
+  race.bets.push({ id: genId(), betType, description, stake, returns, hit });
+  saveDB(); render();
+  toast('馬券を追加しました');
+}
+
+function deleteBet(raceId, betId) {
+  const race = db.races.find(r => r.id === raceId);
+  if (!race || !race.bets) return;
+  race.bets = race.bets.filter(b => b.id !== betId);
+  saveDB(); render();
+  toast('馬券を削除しました');
 }
 
 // ── Init ───────────────────────────────────────────────
