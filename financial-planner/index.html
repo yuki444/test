@@ -2327,7 +2327,7 @@ function simulate(plan,irOverride=null){
     if(retired) baseExpenses*=retireExpenseRatio;
     const stepDeltaVal=data.expenseSteps?.length?data.expenseSteps.filter(s=>age>=s.fromAge).reduce((sum,s)=>sum+s.delta,0):0;
     if(stepDeltaVal) baseExpenses+=stepDeltaVal*12;
-    if(nhEv) baseExpenses=nhEv.amount*12*inflF; // nursing home: replace all living costs
+    if(nhEv) baseExpenses=nhEv.amount*12; // nursing home: fixed monthly cost, no inflation
     let expenses=baseExpenses;
     if(!nhEv&&mortgageMonthly>0&&mortgageBalance>0) expenses+=mortgageMonthly*12;
 
@@ -2340,17 +2340,17 @@ function simulate(plan,irOverride=null){
     }
     const dRetireAdj=nhEv?0:Math.round(ECATS.reduce((s,k)=>s+(data.expenses[k]||0)*12*inflF,0)*(retired?retireExpenseRatio-1:0));
     const dMortgage=(mortgageMonthly>0&&mortgageBalance>0)?mortgageMonthly*12:0;
-    let dEventExp=nhEv?-Math.round(nhEv.amount*12*inflF):0;
+    let dEventExp=nhEv?-Math.round(nhEv.amount*12):0;
 
     // --- Events ---
-    let lump=0, dLumpNet=0;
+    let lump=0, dLumpNet=0, dLumpExp=0, dLumpInc=0;
     plan.events.forEach(ev=>{
       if(age<ev.age||age>=ev.age+ev.duration) return;
       switch(ev.type){
         case 'lump-expense': case 'buy-car': case 'buy-home': case 'education-fee':
-          if(age===ev.age){lump+=ev.amount; dLumpNet+=ev.amount;} break;
+          if(age===ev.age){lump+=ev.amount; dLumpNet+=ev.amount; dLumpExp+=ev.amount;} break;
         case 'lump-income': case 'retire-early':
-          if(age===ev.age){lump+=ev.amount; dLumpNet+=ev.amount; dI.eventInc+=ev.amount;} break;
+          if(age===ev.age){lump+=ev.amount; dLumpNet+=ev.amount; dI.eventInc+=ev.amount; dLumpInc+=ev.amount;} break;
         case 'drawdown':{
           const da=Math.abs(ev.amount);
           income+=da*12; lump-=da*12; dI.drawdown+=da*12; break;}
@@ -2408,10 +2408,10 @@ function simulate(plan,irOverride=null){
       netWorth:Math.round(FA+homeValue+data.assets.realEstate-totalDebt),
       isRetired:retired,
       d:{
-        inc:{...dI, drawdown:Math.round(dI.drawdown), eventInc:Math.round(dI.eventInc)},
+        inc:{...dI, drawdown:Math.round(dI.drawdown), eventInc:Math.round(dI.eventInc), lumpInc:Math.round(dLumpInc)},
         exp:{...dEbase, retireAdj:dRetireAdj, steps:nhEv?0:Math.round(stepDeltaVal*12),
              mortgage:Math.round(dMortgage), eventExp:Math.round(dEventExp)},
-        lump:Math.round(dLumpNet),
+        lump:Math.round(dLumpNet), lumpExp:Math.round(dLumpExp),
         fa:{s:Math.round(FA3s),m:Math.round(FA3m),l:Math.round(FA3l)}
       }
     });
@@ -2624,6 +2624,7 @@ function renderSimulation(){
     {key:'pensionSelf',  label:'年金(本人)', color:'#f59e0b'},
     {key:'pensionSpouse',label:'年金(配偶)', color:'#f97316'},
     {key:'drawdown',     label:'取り崩し',   color:'#ec4899'},
+    {key:'lumpInc',      label:'一時収入',   color:'#64748b'},
   ];
   charts.incomeBreak=new Chart(document.getElementById('chart-income-breakdown'),{
     type:'bar',
@@ -2676,6 +2677,9 @@ function renderSimulation(){
     {label:'老人ホーム',
      data:base.map(r=>nhActive(r)?Math.round(r.expenses/10000):0),
      backgroundColor:'#dc2626'+'bb',borderColor:'#dc2626',borderWidth:0,stack:'exp'},
+    {label:'一時支出イベント',
+     data:base.map(r=>Math.round(Math.abs(r.d.lumpExp||0)/10000)),
+     backgroundColor:'#7c3aed'+'bb',borderColor:'#7c3aed',borderWidth:0,stack:'exp'},
   ];
   charts.expenseBreak=new Chart(document.getElementById('chart-expense-breakdown'),{
     type:'bar',
