@@ -2770,9 +2770,9 @@ function renderDetailTable(){
     {fn:r=>r.cashFlow,            label:'年間収支',    group:'balance',      type:'pm'},
     {fn:r=>r.financialAssets,     label:'金融資産計',  group:'balance',      type:'asset'},
     {fn:r=>r.netWorth,            label:'純資産',      group:'balance',      type:'asset'},
-    {fn:r=>r.d.fa?.s??0,          label:'短期資産',    group:'asset3',       type:'asset'},
-    {fn:r=>r.d.fa?.m??0,          label:'中期資産',    group:'asset3',       type:'asset'},
-    {fn:r=>r.d.fa?.l??0,          label:'長期資産',    group:'asset3',       type:'asset'},
+    {fn:r=>r.d.fa?.s??0,          label:'短期(現金等)',  group:'asset3',       type:'asset'},
+    {fn:r=>r.d.fa?.m??0,          label:'中期(投信等)',  group:'asset3',       type:'asset'},
+    {fn:r=>r.d.fa?.l??0,          label:'長期(NISA)',    group:'asset3',       type:'asset'},
   ];
 
   const GRP={
