@@ -2330,7 +2330,7 @@ function simulate(plan,irOverride=null){
     }
     const dRetireAdj=nhEv?0:Math.round(ECATS.reduce((s,k)=>s+(data.expenses[k]||0)*12*inflF,0)*(retired?retireExpenseRatio-1:0));
     const dMortgage=(mortgageMonthly>0&&mortgageBalance>0)?mortgageMonthly*12:0;
-    let dEventExp=nhEv?Math.round(nhEv.amount*12*inflF):0;
+    let dEventExp=nhEv?-Math.round(nhEv.amount*12*inflF):0;
 
     // --- Events ---
     let lump=0, dLumpNet=0;
