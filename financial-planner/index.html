@@ -2336,9 +2336,18 @@ function simulate(plan,irOverride=null){
     if(nhEv){
       ECATS.forEach(k=>{dEbase[k]=0;});
     } else {
-      ECATS.forEach(k=>{dEbase[k]=Math.round((data.expenses[k]||0)*12*inflF*(retired?retireExpenseRatio:1));});
+      // Apply category-attributed step deltas so each bar reflects actual lifecycle changes
+      const catStep={};
+      ECATS.forEach(k=>{catStep[k]=0;});
+      (data.expenseSteps||[]).filter(s=>age>=s.fromAge).forEach(s=>{
+        if(s.category&&ECATS.includes(s.category)) catStep[s.category]+=s.delta;
+      });
+      ECATS.forEach(k=>{
+        const eff=Math.max(0,(data.expenses[k]||0)+(catStep[k]||0));
+        dEbase[k]=Math.round(eff*12*inflF*(retired?retireExpenseRatio:1));
+      });
     }
-    const dRetireAdj=nhEv?0:Math.round(ECATS.reduce((s,k)=>s+(data.expenses[k]||0)*12*inflF,0)*(retired?retireExpenseRatio-1:0));
+    const dRetireAdj=0;
     const dMortgage=(mortgageMonthly>0&&mortgageBalance>0)?mortgageMonthly*12:0;
     let dEventExp=nhEv?-Math.round(nhEv.amount*12):0;
 
@@ -2409,7 +2418,7 @@ function simulate(plan,irOverride=null){
       isRetired:retired,
       d:{
         inc:{...dI, drawdown:Math.round(dI.drawdown), eventInc:Math.round(dI.eventInc), lumpInc:Math.round(dLumpInc)},
-        exp:{...dEbase, retireAdj:dRetireAdj, steps:nhEv?0:Math.round(stepDeltaVal*12),
+        exp:{...dEbase, retireAdj:0, steps:0,
              mortgage:Math.round(dMortgage), eventExp:Math.round(dEventExp)},
         lump:Math.round(dLumpNet), lumpExp:Math.round(dLumpExp),
         fa:{s:Math.round(FA3s),m:Math.round(FA3m),l:Math.round(FA3l)}
@@ -2667,7 +2676,7 @@ function renderSimulation(){
     {label:'住宅ローン',
      data:base.map(r=>nhActive(r)?0:Math.round((r.d.exp.mortgage||0)/10000)),
      backgroundColor:'#1e40af'+'bb',borderColor:'#1e40af',borderWidth:0,stack:'exp'},
-    {label:'調整(ﾗｲﾌ変化等)',
+    {label:'物価差調整',
      data:base.map(r=>{
        if(nhActive(r)) return 0;
        const sumCats=EXP_SEGS.reduce((s,c)=>s+(r.d.exp[c.key]||0),0);
