@@ -2323,10 +2323,14 @@ function simulate(plan,irOverride=null){
 
     // Expense breakdown (display only, per-category rounded)
     const dEbase={};
-    ECATS.forEach(k=>{dEbase[k]=Math.round((data.expenses[k]||0)*12*inflF*(retired?retireExpenseRatio:1));});
-    const dRetireAdj=Math.round(ECATS.reduce((s,k)=>s+(data.expenses[k]||0)*12*inflF,0)*(retired?retireExpenseRatio-1:0));
+    if(nhEv){
+      ECATS.forEach(k=>{dEbase[k]=0;});
+    } else {
+      ECATS.forEach(k=>{dEbase[k]=Math.round((data.expenses[k]||0)*12*inflF*(retired?retireExpenseRatio:1));});
+    }
+    const dRetireAdj=nhEv?0:Math.round(ECATS.reduce((s,k)=>s+(data.expenses[k]||0)*12*inflF,0)*(retired?retireExpenseRatio-1:0));
     const dMortgage=(mortgageMonthly>0&&mortgageBalance>0)?mortgageMonthly*12:0;
-    let dEventExp=0;
+    let dEventExp=nhEv?Math.round(nhEv.amount*12*inflF):0;
 
     // --- Events ---
     let lump=0, dLumpNet=0;
@@ -2395,7 +2399,7 @@ function simulate(plan,irOverride=null){
       isRetired:retired,
       d:{
         inc:{...dI, drawdown:Math.round(dI.drawdown), eventInc:Math.round(dI.eventInc)},
-        exp:{...dEbase, retireAdj:dRetireAdj, steps:Math.round(stepDeltaVal*12),
+        exp:{...dEbase, retireAdj:dRetireAdj, steps:nhEv?0:Math.round(stepDeltaVal*12),
              mortgage:Math.round(dMortgage), eventExp:Math.round(dEventExp)},
         lump:Math.round(dLumpNet),
         fa:{s:Math.round(FA3s),m:Math.round(FA3m),l:Math.round(FA3l)}
@@ -2656,7 +2660,7 @@ function renderDetailTable(){
     {fn:r=>r.d.exp.retireAdj,     label:'退職後調整',  group:'expense-adj',  type:'pm'},
     {fn:r=>r.d.exp.steps,         label:'ライフ変化',  group:'expense-adj',  type:'pm'},
     {fn:r=>r.d.exp.mortgage,      label:'住宅ローン',  group:'expense-adj',  type:'exp'},
-    {fn:r=>r.d.exp.eventExp,      label:'イベント変化',group:'expense-adj',  type:'pm'},
+    {fn:r=>r.d.exp.eventExp,      label:'老人ﾎｰﾑ/ｲﾍﾞﾝﾄ',group:'expense-adj',  type:'pm'},
     {fn:r=>r.d.lump,              label:'一時収支',    group:'balance',      type:'pm'},
     {fn:r=>r.cashFlow,            label:'年間収支',    group:'balance',      type:'pm'},
     {fn:r=>r.financialAssets,     label:'金融資産計',  group:'balance',      type:'asset'},
