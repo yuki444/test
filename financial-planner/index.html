@@ -425,6 +425,31 @@
     body.mobile-preview .toast{bottom:80px;right:12px;left:12px}
     body.mobile-preview .modal-box{border-radius:16px;padding:18px}
     body.mobile-preview .plan-tab{padding:7px 12px;font-size:11px}
+
+    /* ── Return-rate slider ── */
+    .ir-preset{transition:all .15s;padding:6px 10px!important;min-width:64px;text-align:center;line-height:1.3}
+    .ir-preset.active{background:linear-gradient(135deg,var(--primary-dark),var(--primary))!important;color:white!important;border-color:var(--primary)!important}
+    #sim-return-slider{width:100%;height:6px;cursor:pointer;accent-color:var(--primary)}
+
+    /* ── PDF / Print ── */
+    #print-header{display:none}
+    @media print{
+      *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .sidebar,.nav-container,.topbar,.mobile-topbar,.mobile-nav,
+      #app-header,.page:not(#page-simulation),
+      #sim-return-bar,#family-timeline-section,
+      .chip-filter,.detail-wrap,#cashflow-tbody tr:nth-child(n+21){display:none!important}
+      #page-simulation{display:block!important;padding:0;max-width:100%}
+      #print-header{display:block!important;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #2563eb}
+      .card{box-shadow:none!important;border:1px solid #e2e8f0!important;break-inside:avoid;margin-bottom:12px}
+      .chart-container{height:200px!important}
+      .chart-grid{display:block!important}
+      canvas{max-width:100%!important}
+      .summary-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important}
+      .table-wrap{overflow:visible!important}
+      table{font-size:10px}
+      body{font-size:12px}
+    }
   </style>
 </head>
 <body>
@@ -700,10 +725,44 @@
     <!-- ===== シミュレーション ===== -->
     <div class="page" id="page-simulation">
       <div class="page-header"><h2>📊 シミュレーション結果</h2><p>ライフプランに基づいた将来資産推移の予測です。</p></div>
+      <!-- 印刷ヘッダー（画面非表示・印刷時のみ表示） -->
+      <div id="print-header">
+        <h2 style="margin:0 0 4px;color:#1e40af;font-size:18px">📊 ライフプラン シミュレーション レポート</h2>
+        <div id="print-header-meta" style="font-size:12px;color:#64748b"></div>
+      </div>
+
       <div style="margin-bottom:16px;background:linear-gradient(135deg,var(--primary) 0%,#1d4ed8 100%);padding:12px 16px;border-radius:10px;display:flex;align-items:center;gap:12px">
         <span style="font-size:13px;font-weight:700;color:white;white-space:nowrap">📊 シナリオ：</span>
         <select id="sim-global-scenario" onchange="renderSimulation()" style="flex:1;padding:7px 12px;border:none;border-radius:6px;font-size:13px;font-weight:700;background:white;color:var(--primary);cursor:pointer"></select>
       </div>
+
+      <!-- リターン率スライダー & PDF出力 -->
+      <div id="sim-return-bar" class="card" style="margin-bottom:16px;padding:14px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:800;color:var(--text)">📈 想定リターン率（リアルタイム調整）</span>
+          <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;gap:4px;display:flex;align-items:center" onclick="printReport()">📄 PDF出力</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="btn btn-secondary ir-preset" data-v="1"   onclick="setSimReturn(1)"   style="flex:1">😰 悲観<br><b>1%</b></button>
+          <button class="btn btn-secondary ir-preset" data-v="2"   onclick="setSimReturn(2)"   style="flex:1">📉 保守<br><b>2%</b></button>
+          <button class="btn btn-secondary ir-preset active" data-v="3" onclick="setSimReturn(3)" style="flex:1">📊 標準<br><b>3%</b></button>
+          <button class="btn btn-secondary ir-preset" data-v="5"   onclick="setSimReturn(5)"   style="flex:1">📈 楽観<br><b>5%</b></button>
+          <button class="btn btn-secondary ir-preset" data-v="7"   onclick="setSimReturn(7)"   style="flex:1">🚀 強気<br><b>7%</b></button>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <input type="range" id="sim-return-slider" min="0" max="10" step="0.5" value="3"
+            oninput="setSimReturn(+this.value)">
+          <span id="sim-return-val" style="font-size:22px;font-weight:900;color:var(--primary);min-width:56px;text-align:right">3.0%</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);padding:0 2px;margin-top:2px">
+          <span>0%</span><span>2%</span><span>4%</span><span>6%</span><span>8%</span><span>10%</span>
+        </div>
+        <div style="margin-top:10px;padding:8px 12px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--text-muted);line-height:1.6">
+          💡 グラフに<span style="color:#ef4444;font-weight:700">悲観(1%)</span>・<span style="color:#10b981;font-weight:700">楽観(5%)</span>の比較ラインを自動表示します。
+          スライダーを動かすと全シナリオがリアルタイムで更新されます。
+        </div>
+      </div>
+
       <div id="family-timeline-section"></div>
       <div class="summary-grid" id="sim-summary"></div>
       <div class="card">
@@ -2202,14 +2261,14 @@ function saveEvent(planId){
 // ============================================================
 // SIMULATION ENGINE (fixed)
 // ============================================================
-function simulate(plan){
+function simulate(plan,irOverride=null){
   syncFromDOM();
   const self=data.members.find(m=>m.role==='self');
   const spouse=data.members.find(m=>m.role==='spouse');
   const startAge=self?.age||35;
   const currentYear=new Date().getFullYear();
   const {endAge,retireAge,retireAgeSpouse,investReturn:ir,inflation,salaryGrowth,retireExpenseRatio=1.0}=data.settings;
-  const r=ir/100, inf=inflation/100, sg=salaryGrowth/100;
+  const r=(irOverride!==null?irOverride:ir)/100, inf=inflation/100, sg=salaryGrowth/100;
   const ECATS=['housing','food','utilities','insurance','education','transport','medical','entertainment','other'];
 
   let FA=data.assets.cash+data.assets.fixedDeposit+data.assets.stocks+data.assets.ideco+data.assets.insurance+data.assets.other;
@@ -2443,13 +2502,23 @@ function renderFamilyTimeline(plan,rows){
 
 function renderSimulation(){
   syncFromDOM();
+  const irOverride=_simIrOverride;
+  // Sync slider UI to base IR when no override is active
+  if(irOverride===null){
+    const baseIR=data.settings.investReturn;
+    const sl=document.getElementById('sim-return-slider');
+    const vl=document.getElementById('sim-return-val');
+    if(sl) sl.value=baseIR;
+    if(vl) vl.textContent=baseIR.toFixed(1)+'%';
+    document.querySelectorAll('.ir-preset').forEach(b=>b.classList.toggle('active',+b.dataset.v===baseIR));
+  }
   // Populate global scenario selector (preserve current selection)
   const globalSel=document.getElementById('sim-global-scenario');
   const savedId=globalSel?.value?+globalSel.value:(data.plans[0]?.id||1);
   if(globalSel){
     globalSel.innerHTML=data.plans.map(p=>`<option value="${p.id}"${p.id===savedId?' selected':''}>${p.name}</option>`).join('');
   }
-  const allSims=data.plans.map(p=>({plan:p,rows:simulate(p)}));
+  const allSims=data.plans.map(p=>({plan:p,rows:simulate(p,irOverride)}));
   const selPlanId=getSelectedPlanId();
   const selSim=allSims.find(s=>s.plan.id===selPlanId)||allSims[0];
   const base=selSim.rows;
@@ -2481,9 +2550,20 @@ function renderSimulation(){
   destroyChart('networth');
   const labels=base.map(r=>`${r.age}歳`);
   const retireIdx=base.findIndex(r=>r.isRetired);
+  const currentIR=irOverride!==null?irOverride:data.settings.investReturn;
+  const ghostDatasets=[
+    {v:1,label:'悲観 1%',color:'#ef4444'},
+    {v:5,label:'楽観 5%',color:'#10b981'}
+  ].filter(g=>Math.abs(g.v-currentIR)>0.4)
+   .map(g=>({
+     label:g.label,
+     data:simulate(selSim.plan,g.v).map(r=>Math.round(r.netWorth/10000)),
+     borderColor:g.color+'90',backgroundColor:'transparent',
+     fill:false,borderDash:[3,3],tension:.35,pointRadius:0,borderWidth:1.5
+   }));
   charts.networth=new Chart(document.getElementById('chart-networth'),{
     type:'line',
-    data:{labels,datasets:allSims.map(s=>{
+    data:{labels,datasets:[...allSims.map(s=>{
       const isSel=s.plan.id===selPlanId;
       return {
         label:s.plan.name,data:s.rows.map(r=>Math.round(r.netWorth/10000)),
@@ -2491,7 +2571,7 @@ function renderSimulation(){
         fill:isSel,borderDash:isSel?[]:[5,3],
         tension:.35,pointRadius:0,pointHoverRadius:4,borderWidth:isSel?2.5:1.5
       };
-    })},
+    }),...ghostDatasets]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}万円`}},
         annotation:retireIdx>=0?{annotations:{retire:{type:'line',xMin:retireIdx,xMax:retireIdx,
@@ -4942,6 +5022,32 @@ async function autoCalcDividends(){
   localStorage.setItem('fp-data',JSON.stringify(data));
   renderTradeLog();
   showToast(`✅ ${newDivs.length}件の配当推計を追加しました（合計 ${addCommas(totalDiv)}円）`);
+}
+
+// ── Return-rate slider ──────────────────────────────────────────
+let _simIrOverride=null;
+
+function setSimReturn(v){
+  v=+v;
+  _simIrOverride=v;
+  const vl=document.getElementById('sim-return-val');
+  const sl=document.getElementById('sim-return-slider');
+  if(vl) vl.textContent=v.toFixed(1)+'%';
+  if(sl) sl.value=v;
+  document.querySelectorAll('.ir-preset').forEach(b=>b.classList.toggle('active',+b.dataset.v===v));
+  renderSimulation();
+}
+
+function printReport(){
+  const self=data.members.find(m=>m.role==='self');
+  const spouse=data.members.find(m=>m.role==='spouse');
+  const ir=_simIrOverride!==null?_simIrOverride:data.settings.investReturn;
+  const meta=document.getElementById('print-header-meta');
+  if(meta) meta.textContent=
+    `出力日: ${new Date().toLocaleDateString('ja-JP')} ｜ `+
+    `${self?.name||'本人'}(${self?.age}歳)・${spouse?.name||'配偶者'}(${spouse?.age}歳) ｜ `+
+    `想定リターン: ${ir}%`;
+  window.print();
 }
 </script>
 </body>
