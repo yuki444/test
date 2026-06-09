@@ -2352,7 +2352,7 @@ function simulate(plan,irOverride=null){
     let dEventExp=nhEv?-Math.round(nhEv.amount*12):0;
 
     // --- Events ---
-    let lump=0, dLumpNet=0, dLumpExp=0, dLumpInc=0;
+    let lump=0, dLumpNet=0, dLumpExp=0, dLumpInc=0, dNHSupp=0;
     plan.events.forEach(ev=>{
       if(age<ev.age||age>=ev.age+ev.duration) return;
       switch(ev.type){
@@ -2366,7 +2366,9 @@ function simulate(plan,irOverride=null){
         case 'income-change':
           income+=ev.amount*12; dI.eventInc+=ev.amount*12; break;
         case 'expense-change': case 'child-born':
-          if(!nhEv){expenses+=ev.amount*12; dEventExp+=ev.amount*12;} break;
+          if(nhEv&&ev.amount>0){expenses+=ev.amount*12; dNHSupp+=ev.amount*12;}
+          else if(!nhEv){expenses+=ev.amount*12; dEventExp+=ev.amount*12;}
+          break;
         case 'nursing-home':
           if(age===ev.age&&homeOwned){
             const hv=initialHomeValue*Math.max(0.3,1-0.02*Math.max(0,age-homeAcquiredAge));
@@ -2419,7 +2421,8 @@ function simulate(plan,irOverride=null){
       d:{
         inc:{...dI, drawdown:Math.round(dI.drawdown), eventInc:Math.round(dI.eventInc), lumpInc:Math.round(dLumpInc)},
         exp:{...dEbase, retireAdj:0, steps:0,
-             mortgage:Math.round(dMortgage), eventExp:Math.round(dEventExp)},
+             mortgage:Math.round(dMortgage), eventExp:Math.round(dEventExp),
+             nhSupp:Math.round(dNHSupp)},
         lump:Math.round(dLumpNet), lumpExp:Math.round(dLumpExp),
         fa:{s:Math.round(FA3s),m:Math.round(FA3m),l:Math.round(FA3l)}
       }
@@ -2683,9 +2686,12 @@ function renderSimulation(){
        return Math.round((r.expenses-sumCats-(r.d.exp.mortgage||0))/10000);
      }),
      backgroundColor:'#64748b'+'77',borderColor:'#64748b',borderWidth:0,stack:'exp'},
-    {label:'老人ホーム',
-     data:base.map(r=>nhActive(r)?Math.round(r.expenses/10000):0),
+    {label:'老人ホーム(施設費)',
+     data:base.map(r=>nhActive(r)?Math.round(Math.abs(r.d.exp.eventExp||0)/10000):0),
      backgroundColor:'#dc2626'+'bb',borderColor:'#dc2626',borderWidth:0,stack:'exp'},
+    {label:'老人ホーム(医療・個人費)',
+     data:base.map(r=>nhActive(r)?Math.round((r.d.exp.nhSupp||0)/10000):0),
+     backgroundColor:'#f87171'+'bb',borderColor:'#f87171',borderWidth:0,stack:'exp'},
     {label:'一時支出イベント',
      data:base.map(r=>Math.round(Math.abs(r.d.lumpExp||0)/10000)),
      backgroundColor:'#7c3aed'+'bb',borderColor:'#7c3aed',borderWidth:0,stack:'exp'},
