@@ -779,6 +779,16 @@
           <div class="chart-container chart-sm"><canvas id="chart-assets-pie"></canvas></div>
         </div>
       </div>
+      <div class="chart-grid">
+        <div class="card">
+          <div class="card-title">💴 年間収入内訳</div>
+          <div class="chart-container"><canvas id="chart-income-breakdown"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">💸 年間支出内訳</div>
+          <div class="chart-container"><canvas id="chart-expense-breakdown"></canvas></div>
+        </div>
+      </div>
       <div class="card">
         <div class="card-title">📋 年次キャッシュフロー詳細 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">（金額はすべて万円単位）</span></div>
         <select id="table-scenario-select" style="display:none"></select>
@@ -2603,6 +2613,82 @@ function renderSimulation(){
           tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fmtM(ctx.raw)}`}}}}
     });
   }
+
+  // ── Income breakdown chart ──────────────────────────────────
+  destroyChart('incomeBreak');
+  const INC_SEGS=[
+    {key:'selfSalary',   label:'本人給与',   color:'#3b82f6'},
+    {key:'spouseSalary', label:'配偶者給与', color:'#06b6d4'},
+    {key:'side',         label:'副業収入',   color:'#8b5cf6'},
+    {key:'inv',          label:'投資収入',   color:'#10b981'},
+    {key:'pensionSelf',  label:'年金(本人)', color:'#f59e0b'},
+    {key:'pensionSpouse',label:'年金(配偶)', color:'#f97316'},
+    {key:'drawdown',     label:'取り崩し',   color:'#ec4899'},
+  ];
+  charts.incomeBreak=new Chart(document.getElementById('chart-income-breakdown'),{
+    type:'bar',
+    data:{labels:base.map(r=>`${r.age}歳`),datasets:INC_SEGS.map(s=>({
+      label:s.label,
+      data:base.map(r=>Math.round((r.d.inc[s.key]||0)/10000)),
+      backgroundColor:s.color+'bb',borderColor:s.color,borderWidth:0,stack:'inc'
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}},
+        tooltip:{mode:'index',callbacks:{
+          label:ctx=>ctx.raw!==0?` ${ctx.dataset.label}: ${fmt(ctx.raw)}万円`:null,
+          footer:items=>`合計: ${fmt(items.reduce((s,i)=>s+i.raw,0))}万円`
+        }}},
+      scales:{x:{stacked:true,ticks:{maxTicksLimit:12}},
+        y:{stacked:true,ticks:{callback:v=>fmt(v)+'万'},grid:{color:'#f1f5f9'}}}}
+  });
+
+  // ── Expense breakdown chart ──────────────────────────────────
+  destroyChart('expenseBreak');
+  const EXP_SEGS=[
+    {key:'housing',      label:'住居費',     color:'#3b82f6'},
+    {key:'food',         label:'食費',       color:'#10b981'},
+    {key:'utilities',    label:'光熱費',     color:'#f59e0b'},
+    {key:'insurance',    label:'保険',       color:'#8b5cf6'},
+    {key:'education',    label:'教育費',     color:'#06b6d4'},
+    {key:'transport',    label:'交通費',     color:'#84cc16'},
+    {key:'medical',      label:'医療費',     color:'#ef4444'},
+    {key:'entertainment',label:'娯楽',       color:'#f97316'},
+    {key:'other',        label:'その他',     color:'#94a3b8'},
+  ];
+  // nursing-home detection: all dEbase categories are zeroed when NH active
+  const nhActive=r=>r.d.exp.housing===0&&r.d.exp.food===0;
+  const expDatasets=[
+    ...EXP_SEGS.map(s=>({
+      label:s.label,
+      data:base.map(r=>nhActive(r)?0:Math.round((r.d.exp[s.key]||0)/10000)),
+      backgroundColor:s.color+'bb',borderColor:s.color,borderWidth:0,stack:'exp'
+    })),
+    {label:'住宅ローン',
+     data:base.map(r=>nhActive(r)?0:Math.round((r.d.exp.mortgage||0)/10000)),
+     backgroundColor:'#1e40af'+'bb',borderColor:'#1e40af',borderWidth:0,stack:'exp'},
+    {label:'調整(ﾗｲﾌ変化等)',
+     data:base.map(r=>{
+       if(nhActive(r)) return 0;
+       const sumCats=EXP_SEGS.reduce((s,c)=>s+(r.d.exp[c.key]||0),0);
+       return Math.round((r.expenses-sumCats-(r.d.exp.mortgage||0))/10000);
+     }),
+     backgroundColor:'#64748b'+'77',borderColor:'#64748b',borderWidth:0,stack:'exp'},
+    {label:'老人ホーム',
+     data:base.map(r=>nhActive(r)?Math.round(r.expenses/10000):0),
+     backgroundColor:'#dc2626'+'bb',borderColor:'#dc2626',borderWidth:0,stack:'exp'},
+  ];
+  charts.expenseBreak=new Chart(document.getElementById('chart-expense-breakdown'),{
+    type:'bar',
+    data:{labels:base.map(r=>`${r.age}歳`),datasets:expDatasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}},
+        tooltip:{mode:'index',callbacks:{
+          label:ctx=>ctx.raw!==0?` ${ctx.dataset.label}: ${fmt(ctx.raw)}万円`:null,
+          footer:items=>`合計: ${fmt(items.reduce((s,i)=>s+i.raw,0))}万円`
+        }}},
+      scales:{x:{stacked:true,ticks:{maxTicksLimit:12}},
+        y:{stacked:true,ticks:{callback:v=>fmt(v)+'万'},grid:{color:'#f1f5f9'}}}}
+  });
 
   // Sync hidden selectors and render tables
   const tsel=document.getElementById('table-scenario-select');
