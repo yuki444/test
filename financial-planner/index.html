@@ -758,8 +758,7 @@
           <span>0%</span><span>2%</span><span>4%</span><span>6%</span><span>8%</span><span>10%</span>
         </div>
         <div style="margin-top:10px;padding:8px 12px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--text-muted);line-height:1.6">
-          💡 グラフに<span style="color:#ef4444;font-weight:700">悲観(1%)</span>・<span style="color:#10b981;font-weight:700">楽観(5%)</span>の比較ラインを自動表示します。
-          スライダーを動かすと全シナリオがリアルタイムで更新されます。
+          💡 スライダーを動かすと全シナリオの純資産推移がリアルタイムで更新されます。
         </div>
       </div>
 
@@ -2550,20 +2549,9 @@ function renderSimulation(){
   destroyChart('networth');
   const labels=base.map(r=>`${r.age}歳`);
   const retireIdx=base.findIndex(r=>r.isRetired);
-  const currentIR=irOverride!==null?irOverride:data.settings.investReturn;
-  const ghostDatasets=[
-    {v:1,label:'悲観 1%',color:'#ef4444'},
-    {v:5,label:'楽観 5%',color:'#10b981'}
-  ].filter(g=>Math.abs(g.v-currentIR)>0.4)
-   .map(g=>({
-     label:g.label,
-     data:simulate(selSim.plan,g.v).map(r=>Math.round(r.netWorth/10000)),
-     borderColor:g.color+'90',backgroundColor:'transparent',
-     fill:false,borderDash:[3,3],tension:.35,pointRadius:0,borderWidth:1.5
-   }));
   charts.networth=new Chart(document.getElementById('chart-networth'),{
     type:'line',
-    data:{labels,datasets:[...allSims.map(s=>{
+    data:{labels,datasets:allSims.map(s=>{
       const isSel=s.plan.id===selPlanId;
       return {
         label:s.plan.name,data:s.rows.map(r=>Math.round(r.netWorth/10000)),
@@ -2571,7 +2559,7 @@ function renderSimulation(){
         fill:isSel,borderDash:isSel?[]:[5,3],
         tension:.35,pointRadius:0,pointHoverRadius:4,borderWidth:isSel?2.5:1.5
       };
-    }),...ghostDatasets]},
+    })},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}万円`}},
         annotation:retireIdx>=0?{annotations:{retire:{type:'line',xMin:retireIdx,xMax:retireIdx,
