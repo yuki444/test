@@ -242,12 +242,12 @@
   "assets": {
     "cash": 3000000,
     "fixedDeposit": 2000000,
-    "stocks": 18978775,
+    "stocks": 978775,
     "ideco": 0,
     "home": 70000000,
     "realEstate": 0,
     "insurance": 0,
-    "other": 270000
+    "other": 18270000
   },
   "debts": {
     "mortgage": 60000000,
