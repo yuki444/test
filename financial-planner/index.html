@@ -2759,7 +2759,7 @@ function renderAdvice(){
   const yearsToRetire=retireAge-selfAge;
   const nisaMonthlyMax=300000;
   const idecoMax=23000;
-  const simBase=simulate(data.plans[0]);
+  const simBase=simulate(data.plans[0],_simIrOverride);
   const retireRow=simBase.find(r=>r.isRetired)||simBase[simBase.length-1];
   const lastRow=simBase[simBase.length-1];
   const depletionRow=simBase.find(r=>r.netWorth<0);
