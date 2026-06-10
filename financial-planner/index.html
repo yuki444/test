@@ -1362,7 +1362,7 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'家族海外旅行⑦',        age:57,amount:-2000000,duration:1,memo:'最後の家族旅行 第2子20歳'},
       // 58歳で半値売却。残債~2,500万精算後 約1,000万がFAに加算、以降ローン消滅
       {type:'sell-home',     name:'住宅売却（半値）',      age:58,amount:35000000,duration:1,memo:'7,000万→3,500万(半値)で売却。残債~2,500万精算・純益~1,000万FA算入。ローン消滅'},
-      {type:'expense-change',name:'管理費→家賃 差額',      age:58,amount:20000,  duration:40,memo:'固定資産税・管理費8万→家賃10万へ 月+2万'},
+      {type:'expense-change',name:'管理費→家賃 差額',      age:58,amount:70000,  duration:40,memo:'固定資産税・管理費8万→家賃15万へ 月+7万'},
       {type:'lump-income',   name:'オリックス解約・払戻',    age:49,amount:4000000, duration:1,memo:'2037年3月解約 払戻金400万円'},
       {type:'lump-income',   name:'メットライフ②解約・払戻', age:55,amount:7000000,duration:1,memo:'一時払USD建終身保険 払戻700万円（元金300万入金済み）受取時課税あり'},
       {type:'lump-income',   name:'企業型DC退職金（本人）',  age:55,amount:19000000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 約1,900万（受取時課税あり）'},
@@ -4231,7 +4231,7 @@ function addHousingScenarios(){
   if(!existingNames.includes('20年後売却→賃貸'))
     toAdd.push({name:'20年後売却→賃貸',color:'#10b981',events:[...commonEvents,
       {type:'sell-home',     name:'住宅売却（半値）',   age:58,amount:35000000,duration:1,memo:'残債精算・ローン消滅'},
-      {type:'expense-change',name:'賃貸家賃差額',        age:58,amount:20000,  duration:40,memo:'管理費8万→家賃10万'},
+      {type:'expense-change',name:'賃貸家賃差額',        age:58,amount:70000,  duration:40,memo:'管理費8万→家賃15万'},
     ].sort((a,b)=>a.age-b.age)});
   if(!existingNames.includes('8年ごとに新築'))
     toAdd.push({name:'8年ごとに新築',color:'#f59e0b',events:[...commonEvents,
