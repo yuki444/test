@@ -2579,18 +2579,37 @@ function renderSimulation(){
   destroyChart('networth');
   const labels=base.map(r=>`${r.age}歳`);
   const retireIdx=base.findIndex(r=>r.isRetired);
-  // Cumulative stacks for selected plan breakdown
-  const _faS  =base.map(r=>Math.round((r.d.fa.s||0)/10000));
-  const _faSM =base.map((r,i)=>_faS[i]+Math.round((r.d.fa.m||0)/10000));
-  const _faSML=base.map((r,i)=>_faSM[i]+Math.round((r.d.fa.l||0)/10000));
-  const _faSMLA=base.map((r,i)=>_faSML[i]+Math.round(((r.homeVal||0)+(data.assets.realEstate||0))/10000));
-  const _debt =base.map(r=>-Math.round((r.debts||0)/10000));
+  // Scale FA3 tiers proportionally to actual financialAssets to correct growth-rate divergence
+  const realEstV=Math.round((data.assets.realEstate||0)/10000);
+  const _faScaled=base.map(r=>{
+    const fa3t=(r.d.fa.s||0)+(r.d.fa.m||0)+(r.d.fa.l||0);
+    const faAct=r.financialAssets;
+    if(fa3t>0&&faAct>0){
+      const sc=faAct/fa3t;
+      return{s:Math.round(r.d.fa.s*sc/10000),m:Math.round(r.d.fa.m*sc/10000),l:Math.round(r.d.fa.l*sc/10000)};
+    }
+    // Assets depleted (faAct<=0): show zero for all tiers
+    return{s:0,m:0,l:0};
+  });
+  const _faS   =_faScaled.map(v=>v.s);
+  const _faSM  =_faScaled.map(v=>v.s+v.m);
+  const _faSML =_faScaled.map(v=>v.s+v.m+v.l);
+  const _faSMLA=base.map((r,i)=>_faSML[i]+Math.round((r.homeVal||0)/10000)+realEstV);
+  // Debt = mortgage + exhausted financial assets (negative FA shown as additional debt)
+  const _debt=base.map(r=>{
+    const mortDebt=-Math.round((r.debts||0)/10000);
+    const faDebt=Math.min(0,Math.round(r.financialAssets/10000));
+    return mortDebt+faDebt;
+  });
   const nwDatasets=[
     {label:'現金・定期',    data:_faS,    backgroundColor:'#bfdbfe99',borderColor:'#3b82f6',borderWidth:0,fill:'origin',tension:.35,pointRadius:0},
     {label:'株式・投信',    data:_faSM,   backgroundColor:'#bbf7d099',borderColor:'#10b981',borderWidth:0,fill:'-1',    tension:.35,pointRadius:0},
     {label:'iDeCo・その他',data:_faSML,  backgroundColor:'#ddd6fe99',borderColor:'#8b5cf6',borderWidth:0,fill:'-1',    tension:.35,pointRadius:0},
     {label:'自宅・不動産',  data:_faSMLA, backgroundColor:'#fef08a99',borderColor:'#f59e0b',borderWidth:0,fill:'-1',    tension:.35,pointRadius:0},
     {label:'負債',          data:_debt,   backgroundColor:'#fecaca88',borderColor:'#ef4444',borderWidth:0,fill:'origin',tension:.35,pointRadius:0},
+    {label:selPlan.name+' 純資産',data:base.map(r=>Math.round(r.netWorth/10000)),
+      borderColor:selPlan.color,backgroundColor:'transparent',fill:false,
+      borderDash:[],borderWidth:2,tension:.35,pointRadius:0,pointHoverRadius:4},
     ...allSims.filter(s=>s.plan.id!==selPlanId).map(s=>({
       label:s.plan.name,
       data:s.rows.map(r=>Math.round(r.netWorth/10000)),
@@ -2608,6 +2627,7 @@ function renderSimulation(){
         tooltip:{callbacks:{
           label:ctx=>{
             const ds=ctx.dataset;
+            // Non-stacked lines (actual net worth or comparison)
             if(ds.fill===false||ds.fill===undefined) return ctx.raw!==0?` ${ds.label}: ${fmt(ctx.raw)}万円`:null;
             const dsIdx=ctx.datasetIndex;
             let layerVal=ctx.raw;
@@ -2615,6 +2635,8 @@ function renderSimulation(){
             return layerVal!==0?` ${ds.label}: ${fmt(layerVal)}万円`:null;
           },
           footer:items=>{
+            const nwLine=items.find(i=>i.dataset.label&&i.dataset.label.includes('純資産')&&i.dataset.fill===false);
+            if(nwLine) return `純資産合計: ${fmt(nwLine.raw)}万円`;
             const top=items.find(i=>i.dataset.label==='自宅・不動産');
             const debt=items.find(i=>i.dataset.label==='負債');
             if(!top) return '';
