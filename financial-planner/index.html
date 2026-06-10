@@ -4761,6 +4761,21 @@ function init(){
         await ghSave();
       }
     }, 800);
+  } else {
+    // PAT未設定: 同ディレクトリの user-data.json を直接 fetch（HTTPサーバー経由時に有効）
+    setTimeout(async()=>{
+      try{
+        const res=await fetch('./user-data.json?_='+Date.now());
+        if(!res.ok) return;
+        const parsed=await res.json();
+        if(!parsed?.members||!parsed?.plans) return;
+        Object.assign(data,parsed);
+        localStorage.setItem('fp-data',JSON.stringify(data));
+        syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();
+        renderPlans(); updateMonthlySummary(); updateNetWorthSummary();
+        syncDividendToIncome(); renderAllocChart();
+      }catch(e){}
+    },800);
   }
 
   // Live recalculation listeners
