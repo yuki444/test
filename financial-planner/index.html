@@ -3160,6 +3160,8 @@ async function ghFetch(){
     syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();
     renderPlans(); updateMonthlySummary(); updateNetWorthSummary();
     syncDividendToIncome(); renderAllocChart();
+    if(document.getElementById('page-simulation')?.classList.contains('active')){syncFromDOM();renderSimulation();}
+    if(document.getElementById('page-advice')?.classList.contains('active')){syncFromDOM();renderAdvice();}
     updateGhBadge('synced');
     return true;
   }catch(e){
@@ -4772,6 +4774,8 @@ function init(){
         syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();
         renderPlans(); updateMonthlySummary(); updateNetWorthSummary();
         syncDividendToIncome(); renderAllocChart();
+        if(document.getElementById('page-simulation')?.classList.contains('active')){syncFromDOM();renderSimulation();}
+        if(document.getElementById('page-advice')?.classList.contains('active')){syncFromDOM();renderAdvice();}
       }catch(e){
         // file://プロトコルやネットワーク不可時は fetch 自体が失敗する（TypeError）
         console.error('user-data.json fetch failed:', e.message);
