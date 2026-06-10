@@ -765,13 +765,13 @@
       <div id="family-timeline-section"></div>
       <div class="summary-grid" id="sim-summary"></div>
       <div class="card">
-        <div class="card-title">📈 純資産推移（全シナリオ比較）</div>
+        <div class="card-title">📈 純資産推移（資産内訳・シナリオ比較）</div>
         <div id="sim-legend" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px"></div>
         <div class="chart-container"><canvas id="chart-networth"></canvas></div>
       </div>
       <div class="chart-grid">
         <div class="card">
-          <div class="card-title">💰 年間キャッシュフロー</div>
+          <div class="card-title">💰 年間キャッシュフロー <span style="font-size:10px;font-weight:400;color:var(--text-muted)">（取り崩し・一時収支含む実質増減）</span></div>
           <div class="chart-container chart-sm"><canvas id="chart-cashflow"></canvas></div>
         </div>
         <div class="card">
@@ -781,7 +781,7 @@
       </div>
       <div class="chart-grid">
         <div class="card">
-          <div class="card-title">💴 年間収入内訳</div>
+          <div class="card-title">💴 年間収入内訳 <span style="font-size:10px;font-weight:400;color:var(--text-muted)">（「取り崩し」は資産換金のためCFには含まれず）</span></div>
           <div class="chart-container"><canvas id="chart-income-breakdown"></canvas></div>
         </div>
         <div class="card">
@@ -2420,6 +2420,7 @@ function simulate(plan,irOverride=null){
       cashFlow:Math.round(netCash), financialAssets:Math.round(FA),
       debts:Math.round(totalDebt),
       netWorth:Math.round(FA+homeValue+data.assets.realEstate-totalDebt),
+      homeVal:Math.round(homeValue),
       isRetired:retired,
       d:{
         inc:{...dI, drawdown:Math.round(dI.drawdown), eventInc:Math.round(dI.eventInc), lumpInc:Math.round(dLumpInc)},
@@ -2574,27 +2575,55 @@ function renderSimulation(){
       <span style="width:18px;height:3px;display:inline-block;background:${s.plan.color};border-radius:2px"></span>${s.plan.name}
     </div>`).join('');
 
-  // Net worth chart
+  // Net worth chart: stacked area breakdown (selected plan) + comparison lines (other plans)
   destroyChart('networth');
   const labels=base.map(r=>`${r.age}歳`);
   const retireIdx=base.findIndex(r=>r.isRetired);
+  // Cumulative stacks for selected plan breakdown
+  const _faS  =base.map(r=>Math.round((r.d.fa.s||0)/10000));
+  const _faSM =base.map((r,i)=>_faS[i]+Math.round((r.d.fa.m||0)/10000));
+  const _faSML=base.map((r,i)=>_faSM[i]+Math.round((r.d.fa.l||0)/10000));
+  const _faSMLA=base.map((r,i)=>_faSML[i]+Math.round(((r.homeVal||0)+(data.assets.realEstate||0))/10000));
+  const _debt =base.map(r=>-Math.round((r.debts||0)/10000));
+  const nwDatasets=[
+    {label:'現金・定期',    data:_faS,    backgroundColor:'#bfdbfe99',borderColor:'#3b82f6',borderWidth:0,fill:'origin',tension:.35,pointRadius:0},
+    {label:'株式・投信',    data:_faSM,   backgroundColor:'#bbf7d099',borderColor:'#10b981',borderWidth:0,fill:'-1',    tension:.35,pointRadius:0},
+    {label:'iDeCo・その他',data:_faSML,  backgroundColor:'#ddd6fe99',borderColor:'#8b5cf6',borderWidth:0,fill:'-1',    tension:.35,pointRadius:0},
+    {label:'自宅・不動産',  data:_faSMLA, backgroundColor:'#fef08a99',borderColor:'#f59e0b',borderWidth:0,fill:'-1',    tension:.35,pointRadius:0},
+    {label:'負債',          data:_debt,   backgroundColor:'#fecaca88',borderColor:'#ef4444',borderWidth:0,fill:'origin',tension:.35,pointRadius:0},
+    ...allSims.filter(s=>s.plan.id!==selPlanId).map(s=>({
+      label:s.plan.name,
+      data:s.rows.map(r=>Math.round(r.netWorth/10000)),
+      borderColor:s.plan.color,backgroundColor:'transparent',
+      fill:false,borderDash:[5,3],
+      tension:.35,pointRadius:0,pointHoverRadius:4,borderWidth:1.5
+    }))
+  ];
   charts.networth=new Chart(document.getElementById('chart-networth'),{
     type:'line',
-    data:{labels,datasets:allSims.map(s=>{
-      const isSel=s.plan.id===selPlanId;
-      return {
-        label:s.plan.name,data:s.rows.map(r=>Math.round(r.netWorth/10000)),
-        borderColor:s.plan.color,backgroundColor:isSel?s.plan.color+'20':'transparent',
-        fill:isSel,borderDash:isSel?[]:[5,3],
-        tension:.35,pointRadius:0,pointHoverRadius:4,borderWidth:isSel?2.5:1.5
-      };
-    })},
+    data:{labels,datasets:nwDatasets},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}万円`}},
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}},
+        tooltip:{callbacks:{
+          label:ctx=>{
+            const ds=ctx.dataset;
+            if(ds.fill===false||ds.fill===undefined) return ctx.raw!==0?` ${ds.label}: ${fmt(ctx.raw)}万円`:null;
+            const dsIdx=ctx.datasetIndex;
+            let layerVal=ctx.raw;
+            if(ds.fill==='-1'&&dsIdx>0) layerVal=ctx.raw-(ctx.chart.data.datasets[dsIdx-1].data[ctx.dataIndex]||0);
+            return layerVal!==0?` ${ds.label}: ${fmt(layerVal)}万円`:null;
+          },
+          footer:items=>{
+            const top=items.find(i=>i.dataset.label==='自宅・不動産');
+            const debt=items.find(i=>i.dataset.label==='負債');
+            if(!top) return '';
+            return `純資産合計: ${fmt((top.raw||0)+(debt?.raw||0))}万円`;
+          }
+        }},
         annotation:retireIdx>=0?{annotations:{retire:{type:'line',xMin:retireIdx,xMax:retireIdx,
           borderColor:'#94a3b8',borderWidth:1,borderDash:[4,4],label:{content:'退職',enabled:true,font:{size:10}}}}}:{}},
-      scales:{y:{ticks:{callback:v=>fmt(v)+'万'},grid:{color:'#f1f5f9'}},
-        x:{ticks:{maxTicksLimit:12}}}}
+      scales:{y:{ticks:{callback:v=>fmt(v)+'万'},grid:{color:'#f1f5f9'}},x:{ticks:{maxTicksLimit:12}}}}
   });
 
   // Cash flow chart
