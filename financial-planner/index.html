@@ -3266,7 +3266,7 @@ function ghTransferToken(){
     // コピーも試みる
     navigator.clipboard?.writeText(pat).then(()=>
       showToast('📋 トークンをコピーしました。スマホの同じ画面に貼り付けて「接続する」を押してください')
-    ).catch(()=>{});
+    ).catch(e=>showToast('❌ クリップボードへのコピーに失敗しました。手動でコピーしてください（'+e.message+'）'));
   };
   show();
 }
@@ -4569,7 +4569,7 @@ function applyAllUpdates(){
     if(m) allPending.push(...m[1].split('\n').filter(l=>l.trim()));
     return false;
   };
-  ALL_MIGRATIONS.forEach(fn=>{try{fn();}catch(e){}});
+  ALL_MIGRATIONS.forEach(fn=>{try{fn();}catch(e){console.error('migration dry-run error:',e);}});
   window.confirm=origConfirm;
 
   if(!allPending.length){
@@ -4582,7 +4582,7 @@ function applyAllUpdates(){
 
   // Phase 2: apply all — auto-confirm every individual dialog
   window.confirm=()=>true;
-  ALL_MIGRATIONS.forEach(fn=>{try{fn();}catch(e){}});
+  ALL_MIGRATIONS.forEach(fn=>{try{fn();}catch(e){console.error('migration apply error:',e);}});
   window.confirm=origConfirm;
 
   showToast(`✅ ${label}の未反映アップデートを一括適用しました`);
@@ -4604,7 +4604,7 @@ function renderUpdateBadge(){
     addCryptoHoldings,addInvestmentTrusts,addSBIHoldings,
     addMonthlyFixedCosts,addLifestyleData,addEducationSteps,addFPUpdates,addDrawdownIncome
   ];
-  ALL_MIGRATIONS.forEach(fn=>{try{fn();}catch(e){}});
+  ALL_MIGRATIONS.forEach(fn=>{try{fn();}catch(e){console.error('migration badge-count error:',e);}});
   window.confirm=origConfirm;
   const badge=document.getElementById('update-badge');
   if(badge){
@@ -4655,7 +4655,9 @@ function copySyncURL(){
 function shareSyncURL(){
   const url=document.getElementById('sync-url-display').value;
   if(!url||url==='生成中...') return;
-  navigator.share({title:'ファイナンシャルプランナー データ同期',url}).catch(()=>{});
+  navigator.share({title:'ファイナンシャルプランナー データ同期',url}).catch(e=>{
+    if(e.name!=='AbortError') showToast('❌ 共有に失敗しました（'+e.message+'）');
+  });
 }
 
 function importFromSyncInput(){
@@ -4755,26 +4757,25 @@ function init(){
   if(_ghPat){
     updateGhBadge('syncing');
     setTimeout(async()=>{
-      const loaded=await ghFetch();
-      if(!loaded){
-        syncFromDOM();
-        await ghSave();
-      }
+      await ghFetch();
     }, 800);
   } else {
     // PAT未設定: 同ディレクトリの user-data.json を直接 fetch（HTTPサーバー経由時に有効）
     setTimeout(async()=>{
       try{
         const res=await fetch('./user-data.json?_='+Date.now());
-        if(!res.ok) return;
+        if(!res.ok){showToast('❌ user-data.json の読み込みに失敗しました（HTTP '+res.status+'）');return;}
         const parsed=await res.json();
-        if(!parsed?.members||!parsed?.plans) return;
+        if(!parsed?.members||!parsed?.plans){showToast('❌ user-data.json の形式が不正です');return;}
         Object.assign(data,parsed);
         localStorage.setItem('fp-data',JSON.stringify(data));
         syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();
         renderPlans(); updateMonthlySummary(); updateNetWorthSummary();
         syncDividendToIncome(); renderAllocChart();
-      }catch(e){}
+      }catch(e){
+        // file://プロトコルやネットワーク不可時は fetch 自体が失敗する（TypeError）
+        console.error('user-data.json fetch failed:', e.message);
+      }
     },800);
   }
 

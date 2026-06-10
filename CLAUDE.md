@@ -18,6 +18,32 @@ git checkout claude/financial-planner-tool-QVzK9
 
 ---
 
+## エラーハンドリング原則
+
+**新規コードを書く際の必須ルール:**
+
+- **空の catch ブロック禁止**: `catch(e){}` は絶対に書かない
+- **エラーは必ずユーザーに伝える**: UIコードでは `showToast('❌ ...')` で表示する
+- **非UIコードでは `console.error` で記録**: ユーザーに見えない処理でも黙って捨てない
+- **失敗時の黙った `return` 禁止**: fetch失敗・バリデーション失敗は原因をユーザーに通知してから終了する
+- **フォールバックへの無音移行禁止**: エラーを握りつぶして別処理に進まない。ユーザーに確認を取るかエラーを明示する
+- **ユーザーキャンセル（`AbortError`）は例外**: ユーザー自身が中断した操作はエラー表示不要
+
+```javascript
+// NG
+fetch(url).then(r=>r.json()).catch(()=>{});
+
+// OK
+fetch(url)
+  .then(r=>{
+    if(!r.ok) { showToast('❌ 取得失敗（HTTP '+r.status+'）'); return; }
+    return r.json();
+  })
+  .catch(e=>showToast('❌ ネットワークエラー: '+e.message));
+```
+
+---
+
 # Suno AI Lyrics Integration
 
 毎日歌詞を整理し、Suno AIで5つのスタイルの曲を自動生成するシステム。
