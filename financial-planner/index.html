@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>パーソナル ファイナンシャルプランナー</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+  <script src="chart.umd.min.js"></script>
+  <script src="lz-string.min.js"></script>
   <style>
     :root{
       --primary:#2563eb;--primary-light:#dbeafe;--primary-dark:#1d4ed8;
@@ -2550,6 +2550,7 @@ function renderSimulation(){
   const allSims=data.plans.map(p=>({plan:p,rows:simulate(p,irOverride)}));
   const selPlanId=getSelectedPlanId();
   const selSim=allSims.find(s=>s.plan.id===selPlanId)||allSims[0];
+  const selPlan=selSim.plan;
   const base=selSim.rows;
   renderFamilyTimeline(selSim.plan,base);
   const self=data.members.find(m=>m.role==='self');
