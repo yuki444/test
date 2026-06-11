@@ -560,7 +560,7 @@
           <div class="field"><label>投資・運用利回り（想定）</label><input type="number" id="investment-return" value="3.0" min="0" max="15" step="0.1"><span class="hint">% / 年</span></div>
           <div class="field"><label>物価上昇率（想定）</label><input type="number" id="inflation-rate" value="1.5" min="0" max="10" step="0.1"><span class="hint">% / 年</span></div>
           <div class="field"><label>給与増加率（退職まで）</label><input type="number" id="salary-growth" value="1.0" min="0" max="10" step="0.1"><span class="hint">% / 年</span></div>
-          <div class="field"><label>退職後の生活費倍率</label><input type="number" id="retire-expense-ratio" value="1.0" min="0.5" max="1.5" step="0.05"><span class="hint">倍（1.0=変化なし、0.85=15%減、1.1=10%増）</span></div>
+          <div class="field"><label>退職後の生活費倍率</label><input type="number" id="retire-expense-ratio" value="1.0" min="0.5" max="1.5" step="0.05"><span class="hint">倍（娯楽・その他のみ適用。1.0=変化なし、1.1=10%増）</span></div>
         </div>
       </div>
     </div>
@@ -1237,9 +1237,9 @@ const DEFAULTS = {
     {fromAge:38,delta:-30000,memo:'住宅ローン控除（0.7%×残債相当 年約36万）'},
     {fromAge:39,delta:-31000,memo:'オリックス 払込終了（2027年3月）'},
     {fromAge:39,delta:2000,  memo:'第1子 小学生 小遣い開始（2,000円/月）'},
-    {fromAge:39,delta:-10000,memo:'第1子 小学校入学・保育料終了（-3.5万→塾等+2.5万）'},
+    {fromAge:39,delta:-10000,memo:'第1子 小学校入学・保育料終了（-3.5万→塾等+2.5万）',category:'education'},
     {fromAge:43,delta:2000,  memo:'第2子 小学生 小遣い開始（2,000円/月）'},
-    {fromAge:43,delta:-15000,memo:'第2子 小学校入学・保育料終了（-4万→塾等+2.5万）'},
+    {fromAge:43,delta:-15000,memo:'第2子 小学校入学・保育料終了（-4万→塾等+2.5万）',category:'education'},
     {fromAge:45,delta:3000,  memo:'第1子 中学生 小遣い増額（5,000円/月）'},
     {fromAge:48,delta:5000,  memo:'第1子 高校生 小遣い増額（10,000円/月）'},
     {fromAge:49,delta:3000,  memo:'第2子 中学生 小遣い増額（5,000円/月）'},
@@ -1247,10 +1247,10 @@ const DEFAULTS = {
     {fromAge:51,delta:30000, memo:'住宅ローン控除 終了（13年経過）'},
     {fromAge:52,delta:5000,  memo:'第2子 高校生 小遣い増額（10,000円/月）'},
     {fromAge:55,delta:-10000,memo:'第2子 独立 小遣い終了'},
-    {fromAge:55,delta:-25000,memo:'第1子 独立・教育費半減（-2.5万）'},
+    {fromAge:55,delta:-25000,memo:'第1子 独立・教育費半減（-2.5万）',category:'education'},
     {fromAge:55,delta:10000, memo:'加齢による医療費増加（55歳〜 +1万/月）'},
     {fromAge:55,delta:60000, memo:'退職後健康保険料（国保/任意継続・夫婦2人 月6万推計）',category:'insurance'},
-    {fromAge:59,delta:-25000,memo:'第2子 大学卒業・教育費終了（-2.5万→累計0）'},
+    {fromAge:59,delta:-25000,memo:'第2子 大学卒業・教育費終了（-2.5万→累計0）',category:'education'},
     {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
     {fromAge:65,delta:-40000,memo:'後期高齢者医療移行（健康保険料大幅減・月2万へ）',category:'insurance'},
     {fromAge:65,delta:20000, memo:'加齢による医療費増加（65歳〜 さらに+2万/月）'},
@@ -2341,6 +2341,7 @@ function simulate(plan,irOverride=null){
   const {endAge,retireAge,retireAgeSpouse,investReturn:ir,inflation,salaryGrowth,retireExpenseRatio=1.0}=data.settings;
   const r=(irOverride!==null?irOverride:ir)/100, inf=inflation/100, sg=salaryGrowth/100;
   const ECATS=['housing','food','utilities','insurance','education','transport','medical','entertainment','other'];
+  const RETIRE_LEISURE=['entertainment','other']; // 退職後倍率は娯楽・その他のみ適用
 
   let FA=data.assets.cash+data.assets.fixedDeposit+data.assets.stocks+data.assets.ideco+data.assets.insurance+data.assets.other;
   // 3-tier FA (short/mid/long) — display-only parallel tracking
@@ -2388,8 +2389,7 @@ function simulate(plan,irOverride=null){
 
     // --- Expenses (simulation totals: same logic as before) ---
     const nhEv=plan.events.find(ev=>ev.type==='nursing-home'&&age>=ev.age);
-    let baseExpenses=Object.values(data.expenses).reduce((a,b)=>a+b,0)*12*inflF;
-    if(retired) baseExpenses*=retireExpenseRatio;
+    let baseExpenses=ECATS.reduce((sum,k)=>sum+(data.expenses[k]||0)*((retired&&RETIRE_LEISURE.includes(k))?retireExpenseRatio:1.0),0)*12*inflF;
     const stepDeltaVal=data.expenseSteps?.length?data.expenseSteps.filter(s=>age>=s.fromAge).reduce((sum,s)=>sum+s.delta,0):0;
     if(stepDeltaVal) baseExpenses+=stepDeltaVal*12*inflF;
     if(nhEv) baseExpenses=nhEv.amount*12*inflF; // nursing home: input in today's prices, inflate to future value
@@ -2409,7 +2409,7 @@ function simulate(plan,irOverride=null){
       });
       ECATS.forEach(k=>{
         const eff=Math.max(0,(data.expenses[k]||0)+(catStep[k]||0));
-        dEbase[k]=Math.round(eff*12*inflF*(retired?retireExpenseRatio:1));
+        dEbase[k]=Math.round(eff*12*inflF*((retired&&RETIRE_LEISURE.includes(k))?retireExpenseRatio:1.0));
       });
     }
     const dRetireAdj=0;
@@ -4920,6 +4920,9 @@ function applyMigrations(d){
   if(!stepMemos.has('後期高齢者医療移行（健康保険料大幅減・月2万へ）'))
     d.expenseSteps.push({fromAge:65,delta:-40000,memo:'後期高齢者医療移行（健康保険料大幅減・月2万へ）',category:'insurance'});
   d.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
+  // v6: education カテゴリ付与（グラフ表示の正確性向上）
+  const eduCatMemos=new Set(['第1子 小学校入学・保育料終了（-3.5万→塾等+2.5万）','第2子 小学校入学・保育料終了（-4万→塾等+2.5万）','第1子 独立・教育費半減（-2.5万）','第2子 大学卒業・教育費終了（-2.5万→累計0）']);
+  d.expenseSteps.forEach(s=>{if(eduCatMemos.has(s.memo)&&!s.category)s.category='education';});
   // holdings に value 設定済みなら assets の投資系フィールドを自動同期
   // （prices.json 取得前でも既存の value を信頼できる値として使う）
   if(d.holdings?.some(h=>h.value>0)){
