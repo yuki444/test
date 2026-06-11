@@ -1346,6 +1346,8 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-26000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金（現在1,500万→75歳時インフレ1.73倍で2,600万換算）'},
       {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:700000, duration:26,memo:'夫婦2人分 月70万円（1人35万×2）食事・居住・介護含む。通常生活費置換'},
       {type:'expense-change',name:'老人ホーム 医療・個人費補足',age:75,amount:50000,duration:26,memo:'NH期間の追加費用概算: 医療費3万/月+個人用品・通信・余暇2万/月=計5万/月・夫婦2人分'},
+      {type:'lump-expense',  name:'配偶者の葬儀費用',           age:88,amount:-3000000,duration:1,memo:'本人88歳・配偶者87歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'},
+      {type:'lump-expense',  name:'本人の葬儀費用',             age:90,amount:-3000000,duration:1,memo:'本人90歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'},
       {type:'drawdown', name:'投資取り崩し（月50万）',  age:55,amount:500000, duration:35,memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'},
     ]},
     // ── プラン2: 20年後（58歳）に半値売却→賃貸転居 ────────────────
@@ -1378,6 +1380,8 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-26000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金（現在1,500万→75歳時インフレ1.73倍で2,600万換算）'},
       {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:700000, duration:26,memo:'夫婦2人分 月70万円（1人35万×2）食事・居住・介護含む。通常生活費置換'},
       {type:'expense-change',name:'老人ホーム 医療・個人費補足',age:75,amount:50000,duration:26,memo:'NH期間の追加費用概算: 医療費3万/月+個人用品・通信・余暇2万/月=計5万/月・夫婦2人分'},
+      {type:'lump-expense',  name:'配偶者の葬儀費用',           age:88,amount:-3000000,duration:1,memo:'本人88歳・配偶者87歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'},
+      {type:'lump-expense',  name:'本人の葬儀費用',             age:90,amount:-3000000,duration:1,memo:'本人90歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'},
       {type:'drawdown', name:'投資取り崩し（月50万）',  age:55,amount:500000, duration:35,memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'},
     ]},
     // ── プラン3: 8年ごとに新築へ住み替え（2割ずつ縮小） ───────────
@@ -1428,6 +1432,8 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-26000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金（現在1,500万→75歳時インフレ1.73倍で2,600万換算）'},
       {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:700000, duration:26,memo:'夫婦2人分 月70万円（1人35万×2）食事・居住・介護含む。自宅売却・通常生活費置換'},
       {type:'expense-change',name:'老人ホーム 医療・個人費補足',age:75,amount:50000,duration:26,memo:'NH期間の追加費用概算: 医療費3万/月+個人用品・通信・余暇2万/月=計5万/月・夫婦2人分'},
+      {type:'lump-expense',  name:'配偶者の葬儀費用',           age:88,amount:-3000000,duration:1,memo:'本人88歳・配偶者87歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'},
+      {type:'lump-expense',  name:'本人の葬儀費用',             age:90,amount:-3000000,duration:1,memo:'本人90歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'},
       {type:'drawdown', name:'投資取り崩し（月50万）',  age:55,amount:500000, duration:35,memo:'定年後 投資信託→NISA→個別株の順で月50万取り崩し。新NISAは上限後も課税口座で継続積立'},
     ]},
   ],
@@ -4229,6 +4235,8 @@ function addHousingScenarios(){
     {type:'lump-income',   name:'企業型DC退職金（本人）',age:55,amount:17700000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 税引後約1,770万（退職所得控除760万・税130万）'},
     {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-26000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金（現在1,500万→75歳時インフレ1.73倍で2,600万換算）'},
     {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:700000, duration:26,memo:'夫婦2人分 月70万円（1人35万×2）食事・居住・介護含む。自宅売却・通常生活費置換'},
+    {type:'lump-expense',  name:'配偶者の葬儀費用',        age:88,amount:-3000000,duration:1,memo:'本人88歳・配偶者87歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'},
+    {type:'lump-expense',  name:'本人の葬儀費用',          age:90,amount:-3000000,duration:1,memo:'本人90歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'},
   ];
   if(!existingNames.includes('住み続ける（ローン完済）'))
     toAdd.push({name:'住み続ける（ローン完済）',color:'#3b82f6',events:[...commonEvents,
@@ -4781,7 +4789,7 @@ function init(){
     data.savings.pensionSpouse=110000;
     data._migrationV3=true;
   }
-  // v4マイグレーション: 老人ホーム月額 50万→70万・期間15→26年 を強制反映
+  // v4マイグレーション: 老人ホーム月額 50万→70万・期間15→26年 を強制反映 + 葬儀費追加
   if(!data._migrationV4){
     data.plans.forEach(p=>{
       p.events.forEach(ev=>{
@@ -4791,6 +4799,11 @@ function init(){
           ev.memo='夫婦2人分 月70万円（1人35万×2）食事・居住・介護含む。通常生活費置換';
         }
       });
+      // 葬儀費がまだ登録されていないプランに追加
+      const hasSpouseFuneral=p.events.some(e=>e.name==='配偶者の葬儀費用');
+      const hasSelfFuneral=p.events.some(e=>e.name==='本人の葬儀費用');
+      if(!hasSpouseFuneral) p.events.push({type:'lump-expense',name:'配偶者の葬儀費用',age:88,amount:-3000000,duration:1,memo:'本人88歳・配偶者87歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'});
+      if(!hasSelfFuneral) p.events.push({type:'lump-expense',name:'本人の葬儀費用',age:90,amount:-3000000,duration:1,memo:'本人90歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'});
     });
     data._migrationV4=true;
   }
