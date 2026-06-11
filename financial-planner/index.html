@@ -4910,6 +4910,18 @@ function applyMigrations(d){
   if(!stepMemos.has('後期高齢者医療移行（健康保険料大幅減・月2万へ）'))
     d.expenseSteps.push({fromAge:65,delta:-40000,memo:'後期高齢者医療移行（健康保険料大幅減・月2万へ）',category:'insurance'});
   d.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
+  // holdings に value 設定済みなら assets の投資系フィールドを自動同期
+  // （prices.json 取得前でも既存の value を信頼できる値として使う）
+  if(d.holdings?.some(h=>h.value>0)){
+    const hStocks=d.holdings.filter(h=>h.category==='stocks').reduce((s,h)=>s+(h.value||0),0);
+    const hOther=d.holdings.filter(h=>h.category==='crypto'||h.category==='other').reduce((s,h)=>s+(h.value||0),0);
+    const hIdeco=d.holdings.filter(h=>h.category==='ideco').reduce((s,h)=>s+(h.value||0),0);
+    const hInsurance=d.holdings.filter(h=>h.category==='insurance').reduce((s,h)=>s+(h.value||0),0);
+    if(hStocks>0) d.assets.stocks=hStocks;
+    if(hOther>0) d.assets.other=hOther;
+    if(hIdeco>0) d.assets.ideco=hIdeco;
+    if(hInsurance>0) d.assets.insurance=hInsurance;
+  }
 }
 
 // ============================================================
