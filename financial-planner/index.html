@@ -4838,91 +4838,86 @@ function checkURLSync(){
 }
 
 // ============================================================
+// MIGRATIONS — called from init() and from the fallback fetch handler
+// ============================================================
+function applyMigrations(d){
+  // フィールド補完（マージ後に欠けているキーを安全に埋める）
+  d.settings=Object.assign({retireAge:55,retireAgeSpouse:50,endAge:90,investReturn:4.0,inflation:1.5,salaryGrowth:5.0,selfIncomeCap:13000000},d.settings);
+  d.debts=Object.assign({mortgage:0,mortgageMonthly:0,car:0,education:0,consumer:0,other:0},d.debts);
+  d.savings=Object.assign({invest:200000,deposit:100000,pensionSelf:170000,pensionSpouse:110000},d.savings);
+  // v3: 昇給率5%・配偶者退職50歳・昇給上限1300万・配偶者年金11万 を強制反映
+  d.settings.salaryGrowth=5.0;
+  d.settings.retireAgeSpouse=50;
+  d.settings.selfIncomeCap=13000000;
+  d.savings.pensionSpouse=110000;
+  // v4: 老人ホーム月額 50万→70万・期間15→26年 + 葬儀費追加（重複防止あり）
+  d.plans.forEach(p=>{
+    p.events.forEach(ev=>{
+      if(ev.type==='nursing-home'&&ev.amount===500000){
+        ev.amount=700000;ev.duration=26;
+        ev.memo='夫婦2人分 月70万円（1人35万×2）食事・居住・介護含む。通常生活費置換';
+      }
+    });
+    const existingSpouseFuneral=p.events.find(e=>e.name==='配偶者の葬儀費用');
+    if(!existingSpouseFuneral)
+      p.events.push({type:'lump-expense',name:'配偶者の葬儀費用',age:88,amount:-3000000,duration:1,memo:'本人88歳・配偶者87歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'});
+    else{existingSpouseFuneral.age=88;existingSpouseFuneral.amount=-3000000;}
+    const existingSelfFuneral=p.events.find(e=>e.name==='本人の葬儀費用');
+    if(!existingSelfFuneral)
+      p.events.push({type:'lump-expense',name:'本人の葬儀費用',age:90,amount:-3000000,duration:1,memo:'本人90歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'});
+    else{existingSelfFuneral.age=90;existingSelfFuneral.amount=-3000000;}
+  });
+  // v5: イベント金額修正・欠落イベント追加・expenseSteps補完
+  d.plans.forEach(p=>{
+    p.events.forEach(ev=>{
+      if(ev.name==='企業型DC退職金（本人）'&&ev.amount===19000000){ev.amount=17700000;ev.memo='2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 税引後約1,770万（退職所得控除760万・税130万）';}
+      if(ev.name==='メットライフ②解約・払戻'&&ev.amount===7000000){ev.age=55;ev.amount=6500000;ev.memo='一時払USD建終身保険 払戻700万円 税引後650万（元金300万・一時所得175万・税50万）';}
+      if(ev.name==='メットライフ①解約・払戻'&&ev.amount===9425000){ev.age=70;ev.amount=11350000;ev.memo='USD建終身保険 70歳時81,145ドル→税引後1,135万（払込52,861ドル・一時所得180万・税40万）';}
+      if(ev.name==='老人ホーム入居一時金'&&ev.amount===-15000000){ev.amount=-26000000;ev.memo='夫婦2人分 有料老人ホーム 入居一時金（現在1,500万→75歳時インフレ1.73倍で2,600万換算）';}
+      if(ev.name==='引越費用①'){ev.name='売買・引越諸費用①';ev.amount=-5400000;ev.memo='売買諸費用440万（仲介206万+登記/税/保険/ローン230万）+引越100万';}
+      if(ev.name==='引越費用②'){ev.name='売買・引越諸費用②';ev.amount=-5300000;ev.memo='売買諸費用430万（仲介206万+登記/税/保険/ローン220万）+引越100万';}
+      if(ev.name==='引越費用③'){ev.name='売買・引越諸費用③';ev.amount=-5300000;ev.memo='売買諸費用430万（仲介206万+登記/税/保険/ローン220万）+引越100万';}
+    });
+    const hasEv=n=>p.events.some(e=>e.name===n);
+    if(!hasEv('第1子 私立高校 入学金'))      p.events.push({type:'lump-expense',name:'第1子 私立高校 入学金',age:48,amount:-250000,duration:1,memo:'私立高校入学金・制服等 第1子15歳'});
+    if(!hasEv('第2子 私立高校 入学金'))      p.events.push({type:'lump-expense',name:'第2子 私立高校 入学金',age:52,amount:-250000,duration:1,memo:'私立高校入学金・制服等 第2子15歳'});
+    if(!hasEv('第1子 成人式（スーツ・写真）'))p.events.push({type:'lump-expense',name:'第1子 成人式（スーツ・写真）',age:52,amount:-100000,duration:1,memo:'成人式スーツ・写真・会食'});
+    if(!hasEv('第2子 成人式（スーツ・写真）'))p.events.push({type:'lump-expense',name:'第2子 成人式（スーツ・写真）',age:56,amount:-100000,duration:1,memo:'成人式スーツ・写真・会食'});
+    if(!hasEv('夫婦旅行①'))                p.events.push({type:'lump-expense',name:'夫婦旅行①',age:60,amount:-2000000,duration:1,memo:'退職後 夫婦2人旅行①'});
+    if(!hasEv('夫婦旅行②'))                p.events.push({type:'lump-expense',name:'夫婦旅行②',age:63,amount:-2000000,duration:1,memo:'退職後 夫婦2人旅行②'});
+    if(!hasEv('夫婦旅行③'))                p.events.push({type:'lump-expense',name:'夫婦旅行③',age:66,amount:-2000000,duration:1,memo:'退職後 夫婦2人旅行③'});
+    if(!hasEv('夫婦旅行④'))                p.events.push({type:'lump-expense',name:'夫婦旅行④',age:69,amount:-2000000,duration:1,memo:'退職後 夫婦2人旅行④'});
+    if(!hasEv('夫婦旅行⑤'))                p.events.push({type:'lump-expense',name:'夫婦旅行⑤',age:72,amount:-2000000,duration:1,memo:'退職後 夫婦2人旅行⑤'});
+    if(!hasEv('孫①誕生お祝い（第1子第1子）'))p.events.push({type:'lump-expense',name:'孫①誕生お祝い（第1子第1子）',age:63,amount:-1000000,duration:1,memo:'孫誕生お祝い 100万円'});
+    if(!hasEv('孫②誕生お祝い（第1子第2子）'))p.events.push({type:'lump-expense',name:'孫②誕生お祝い（第1子第2子）',age:65,amount:-1000000,duration:1,memo:'孫誕生お祝い 100万円'});
+    if(!hasEv('孫③誕生お祝い（第2子第1子）'))p.events.push({type:'lump-expense',name:'孫③誕生お祝い（第2子第1子）',age:67,amount:-1000000,duration:1,memo:'孫誕生お祝い 100万円'});
+    if(!hasEv('孫④誕生お祝い（第2子第2子）'))p.events.push({type:'lump-expense',name:'孫④誕生お祝い（第2子第2子）',age:69,amount:-1000000,duration:1,memo:'孫誕生お祝い 100万円'});
+    if(!hasEv('第1子 住宅建築お祝い'))       p.events.push({type:'lump-expense',name:'第1子 住宅建築お祝い',age:65,amount:-3000000,duration:1,memo:'第1子マイホーム建築お祝い 300万円'});
+    if(!hasEv('第2子 住宅建築お祝い'))       p.events.push({type:'lump-expense',name:'第2子 住宅建築お祝い',age:69,amount:-3000000,duration:1,memo:'第2子マイホーム建築お祝い 300万円'});
+  });
+  const p2=d.plans.find(p=>p.name.includes('賃貸')||p.name.includes('売却'));
+  if(p2&&!p2.events.some(e=>e.name==='火災保険終了（住宅売却）'))
+    p2.events.push({type:'expense-change',name:'火災保険終了（住宅売却）',age:58,amount:-14000,duration:42,memo:'住宅売却後 火災保険不要 月1.4万減'});
+  const p3=d.plans.find(p=>p.name.includes('新築'));
+  if(p3&&!p3.events.some(e=>e.name==='新築④へ住替（70歳）')){
+    p3.events.push({type:'move-home',name:'新築④へ住替（70歳）',age:70,amount:0,duration:1,salePrice:58500000,newPrice:65000000,newLoan:43000000,newMonthly:132000,memo:'旧家5,850万売却(6,500万×0.9)・新築6,500万。新ローン4,300万@1.5%35年≈月13.2万'});
+    p3.events.push({type:'lump-expense',name:'売買・引越諸費用④',age:70,amount:-5300000,duration:1,memo:'売買諸費用430万（仲介206万+登記/税/保険/ローン220万）+引越100万'});
+  }
+  if(!d.expenseSteps) d.expenseSteps=[];
+  const stepMemos=new Set(d.expenseSteps.map(s=>s.memo));
+  if(!stepMemos.has('退職後健康保険料（国保/任意継続・夫婦2人 月6万推計）'))
+    d.expenseSteps.push({fromAge:55,delta:60000,memo:'退職後健康保険料（国保/任意継続・夫婦2人 月6万推計）',category:'insurance'});
+  if(!stepMemos.has('後期高齢者医療移行（健康保険料大幅減・月2万へ）'))
+    d.expenseSteps.push({fromAge:65,delta:-40000,memo:'後期高齢者医療移行（健康保険料大幅減・月2万へ）',category:'insurance'});
+  d.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
+}
+
+// ============================================================
 // INIT
 // ============================================================
 function init(){
   initPin();
-  // 旧バージョンからのマイグレーション：新フィールドの安全なデフォルト補完
-  data.settings=Object.assign({retireAge:55,retireAgeSpouse:50,endAge:90,investReturn:4.0,inflation:1.5,salaryGrowth:5.0,selfIncomeCap:13000000},data.settings);
-  data.debts=Object.assign({mortgage:0,mortgageMonthly:0,car:0,education:0,consumer:0,other:0},data.debts);
-  data.savings=Object.assign({invest:200000,deposit:100000,pensionSelf:170000,pensionSpouse:110000},data.savings);
-  // v3マイグレーション: 昇給率5%・配偶者退職50歳・配偶者年金11万を強制反映（旧保存データ上書き）
-  if(!data._migrationV3){
-    data.settings.salaryGrowth=5.0;
-    data.settings.retireAgeSpouse=50;
-    data.settings.selfIncomeCap=13000000;
-    data.savings.pensionSpouse=110000;
-    data._migrationV3=true;
-  }
-  // v4マイグレーション: 老人ホーム月額 50万→70万・期間15→26年 を強制反映 + 葬儀費追加
-  if(!data._migrationV4){
-    data.plans.forEach(p=>{
-      p.events.forEach(ev=>{
-        if(ev.type==='nursing-home'&&ev.amount===500000){
-          ev.amount=700000;
-          ev.duration=26;
-          ev.memo='夫婦2人分 月70万円（1人35万×2）食事・居住・介護含む。通常生活費置換';
-        }
-      });
-      // 葬儀費がまだ登録されていないプランに追加
-      const hasSpouseFuneral=p.events.some(e=>e.name==='配偶者の葬儀費用');
-      const hasSelfFuneral=p.events.some(e=>e.name==='本人の葬儀費用');
-      if(!hasSpouseFuneral) p.events.push({type:'lump-expense',name:'配偶者の葬儀費用',age:88,amount:-3000000,duration:1,memo:'本人88歳・配偶者87歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'});
-      if(!hasSelfFuneral) p.events.push({type:'lump-expense',name:'本人の葬儀費用',age:90,amount:-3000000,duration:1,memo:'本人90歳・葬儀一式300万円（葬儀・お布施・墓地等含む）'});
-    });
-    data._migrationV4=true;
-  }
-  // v5マイグレーション: イベント金額修正・欠落イベント追加・expenseSteps補完
-  if(!data._migrationV5){
-    data.plans.forEach(p=>{
-      // 金額修正
-      p.events.forEach(ev=>{
-        if(ev.name==='企業型DC退職金（本人）'&&ev.amount===19000000){ev.amount=17700000;ev.memo='2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 税引後約1,770万（退職所得控除760万・税130万）';}
-        if(ev.name==='メットライフ②解約・払戻'&&ev.amount===7000000){ev.age=55;ev.amount=6500000;ev.memo='一時払USD建終身保険 払戻700万円 税引後650万（元金300万・一時所得175万・税50万）';}
-        if(ev.name==='メットライフ①解約・払戻'&&ev.amount===9425000){ev.age=70;ev.amount=11350000;ev.memo='USD建終身保険 70歳時81,145ドル→税引後1,135万（払込52,861ドル・一時所得180万・税40万）';}
-        if(ev.name==='老人ホーム入居一時金'&&ev.amount===-15000000){ev.amount=-26000000;ev.memo='夫婦2人分 有料老人ホーム 入居一時金（現在1,500万→75歳時インフレ1.73倍で2,600万換算）';}
-        if(ev.name==='引越費用①'){ev.name='売買・引越諸費用①';ev.amount=-5400000;ev.memo='売買諸費用440万（仲介206万+登記/税/保険/ローン230万）+引越100万';}
-        if(ev.name==='引越費用②'){ev.name='売買・引越諸費用②';ev.amount=-5300000;ev.memo='売買諸費用430万（仲介206万+登記/税/保険/ローン220万）+引越100万';}
-        if(ev.name==='引越費用③'){ev.name='売買・引越諸費用③';ev.amount=-5300000;ev.memo='売買諸費用430万（仲介206万+登記/税/保険/ローン220万）+引越100万';}
-      });
-      // 共通イベント追加
-      const hasEv=n=>p.events.some(e=>e.name===n);
-      if(!hasEv('第1子 私立高校 入学金'))      p.events.push({type:'lump-expense',name:'第1子 私立高校 入学金',age:48,amount:-250000,duration:1,memo:'私立高校入学金・制服等 第1子15歳'});
-      if(!hasEv('第2子 私立高校 入学金'))      p.events.push({type:'lump-expense',name:'第2子 私立高校 入学金',age:52,amount:-250000,duration:1,memo:'私立高校入学金・制服等 第2子15歳'});
-      if(!hasEv('第1子 成人式（スーツ・写真）'))p.events.push({type:'lump-expense',name:'第1子 成人式（スーツ・写真）',age:52,amount:-100000,duration:1,memo:'成人式スーツ・写真・会食'});
-      if(!hasEv('第2子 成人式（スーツ・写真）'))p.events.push({type:'lump-expense',name:'第2子 成人式（スーツ・写真）',age:56,amount:-100000,duration:1,memo:'成人式スーツ・写真・会食'});
-      if(!hasEv('夫婦旅行①'))                p.events.push({type:'lump-expense',name:'夫婦旅行①',age:60,amount:-2000000,duration:1,memo:'退職後 夫婦2人旅行①'});
-      if(!hasEv('夫婦旅行②'))                p.events.push({type:'lump-expense',name:'夫婦旅行②',age:63,amount:-2000000,duration:1,memo:'退職後 夫婦2人旅行②'});
-      if(!hasEv('夫婦旅行③'))                p.events.push({type:'lump-expense',name:'夫婦旅行③',age:66,amount:-2000000,duration:1,memo:'退職後 夫婦2人旅行③'});
-      if(!hasEv('夫婦旅行④'))                p.events.push({type:'lump-expense',name:'夫婦旅行④',age:69,amount:-2000000,duration:1,memo:'退職後 夫婦2人旅行④'});
-      if(!hasEv('夫婦旅行⑤'))                p.events.push({type:'lump-expense',name:'夫婦旅行⑤',age:72,amount:-2000000,duration:1,memo:'退職後 夫婦2人旅行⑤'});
-      if(!hasEv('孫①誕生お祝い（第1子第1子）'))p.events.push({type:'lump-expense',name:'孫①誕生お祝い（第1子第1子）',age:63,amount:-1000000,duration:1,memo:'孫誕生お祝い 100万円'});
-      if(!hasEv('孫②誕生お祝い（第1子第2子）'))p.events.push({type:'lump-expense',name:'孫②誕生お祝い（第1子第2子）',age:65,amount:-1000000,duration:1,memo:'孫誕生お祝い 100万円'});
-      if(!hasEv('孫③誕生お祝い（第2子第1子）'))p.events.push({type:'lump-expense',name:'孫③誕生お祝い（第2子第1子）',age:67,amount:-1000000,duration:1,memo:'孫誕生お祝い 100万円'});
-      if(!hasEv('孫④誕生お祝い（第2子第2子）'))p.events.push({type:'lump-expense',name:'孫④誕生お祝い（第2子第2子）',age:69,amount:-1000000,duration:1,memo:'孫誕生お祝い 100万円'});
-      if(!hasEv('第1子 住宅建築お祝い'))       p.events.push({type:'lump-expense',name:'第1子 住宅建築お祝い',age:65,amount:-3000000,duration:1,memo:'第1子マイホーム建築お祝い 300万円'});
-      if(!hasEv('第2子 住宅建築お祝い'))       p.events.push({type:'lump-expense',name:'第2子 住宅建築お祝い',age:69,amount:-3000000,duration:1,memo:'第2子マイホーム建築お祝い 300万円'});
-    });
-    // プラン2: 火災保険終了
-    const p2=data.plans.find(p=>p.name.includes('賃貸')||p.name.includes('売却'));
-    if(p2&&!p2.events.some(e=>e.name==='火災保険終了（住宅売却）'))
-      p2.events.push({type:'expense-change',name:'火災保険終了（住宅売却）',age:58,amount:-14000,duration:42,memo:'住宅売却後 火災保険不要 月1.4万減'});
-    // プラン3: 新築④
-    const p3=data.plans.find(p=>p.name.includes('新築'));
-    if(p3&&!p3.events.some(e=>e.name==='新築④へ住替（70歳）')){
-      p3.events.push({type:'move-home',name:'新築④へ住替（70歳）',age:70,amount:0,duration:1,salePrice:58500000,newPrice:65000000,newLoan:43000000,newMonthly:132000,memo:'旧家5,850万売却(6,500万×0.9)・新築6,500万。新ローン4,300万@1.5%35年≈月13.2万'});
-      p3.events.push({type:'lump-expense',name:'売買・引越諸費用④',age:70,amount:-5300000,duration:1,memo:'売買諸費用430万（仲介206万+登記/税/保険/ローン220万）+引越100万'});
-    }
-    // expenseSteps: 退職後健康保険料・後期高齢者医療移行 を未追加なら補完
-    if(!data.expenseSteps) data.expenseSteps=[];
-    const stepMemos=new Set(data.expenseSteps.map(s=>s.memo));
-    if(!stepMemos.has('退職後健康保険料（国保/任意継続・夫婦2人 月6万推計）'))
-      data.expenseSteps.push({fromAge:55,delta:60000,memo:'退職後健康保険料（国保/任意継続・夫婦2人 月6万推計）',category:'insurance'});
-    if(!stepMemos.has('後期高齢者医療移行（健康保険料大幅減・月2万へ）'))
-      data.expenseSteps.push({fromAge:65,delta:-40000,memo:'後期高齢者医療移行（健康保険料大幅減・月2万へ）',category:'insurance'});
-    data.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
-    data._migrationV5=true;
-  }
+  applyMigrations(data);
   data.income=Object.assign({self:0,spouse:0,side:0,investment:0,bonusSelf:0,bonusSpouse:0},data.income);
   if(!data.holdings) data.holdings=[];
   if(!data.expenseSteps) data.expenseSteps=[];
@@ -4978,6 +4973,7 @@ function init(){
         const parsed=await res.json();
         if(!parsed?.members||!parsed?.plans){showToast('❌ user-data.json の形式が不正です');return;}
         Object.assign(data,parsed);
+        applyMigrations(data);
         localStorage.setItem('fp-data',JSON.stringify(data));
         syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();
         renderPlans(); updateMonthlySummary(); updateNetWorthSummary();
