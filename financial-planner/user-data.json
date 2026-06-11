@@ -2148,7 +2148,7 @@
       "qty": 15,
       "price": 4251.42,
       "fee": 288,
-      "realizedGain": 0,
+      "realizedGain": 7452,
       "memo": "米国株（JPY換算）"
     },
     {
@@ -2200,7 +2200,7 @@
       "qty": 100,
       "price": 1460,
       "fee": 115,
-      "realizedGain": 0,
+      "realizedGain": 25770,
       "memo": "申告"
     },
     {
@@ -2239,7 +2239,7 @@
       "qty": 100,
       "price": 3200,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 31050,
       "memo": "申告"
     },
     {
@@ -2330,7 +2330,7 @@
       "qty": 100,
       "price": 6200,
       "fee": 535,
-      "realizedGain": 0,
+      "realizedGain": 108930,
       "memo": "申告"
     },
     {
@@ -2525,7 +2525,7 @@
       "qty": 100,
       "price": 16,
       "fee": 55,
-      "realizedGain": 0,
+      "realizedGain": -116470,
       "memo": "申告"
     },
     {
@@ -2655,7 +2655,7 @@
       "qty": 200,
       "price": 565,
       "fee": 115,
-      "realizedGain": 0,
+      "realizedGain": 20586,
       "memo": "申告"
     },
     {
@@ -2759,7 +2759,7 @@
       "qty": 100,
       "price": 5360,
       "fee": 535,
-      "realizedGain": 0,
+      "realizedGain": 235490,
       "memo": "申告"
     },
     {
@@ -2889,7 +2889,7 @@
       "qty": 100,
       "price": 2500,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 15950,
       "memo": "申告"
     },
     {
@@ -2902,7 +2902,7 @@
       "qty": 100,
       "price": 2500,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 15950,
       "memo": "申告"
     },
     {
@@ -2928,7 +2928,7 @@
       "qty": 100,
       "price": 5820,
       "fee": 535,
-      "realizedGain": 0,
+      "realizedGain": -100170,
       "memo": "申告"
     },
     {
@@ -3058,7 +3058,7 @@
       "qty": 58218,
       "price": 1.9103,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 11213,
       "memo": "投信解約（円/口）"
     },
     {
@@ -3071,7 +3071,7 @@
       "qty": 100,
       "price": 5090,
       "fee": 535,
-      "realizedGain": 0,
+      "realizedGain": 78190,
       "memo": "申告"
     },
     {
@@ -3110,7 +3110,7 @@
       "qty": 100,
       "price": 5790,
       "fee": 535,
-      "realizedGain": 0,
+      "realizedGain": 39930,
       "memo": "申告"
     },
     {
@@ -3123,7 +3123,7 @@
       "qty": 100,
       "price": 3582,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 44950,
       "memo": "申告"
     },
     {
@@ -3136,7 +3136,7 @@
       "qty": 100,
       "price": 3500,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 60450,
       "memo": "申告"
     },
     {
@@ -3149,7 +3149,7 @@
       "qty": 100,
       "price": 4500,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 158000,
       "memo": "NISA"
     },
     {
@@ -3240,7 +3240,7 @@
       "qty": 100,
       "price": 1538.5,
       "fee": 115,
-      "realizedGain": 0,
+      "realizedGain": 6620,
       "memo": "申告"
     },
     {
@@ -3253,7 +3253,7 @@
       "qty": 100,
       "price": 1101.5,
       "fee": 115,
-      "realizedGain": 0,
+      "realizedGain": 44936,
       "memo": "申告"
     },
     {
@@ -3279,7 +3279,7 @@
       "qty": 100,
       "price": 2200,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 18450,
       "memo": "申告"
     },
     {
@@ -3396,7 +3396,7 @@
       "qty": 100,
       "price": 0,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": -649,
       "memo": "株式併合100:1 旧株消去"
     },
     {
@@ -3435,7 +3435,7 @@
       "qty": 100,
       "price": 5522,
       "fee": 535,
-      "realizedGain": 0,
+      "realizedGain": 96390,
       "memo": "申告"
     },
     {
@@ -3539,7 +3539,7 @@
       "qty": 100,
       "price": 4310,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 109850,
       "memo": "申告"
     },
     {
@@ -3552,7 +3552,7 @@
       "qty": 100,
       "price": 729.3,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 26420,
       "memo": "NISA"
     },
     {
@@ -3695,7 +3695,7 @@
       "qty": 100,
       "price": 3000,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 108000,
       "memo": "NISA"
     },
     {
@@ -3799,7 +3799,7 @@
       "qty": 100,
       "price": 5700,
       "fee": 535,
-      "realizedGain": 0,
+      "realizedGain": 174190,
       "memo": "申告"
     },
     {
@@ -3968,7 +3968,7 @@
       "qty": 100,
       "price": 2440,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 27450,
       "memo": "申告"
     },
     {
@@ -4124,7 +4124,7 @@
       "qty": 100,
       "price": 668,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 21800,
       "memo": "NISA"
     },
     {
@@ -4137,7 +4137,7 @@
       "qty": 100,
       "price": 3631,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 61050,
       "memo": "源徴あり"
     },
     {
@@ -4215,7 +4215,7 @@
       "qty": 100,
       "price": 50,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": -109100,
       "memo": "NISA"
     },
     {
@@ -4241,7 +4241,7 @@
       "qty": 100,
       "price": 50,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": -109100,
       "memo": "NISA"
     },
     {
@@ -4254,7 +4254,7 @@
       "qty": 100,
       "price": 2499,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 80200,
       "memo": "NISA"
     },
     {
@@ -4761,7 +4761,7 @@
       "qty": 118259,
       "price": 2.1963,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 59733,
       "memo": "投信解約（円/口）"
     },
     {
@@ -4774,7 +4774,7 @@
       "qty": 100719,
       "price": 3.6045,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 81149,
       "memo": "投信解約（円/口）"
     },
     {
@@ -4826,7 +4826,7 @@
       "qty": 100,
       "price": 4220,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 198790,
       "memo": "源徴あり"
     },
     {
@@ -4839,7 +4839,7 @@
       "qty": 100,
       "price": 5499,
       "fee": 535,
-      "realizedGain": 0,
+      "realizedGain": 180390,
       "memo": "源徴あり"
     },
     {
@@ -4865,7 +4865,7 @@
       "qty": 200,
       "price": 949,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 96780,
       "memo": "NISA"
     },
     {
@@ -5034,7 +5034,7 @@
       "qty": 100,
       "price": 2362,
       "fee": 275,
-      "realizedGain": 0,
+      "realizedGain": 30550,
       "memo": "申告"
     },
     {
@@ -5047,7 +5047,7 @@
       "qty": 300,
       "price": 531.5,
       "fee": 115,
-      "realizedGain": 0,
+      "realizedGain": 14981,
       "memo": "申告"
     },
     {
@@ -5125,7 +5125,7 @@
       "qty": 300,
       "price": 1260,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 42500,
       "memo": "NISA"
     },
     {
@@ -5138,7 +5138,7 @@
       "qty": 100,
       "price": 3599,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 17900,
       "memo": "NISA"
     },
     {
@@ -5229,7 +5229,7 @@
       "qty": 1,
       "price": 0,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": -6,
       "memo": "出庫"
     },
     {
@@ -5255,7 +5255,7 @@
       "qty": 100,
       "price": 2708,
       "fee": 0,
-      "realizedGain": 0,
+      "realizedGain": 95800,
       "memo": "NISA"
     },
     {
@@ -5268,7 +5268,7 @@
       "qty": 100,
       "price": 7577,
       "fee": 535,
-      "realizedGain": 0,
+      "realizedGain": 178130,
       "memo": "源徴あり"
     },
     {
