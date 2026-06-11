@@ -1257,7 +1257,7 @@ const DEFAULTS = {
     {fromAge:75,delta:20000, memo:'加齢による医療費増加（75歳〜 さらに+2万/月）'},
   ],
   // 3年前に7,000万円の家を購入（自宅評価額）
-  assets:{cash:3000000,fixedDeposit:2000000,stocks:18978775,ideco:0,home:70000000,realEstate:0,insurance:0,other:270000},
+  assets:{cash:1900000,fixedDeposit:0,stocks:18978775,ideco:0,home:70000000,realEstate:0,insurance:0,other:270000},
   // 35年ローン・1.5%固定・月20万返済。3年経過後残高約6,000万
   debts:{mortgage:60000000,mortgageMonthly:200000,mortgageRate:1.5,car:0,education:0,consumer:0,other:0},
   holdings:[
@@ -3268,7 +3268,17 @@ async function ghFetch(){
     const decoded=new TextDecoder().decode(Uint8Array.from(atob(j.content.replace(/\n/g,'')),c=>c.charCodeAt(0)));
     const parsed=JSON.parse(decoded);
     if(!parsed?.members||!parsed?.income) throw new Error('invalid data');
+    const prevTradeLogGh=data.tradeLog?[...data.tradeLog]:[];
     Object.assign(data,parsed);
+    if(prevTradeLogGh.length&&data.tradeLog?.length){
+      const keyGh=t=>`${t.date}|${t.type}|${t.name}|${t.qty}|${t.price}`;
+      const prevMapGh=new Map(prevTradeLogGh.map(t=>[keyGh(t),t]));
+      data.tradeLog=data.tradeLog.map(t=>{
+        const old=prevMapGh.get(keyGh(t));
+        return (old?.realizedGain&&!t.realizedGain)?{...t,realizedGain:old.realizedGain}:t;
+      });
+    }
+    applyMigrations(data);
     localStorage.setItem('fp-data',JSON.stringify(data));
     activePlanId=data.plans?.[0]?.id||1;
     syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();
@@ -4984,7 +4994,18 @@ function init(){
         if(!res.ok){showToast('❌ user-data.json の読み込みに失敗しました（HTTP '+res.status+'）');return;}
         const parsed=await res.json();
         if(!parsed?.members||!parsed?.plans){showToast('❌ user-data.json の形式が不正です');return;}
+        // tradeLog の計算済み realizedGain をマージ前に退避（フェッチ後の上書きで消さないため）
+        const prevTradeLog=data.tradeLog?[...data.tradeLog]:[];
         Object.assign(data,parsed);
+        // 退避した値を復元: 同一エントリ（date+type+name+qty+price）で旧側に realizedGain があれば優先
+        if(prevTradeLog.length&&data.tradeLog?.length){
+          const key=t=>`${t.date}|${t.type}|${t.name}|${t.qty}|${t.price}`;
+          const prevMap=new Map(prevTradeLog.map(t=>[key(t),t]));
+          data.tradeLog=data.tradeLog.map(t=>{
+            const old=prevMap.get(key(t));
+            return (old?.realizedGain&&!t.realizedGain)?{...t,realizedGain:old.realizedGain}:t;
+          });
+        }
         applyMigrations(data);
         localStorage.setItem('fp-data',JSON.stringify(data));
         syncToDOM(); renderMembers(); renderExpenseDetails(); renderExpenseSteps();

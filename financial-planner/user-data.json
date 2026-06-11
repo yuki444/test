@@ -240,8 +240,8 @@
     }
   ],
   "assets": {
-    "cash": 3000000,
-    "fixedDeposit": 2000000,
+    "cash": 1900000,
+    "fixedDeposit": 0,
     "stocks": 978775,
     "ideco": 0,
     "home": 70000000,
