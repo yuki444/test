@@ -2391,7 +2391,7 @@ function simulate(plan,irOverride=null){
     let baseExpenses=Object.values(data.expenses).reduce((a,b)=>a+b,0)*12*inflF;
     if(retired) baseExpenses*=retireExpenseRatio;
     const stepDeltaVal=data.expenseSteps?.length?data.expenseSteps.filter(s=>age>=s.fromAge).reduce((sum,s)=>sum+s.delta,0):0;
-    if(stepDeltaVal) baseExpenses+=stepDeltaVal*12;
+    if(stepDeltaVal) baseExpenses+=stepDeltaVal*12*inflF;
     if(nhEv) baseExpenses=nhEv.amount*12*inflF; // nursing home: input in today's prices, inflate to future value
     let expenses=baseExpenses;
     if(!nhEv&&mortgageMonthly>0&&mortgageBalance>0) expenses+=mortgageMonthly*12;
