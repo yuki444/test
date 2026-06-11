@@ -1206,7 +1206,7 @@ const DEFAULTS = {
     {id:3,name:'第1子', role:'child', age:5, birthdate:'2021-01-01',gender:'male'},
     {id:4,name:'第2子', role:'child', age:1, birthdate:'2025-01-01',gender:'female'}
   ],
-  settings:{retireAge:55,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0,retireExpenseRatio:1.1},
+  settings:{retireAge:55,retireAgeSpouse:50,endAge:90,investReturn:4.0,inflation:1.5,salaryGrowth:5.0,retireExpenseRatio:1.1},
   // 手取り推計: 本人1100万gross→月85万（2026年以降昇給見込）, 配偶者500万gross→月32.5万
   income:{self:850000,spouse:325000,side:16200,investment:0,bonusSelf:1000000,bonusSpouse:0},
   // ↑ side:16200 = ACN ESPP 15%割引ベネフィット（月9.17万積立×15%割引 差額1.62万/月）
@@ -1338,8 +1338,10 @@ const DEFAULTS = {
       {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳 お祝い300万円'},
       {type:'lump-expense',  name:'家電・設備買い替え①',   age:48,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
       {type:'lump-expense',  name:'家電・設備買い替え②',   age:58,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
-      {type:'lump-expense',  name:'大規模リフォーム①',     age:58,amount:-10000000,duration:1,memo:'築20年 外壁・屋根・設備 大規模リフォーム概算1,000万円'},
+      {type:'lump-expense',  name:'大規模リフォーム①',     age:58,amount:-10000000,duration:1,memo:'20年後（築23年） 外壁・屋根・設備 大規模リフォーム概算1,000万円'},
       {type:'lump-expense',  name:'家電・設備買い替え③',   age:68,amount:-1000000,duration:1,memo:'家電・設備 一括買い替え概算（10年ごと）'},
+      {type:'lump-expense',  name:'大規模リフォーム②',     age:68,amount:-10000000,duration:1,memo:'30年後（築33年） 外壁・水回り・設備 大規模リフォーム概算1,000万円'},
+      {type:'lump-expense',  name:'大規模リフォーム③',     age:78,amount:-10000000,duration:1,memo:'40年後（築43年） 大規模リフォーム1,000万円（※NH入居75歳後・空家処分前の補修想定）'},
       {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-26000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金（現在1,500万→75歳時インフレ1.73倍で2,600万換算）'},
       {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:700000, duration:26,memo:'夫婦2人分 月70万円（1人35万×2）食事・居住・介護含む。通常生活費置換'},
       {type:'expense-change',name:'老人ホーム 医療・個人費補足',age:75,amount:50000,duration:26,memo:'NH期間の追加費用概算: 医療費3万/月+個人用品・通信・余暇2万/月=計5万/月・夫婦2人分'},
@@ -4764,7 +4766,7 @@ function checkURLSync(){
 function init(){
   initPin();
   // 旧バージョンからのマイグレーション：新フィールドの安全なデフォルト補完
-  data.settings=Object.assign({retireAge:55,retireAgeSpouse:63,endAge:90,investReturn:3.0,inflation:1.5,salaryGrowth:1.0},data.settings);
+  data.settings=Object.assign({retireAge:55,retireAgeSpouse:50,endAge:90,investReturn:4.0,inflation:1.5,salaryGrowth:5.0},data.settings);
   data.debts=Object.assign({mortgage:0,mortgageMonthly:0,car:0,education:0,consumer:0,other:0},data.debts);
   data.savings=Object.assign({invest:200000,deposit:100000,pensionSelf:170000,pensionSpouse:140000},data.savings);
   data.income=Object.assign({self:0,spouse:0,side:0,investment:0,bonusSelf:0,bonusSpouse:0},data.income);
