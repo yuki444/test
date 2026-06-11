@@ -172,15 +172,31 @@ docs/
 
 # Part 2: iOS App Development
 
-iOSアプリを開発する際は、このセクションのルールをすべて適用してください。
+iOSアプリを開発する際は、このセクションのルールをすべて適用してください。  
+**セクション1は開発環境（Mac / Windows）で分岐。セクション2〜7は共通ルールです。**
+
+---
 
 ## 1. 開発環境・ツール連携
 
-### Xcode MCP 接続
+### 環境の選択
+
+| 項目 | Mac環境 | Windows環境 |
+|------|---------|------------|
+| フレームワーク | Swift / SwiftUI（ネイティブ） | Flutter または React Native |
+| エディタ | Xcode 26.3以降 | VSCode |
+| ビルド・実行 | Xcode + シミュレーター | GitHub Actions macOSランナー or クラウドMac |
+| プロジェクト管理 | `.xcodeproj`（スクリプト経由） | Flutter/RN が自動管理 |
+
+---
+
+### Mac環境
+
+#### Xcode MCP 接続
 - **Xcode 26.3以降**のMCPサーバーに接続し、ビルド・テスト・`DocumentationSearch`を活用する
 - 最新SwiftUI API・WWDC情報は必ずMCP経由で取得し、古いAPIを誤用しない
 
-### 必須スクリプト（.xcodeproj直接編集禁止）
+#### 必須スクリプト（.xcodeproj直接編集禁止）
 ```bash
 # 新規ファイル追加時（プロジェクト破壊防止）
 ./.claude/scripts/on_new_file.sh <path>
@@ -190,7 +206,79 @@ iOSアプリを開発する際は、このセクションのルールをすべ�
 ```
 `.xcodeproj` を直接編集してはならない。上記スクリプトを必ず経由すること。
 
-### コンテキスト管理
+#### ファイル構成（Mac / Swift）
+```
+MyApp/
+  MyApp.xcodeproj/        ← 直接編集禁止
+  MyApp/
+    App/
+      MyAppApp.swift
+    Features/             ← 機能別モジュール
+    Shared/               ← 共通コンポーネント・拡張
+    Resources/            ← Assets.xcassets, Info.plist
+  MyAppTests/
+  MyAppUITests/
+.claude/
+  scripts/
+    on_new_file.sh
+    on_build.sh
+```
+
+---
+
+### Windows環境
+
+XcodeはWindowsで動作しないため、クロスプラットフォームフレームワークを用い、  
+**ビルド・署名・Archiveはすべてクラウド（GitHub Actions macOSランナー等）で実施する。**
+
+#### 推奨フレームワーク
+- **Flutter**（推奨）: Dart言語、iOS/Androidを単一コードベースでカバー
+- **React Native**: JavaScript/TypeScript、既存Webエンジニア向け
+
+#### ローカル開発セットアップ（Flutter例）
+```powershell
+# Flutter SDKインストール後
+flutter doctor          # 環境確認（Xcodeはクラウド側で対応するためエラー許容）
+flutter pub get         # 依存関係インストール
+flutter run             # Androidエミュレーターで動作確認（iOSはCI経由）
+```
+
+#### iOS ビルドはGitHub Actionsで実施
+```yaml
+# .github/workflows/ios_build.yml の例
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+      - run: flutter build ios --release --no-codesign
+```
+- 証明書・プロビジョニングプロファイルは GitHub Secrets に格納する
+- シミュレーターテストも `runs-on: macos-latest` で実行する
+
+#### .xcodeproj 操作について
+- Flutter/RNが自動生成・管理するため、**直接編集は禁止**（Macと同様）
+- プロジェクト設定変更は `pubspec.yaml`（Flutter）または `package.json` + `app.json`（RN）で行う
+
+#### ファイル構成（Windows / Flutter）
+```
+my_app/
+  lib/
+    main.dart
+    features/           ← 機能別モジュール
+    shared/             ← 共通ウィジェット・ユーティリティ
+  ios/                  ← Flutter自動生成（直接編集禁止）
+  android/              ← Flutter自動生成（直接編集禁止）
+  pubspec.yaml          ← 依存管理
+.github/
+  workflows/
+    ios_build.yml       ← macOSランナーでiOSビルド
+```
+
+---
+
+### コンテキスト管理（共通）
 | タイミング | アクション |
 |-----------|-----------|
 | タスク完了・切り替え時 | `/clear` で履歴リセット |
@@ -275,26 +363,12 @@ iOSアプリを開発する際は、このセクションのルールをすべ�
 
 ## 6. ファイル構成（参考）
 
+環境別の構成は **セクション1** を参照。共通で用意するドキュメント:
+
 ```
-MyApp/
-  MyApp.xcodeproj/        ← 直接編集禁止
-  MyApp/
-    App/
-      MyAppApp.swift
-    Features/             ← 機能別モジュール
-    Shared/               ← 共通コンポーネント・拡張
-    Resources/            ← Assets.xcassets, Info.plist
-  MyAppTests/
-  MyAppUITests/
-
-.claude/
-  scripts/
-    on_new_file.sh        ← ファイル追加時に実行
-    on_build.sh           ← ビルド確認時に実行
-
 docs/
   privacy_policy.md
-  review_notes.md         ← 審査用メモのテンプレート
+  review_notes.md   ← 審査用メモのテンプレート
 ```
 
 ---
