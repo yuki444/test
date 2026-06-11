@@ -4773,6 +4773,14 @@ function init(){
   data.settings=Object.assign({retireAge:55,retireAgeSpouse:50,endAge:90,investReturn:4.0,inflation:1.5,salaryGrowth:5.0,selfIncomeCap:13000000},data.settings);
   data.debts=Object.assign({mortgage:0,mortgageMonthly:0,car:0,education:0,consumer:0,other:0},data.debts);
   data.savings=Object.assign({invest:200000,deposit:100000,pensionSelf:170000,pensionSpouse:110000},data.savings);
+  // v3マイグレーション: 昇給率5%・配偶者退職50歳・配偶者年金11万を強制反映（旧保存データ上書き）
+  if(!data._migrationV3){
+    data.settings.salaryGrowth=5.0;
+    data.settings.retireAgeSpouse=50;
+    data.settings.selfIncomeCap=13000000;
+    data.savings.pensionSpouse=110000;
+    data._migrationV3=true;
+  }
   data.income=Object.assign({self:0,spouse:0,side:0,investment:0,bonusSelf:0,bonusSpouse:0},data.income);
   if(!data.holdings) data.holdings=[];
   if(!data.expenseSteps) data.expenseSteps=[];
