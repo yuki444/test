@@ -4228,7 +4228,7 @@ function addHousingScenarios(){
     {type:'lump-expense',  name:'第2子 結婚お祝い',      age:65,amount:-3000000,duration:1,memo:'第2子28歳'},
     {type:'lump-income',   name:'企業型DC退職金（本人）',age:55,amount:17700000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 税引後約1,770万（退職所得控除760万・税130万）'},
     {type:'lump-expense',  name:'老人ホーム入居一時金',   age:75,amount:-26000000,duration:1,memo:'夫婦2人分 有料老人ホーム 入居一時金（現在1,500万→75歳時インフレ1.73倍で2,600万換算）'},
-    {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:500000, duration:15,memo:'夫婦2人分 月50万円（1人25万×2）食事・居住・介護含む。自宅売却・通常生活費置換'},
+    {type:'nursing-home',  name:'老人ホーム居住（75歳〜）',age:75,amount:700000, duration:26,memo:'夫婦2人分 月70万円（1人35万×2）食事・居住・介護含む。自宅売却・通常生活費置換'},
   ];
   if(!existingNames.includes('住み続ける（ローン完済）'))
     toAdd.push({name:'住み続ける（ローン完済）',color:'#3b82f6',events:[...commonEvents,
@@ -4780,6 +4780,19 @@ function init(){
     data.settings.selfIncomeCap=13000000;
     data.savings.pensionSpouse=110000;
     data._migrationV3=true;
+  }
+  // v4マイグレーション: 老人ホーム月額 50万→70万・期間15→26年 を強制反映
+  if(!data._migrationV4){
+    data.plans.forEach(p=>{
+      p.events.forEach(ev=>{
+        if(ev.type==='nursing-home'&&ev.amount===500000){
+          ev.amount=700000;
+          ev.duration=26;
+          ev.memo='夫婦2人分 月70万円（1人35万×2）食事・居住・介護含む。通常生活費置換';
+        }
+      });
+    });
+    data._migrationV4=true;
   }
   data.income=Object.assign({self:0,spouse:0,side:0,investment:0,bonusSelf:0,bonusSpouse:0},data.income);
   if(!data.holdings) data.holdings=[];
