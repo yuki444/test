@@ -1206,7 +1206,7 @@ const DEFAULTS = {
     {id:3,name:'第1子', role:'child', age:5, birthdate:'2021-01-01',gender:'male'},
     {id:4,name:'第2子', role:'child', age:1, birthdate:'2025-01-01',gender:'female'}
   ],
-  settings:{retireAge:55,retireAgeSpouse:50,endAge:90,investReturn:4.0,inflation:1.5,salaryGrowth:5.0,retireExpenseRatio:1.1},
+  settings:{retireAge:55,retireAgeSpouse:50,endAge:90,investReturn:4.0,inflation:1.5,salaryGrowth:5.0,retireExpenseRatio:1.1,selfIncomeCap:13000000},
   // 手取り推計: 本人1100万gross→月85万（2026年以降昇給見込）, 配偶者500万gross→月32.5万
   income:{self:850000,spouse:325000,side:16200,investment:0,bonusSelf:1000000,bonusSpouse:0},
   // ↑ side:16200 = ACN ESPP 15%割引ベネフィット（月9.17万積立×15%割引 差額1.62万/月）
@@ -1230,8 +1230,8 @@ const DEFAULTS = {
       {name:'インターネット',       amount:4000},
     ]
   },
-  // 年金見込み: 本人厚生年金+国民年金(65歳~)≈17万/月（大卒22歳入社33年加入・55歳早期退職）, 配偶者≈14万/月
-  savings:{invest:200000,deposit:100000,pensionSelf:170000,pensionSpouse:140000},
+  // 年金見込み: 本人厚生年金+国民年金(65歳~)≈17万/月（大卒22歳入社33年加入・55歳早期退職）, 配偶者≈11万/月（50歳退職・加入期間短）
+  savings:{invest:200000,deposit:100000,pensionSelf:170000,pensionSpouse:110000},
   // 年齢別生活費スケジュール（全シナリオ共通）
   expenseSteps:[
     {fromAge:38,delta:-30000,memo:'住宅ローン控除（0.7%×残債相当 年約36万）'},
@@ -1249,8 +1249,10 @@ const DEFAULTS = {
     {fromAge:55,delta:-10000,memo:'第2子 独立 小遣い終了'},
     {fromAge:55,delta:-25000,memo:'第1子 独立・教育費半減（-2.5万）'},
     {fromAge:55,delta:10000, memo:'加齢による医療費増加（55歳〜 +1万/月）'},
+    {fromAge:55,delta:60000, memo:'退職後健康保険料（国保/任意継続・夫婦2人 月6万推計）',category:'insurance'},
     {fromAge:59,delta:-25000,memo:'第2子 大学卒業・教育費終了（-2.5万→累計0）'},
     {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
+    {fromAge:65,delta:-40000,memo:'後期高齢者医療移行（健康保険料大幅減・月2万へ）',category:'insurance'},
     {fromAge:65,delta:20000, memo:'加齢による医療費増加（65歳〜 さらに+2万/月）'},
     {fromAge:75,delta:20000, memo:'加齢による医療費増加（75歳〜 さらに+2万/月）'},
   ],
@@ -2309,14 +2311,17 @@ function simulate(plan,irOverride=null){
     const inflF=Math.pow(1+inf,off);
 
     // --- Income (simulation totals: same logic as before) ---
+    const selfCap=data.settings.selfIncomeCap||0;
+    const selfAnnualUncapped=(data.income.self*12+data.income.bonusSelf)*gf;
+    const selfAnnualCapped=selfCap>0?Math.min(selfAnnualUncapped,selfCap):selfAnnualUncapped;
     let income=0;
-    income+=retired?(age>=65?data.savings.pensionSelf*12:0):(data.income.self*12+data.income.bonusSelf)*gf;
+    income+=retired?(age>=65?data.savings.pensionSelf*12:0):selfAnnualCapped;
     if(spouse) income+=spouseRetired?(spouseAge>=65?data.savings.pensionSpouse*12:0):(data.income.spouse*12+data.income.bonusSpouse)*gf;
     income+=(retired?0:data.income.side)*12+data.income.investment*12;
 
     // Income breakdown (display only)
     const dI={
-      selfSalary:  Math.round(retired?0:(data.income.self*12+data.income.bonusSelf)*gf),
+      selfSalary:  Math.round(retired?0:selfAnnualCapped),
       spouseSalary:!spouse?0:Math.round(spouseRetired?0:(data.income.spouse*12+data.income.bonusSpouse)*gf),
       side:        Math.round((retired?0:data.income.side)*12),
       inv:         Math.round(data.income.investment*12),
@@ -4267,7 +4272,7 @@ function addFPSheetData(){
   // ↑ side は addFPUpdates で ESPP値(16200)管理のため除外
   const NEW_EXPENSES={food:55000,utilities:22000,insurance:65000,education:75000,transport:25000,medical:30000};
   // entertainment/other are managed via expenseDetails
-  const NEW_SAVINGS={invest:200000,deposit:100000,pensionSelf:170000,pensionSpouse:140000};
+  const NEW_SAVINGS={invest:200000,deposit:100000,pensionSelf:170000,pensionSpouse:110000};
   const DC_EVENT={type:'lump-income',name:'企業型DC退職金（本人）',age:55,amount:17700000,duration:1,memo:'2024年10月入社・55歳退職=19年 年収5%積立 運用3%推計 税引後約1,770万（退職所得控除760万・税130万）'};
   const OLD_RETIRE_NAMES=['退職金（本人）','企業型DC退職金（本人）'];
 
@@ -4765,9 +4770,9 @@ function checkURLSync(){
 function init(){
   initPin();
   // 旧バージョンからのマイグレーション：新フィールドの安全なデフォルト補完
-  data.settings=Object.assign({retireAge:55,retireAgeSpouse:50,endAge:90,investReturn:4.0,inflation:1.5,salaryGrowth:5.0},data.settings);
+  data.settings=Object.assign({retireAge:55,retireAgeSpouse:50,endAge:90,investReturn:4.0,inflation:1.5,salaryGrowth:5.0,selfIncomeCap:13000000},data.settings);
   data.debts=Object.assign({mortgage:0,mortgageMonthly:0,car:0,education:0,consumer:0,other:0},data.debts);
-  data.savings=Object.assign({invest:200000,deposit:100000,pensionSelf:170000,pensionSpouse:140000},data.savings);
+  data.savings=Object.assign({invest:200000,deposit:100000,pensionSelf:170000,pensionSpouse:110000},data.savings);
   data.income=Object.assign({self:0,spouse:0,side:0,investment:0,bonusSelf:0,bonusSpouse:0},data.income);
   if(!data.holdings) data.holdings=[];
   if(!data.expenseSteps) data.expenseSteps=[];
