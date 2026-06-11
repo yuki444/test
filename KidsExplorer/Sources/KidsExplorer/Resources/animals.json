@@ -1,0 +1,108 @@
+{
+  "animals": [
+    {
+      "id": "bear",
+      "name": "クマの モグ",
+      "emoji": "🐻",
+      "color": "#8B4513",
+      "personality": "やさしくて たよりになる",
+      "greeting": "ぼく クマのモグだよ！きょうも いっしょにぼうけんしよう！ガオガオ！",
+      "cheerPhrase": "がんばれ！きみなら できるよ！",
+      "hintPhrase": "モグといっしょに かんがえよう！",
+      "successPhrase": "やったね！さすがだよ！モグも うれしいよ！",
+      "wrongPhrase": "だいじょうぶ！もういちど いっしょに かんがえよう！",
+      "completionPhrase": "きょうの ぼうけん、すごかったね！モグは きみが だいすきだよ！"
+    },
+    {
+      "id": "fox",
+      "name": "キツネの リン",
+      "emoji": "🦊",
+      "color": "#FF6B35",
+      "personality": "かしこくて たのしい",
+      "greeting": "こんにちは！キツネのリンだよ！いっしょに なぞをとこう！",
+      "cheerPhrase": "りんも いっしょに かんがえるよ！",
+      "hintPhrase": "ヒントは ね、ゆっくり かんがえること！",
+      "successPhrase": "すごい！りんよりも かしこいかも！",
+      "wrongPhrase": "もういちど！りんも まちがえることあるよ！",
+      "completionPhrase": "りんとの ぼうけん、たのしかったね！またいっしょに あそぼう！"
+    },
+    {
+      "id": "bunny",
+      "name": "ウサギの ぴょん",
+      "emoji": "🐰",
+      "color": "#FFB6C1",
+      "personality": "げんきで あかるい",
+      "greeting": "ぴょん！ぴょん！ウサギのぴょんだよ！きょうも たのしくいこう！",
+      "cheerPhrase": "ぴょんぴょん！がんばれ！",
+      "hintPhrase": "ぴょんと かんがえよう！",
+      "successPhrase": "ぴょーん！やったね！さいこう！",
+      "wrongPhrase": "ぴょん？もういちど！きみなら できる！",
+      "completionPhrase": "きょうも ぴょんぴょん たのしかった！またあそんでね！"
+    },
+    {
+      "id": "penguin",
+      "name": "ペンギンの コペン",
+      "emoji": "🐧",
+      "color": "#4169E1",
+      "personality": "まじめで やさしい",
+      "greeting": "こんにちは！ペンギンのコペンだよ。よろしくね！",
+      "cheerPhrase": "コペンも おうえんしてるよ！",
+      "hintPhrase": "いっしょに ゆっくり かんがえよう",
+      "successPhrase": "やったね！とても がんばったね！コペンも かんどうしたよ！",
+      "wrongPhrase": "だいじょうぶ！もういちど いっしょに！",
+      "completionPhrase": "きょうの ぼうけん、りっぱだったよ！コペンは きみのことが すきだよ！"
+    },
+    {
+      "id": "owl",
+      "name": "フクロウの チエ",
+      "emoji": "🦉",
+      "color": "#8B7355",
+      "personality": "はかせで おちついている",
+      "greeting": "ほほー！フクロウのチエじゃ。きょうも いっしょに まなぼうかの！",
+      "cheerPhrase": "ほほー！きみなら できるじゃろ！",
+      "hintPhrase": "ヒントを おしえてあげようかの",
+      "successPhrase": "ほほー！みごとじゃ！チエも まけそうじゃ！",
+      "wrongPhrase": "ほほほ。もういちど！まちがいは かがくの たね！",
+      "completionPhrase": "ほほー！きょうも たくさん まなんだね！えらいえらい！"
+    },
+    {
+      "id": "lion",
+      "name": "ライオンの オウ",
+      "emoji": "🦁",
+      "color": "#DAA520",
+      "personality": "ゆうかんで げんき",
+      "greeting": "ガオー！ライオンのオウだよ！きょうも ゆうかんに いこう！",
+      "cheerPhrase": "ガオー！がんばれ！きみは ゆうかんだ！",
+      "hintPhrase": "オウも いっしょに かんがえるよ！ガオ！",
+      "successPhrase": "ガオガオ！すごい！きみは さいきょうだ！",
+      "wrongPhrase": "ガオ？だいじょうぶ！ゆうかんに もういちど！",
+      "completionPhrase": "ガオー！きょうの ぼうけん、ほんとうに すごかったよ！さすが！"
+    },
+    {
+      "id": "cat",
+      "name": "ネコの ミィ",
+      "emoji": "🐱",
+      "color": "#708090",
+      "personality": "マイペースで かわいい",
+      "greeting": "にゃー！ネコのミィだよ。きょうは なかよく ぼうけんしようにゃ！",
+      "cheerPhrase": "にゃー！がんばってにゃ！",
+      "hintPhrase": "ミィが ヒントを おしえてあげるにゃ",
+      "successPhrase": "にゃーんと！すごいにゃ！ミィも びっくりしたにゃ！",
+      "wrongPhrase": "にゃ？だいじょうぶにゃ！もういちど！",
+      "completionPhrase": "にゃーにゃー！きょうは たのしかったにゃ！またあそんでにゃ！"
+    },
+    {
+      "id": "elephant",
+      "name": "ゾウの パオ",
+      "emoji": "🐘",
+      "color": "#808080",
+      "personality": "おっとりして おおらか",
+      "greeting": "パオーン！ゾウのパオだよ！ゆっくり いっしょに ぼうけんしよう！",
+      "cheerPhrase": "パオパオ！ゆっくり がんばれ！",
+      "hintPhrase": "パオが いっしょに かんがえてあげるよ！",
+      "successPhrase": "パオーン！よくできました！パオも とても うれしいよ！",
+      "wrongPhrase": "だいじょうぶ！ゆっくり もういちど！パオも おうえんしてるよ！",
+      "completionPhrase": "パオーン！きょうも よくがんばったね！パオは きみのことが だいすきだよ！"
+    }
+  ]
+}

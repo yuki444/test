@@ -1,0 +1,459 @@
+{
+  "adventures": [
+    {
+      "id": "adventure_kitchen",
+      "title": "まほうのキッチン",
+      "subtitle": "りょうりのまほうをさがそう！",
+      "theme": "kitchen",
+      "colorHex": "#FF8C42",
+      "locationName": "キッチン",
+      "openingNarration": "きょうは まほうの キッチンに ぼうけんに いくよ！おなべや フライパンには、ちいさなまほうつかいが すんでいるんだ。いっしょに さがしに いこう！",
+      "scenes": [
+        {
+          "id": "kitchen_s1",
+          "order": 1,
+          "locationPrompt": "キッチンに いこう！",
+          "locationHint": "おなべや フライパンが ある ところだよ",
+          "narration": "キッチンに ちいさな まほうつかいが すんでいるよ。こんにちは！きょうは いっしょに まほうの スープを つくろうね。まず ざいりょうを あつめよう！",
+          "overlayEmojis": ["✨", "🌟", "⭐️", "🔮", "🫧"],
+          "characterLine": "キッチンに ついたね！ここには まほうの ざいりょうが かくれているよ！いっしょに さがそう！",
+          "quiz": {
+            "type": "addition",
+            "question": "まほうの なべに トマトが 2こ、にんじんが 3こ はいったよ。あわせて なんこ？",
+            "visualItems": ["🍅", "🍅", "🥕", "🥕", "🥕"],
+            "answer": "5",
+            "options": ["4", "5", "6"],
+            "successMessage": "すごい！ 5こだね！まほうのスープが ぐつぐつ！",
+            "hintMessage": "トマトを かぞえて、にんじんも かぞえてみよう！"
+          }
+        },
+        {
+          "id": "kitchen_s2",
+          "order": 2,
+          "locationPrompt": "れいぞうこを のぞいてみよう！",
+          "locationHint": "つめたくて しろい はこだよ",
+          "narration": "れいぞうこの なかは ちいさな ゆきのせかい！ゆきのせいれいが でてきたよ。「おはよう！いっしょに あそぼうよ！」",
+          "overlayEmojis": ["❄️", "⛄", "🌨️", "💎", "🦋"],
+          "characterLine": "ゆきのせかいに ようこそ！とても きれいだね。クイズを といてくれる？",
+          "quiz": {
+            "type": "katakana",
+            "question": "この もじは なんと よむかな？",
+            "visualItems": ["ア"],
+            "answer": "ア",
+            "options": ["ア", "イ", "ウ"],
+            "successMessage": "せいかい！「ア」だね！かたかなを しっているね！",
+            "hintMessage": "「あ」のかたかなだよ。おおきいやつを えらんでみて！"
+          }
+        },
+        {
+          "id": "kitchen_s3",
+          "order": 3,
+          "locationPrompt": "まほうのスープが できたよ！",
+          "locationHint": "もうすこしで ぼうけん かんりょうだよ！",
+          "narration": "やった！まほうのスープが かんせいしたよ！ことりたちが においに さそわれて あつまってきた！きょうの ぼうけん、だいせいこう！",
+          "overlayEmojis": ["🌈", "🎉", "✨", "🦜", "🌸"],
+          "characterLine": "やったね！すてきな スープを つくれたね！きみは まほうの コックさんだ！",
+          "quiz": {
+            "type": "counting",
+            "question": "ことりが あつまってきたよ。なんわ いるかな？",
+            "visualItems": ["🐦", "🐦", "🐦"],
+            "answer": "3",
+            "options": ["2", "3", "4"],
+            "successMessage": "かんぺき！3わだね！ことりたちも よろこんでいるよ！",
+            "hintMessage": "ことりを ひとつずつ ゆびさして かぞえてみよう！"
+          }
+        }
+      ]
+    },
+    {
+      "id": "adventure_bookshelf",
+      "title": "ふしぎな ほんだな",
+      "subtitle": "えほんの せかいに とびこもう！",
+      "theme": "living_room",
+      "colorHex": "#7B68EE",
+      "locationName": "リビング",
+      "openingNarration": "きょうは ほんだなに ひみつの とびらを みつけたよ！えほんの なかに はいれるかもしれない。いっしょに ほんだなを のぞいてみよう！",
+      "scenes": [
+        {
+          "id": "bookshelf_s1",
+          "order": 1,
+          "locationPrompt": "ほんだなを さがそう！",
+          "locationHint": "ほんが たくさん ならんでいる ところだよ",
+          "narration": "ほんだなの おくに ちいさな とびらを みつけたよ！そこから ちいさな ドラゴンが でてきた。「やあ！えほんの せかいに ようこそ！」",
+          "overlayEmojis": ["🐉", "📚", "✨", "🗝️", "🌟"],
+          "characterLine": "えほんの ドラゴンだよ！いっしょに えほんのせかいを ぼうけんしよう！",
+          "quiz": {
+            "type": "katakana",
+            "question": "ドラゴンが もっている ほんに かいてあるよ。なんと よむかな？",
+            "visualItems": ["イ"],
+            "answer": "イ",
+            "options": ["ア", "イ", "ウ"],
+            "successMessage": "すごい！「イ」だね！ドラゴンも よろこんでいるよ！",
+            "hintMessage": "「い」のかたかなだよ。まんなかのやつを みてみて！"
+          }
+        },
+        {
+          "id": "bookshelf_s2",
+          "order": 2,
+          "locationPrompt": "まほうの ソファーを さがそう！",
+          "locationHint": "ふかふかした おおきい いすだよ",
+          "narration": "ソファーが まほうの フネに へんしんしたよ！うみを わたって ひみつのしまへ むかおう！なみが きらきらと ひかっているよ。",
+          "overlayEmojis": ["🚢", "🌊", "🐠", "🐬", "⚓"],
+          "characterLine": "フネに のれたね！うみの なかに まほうの さかなが いるよ！クイズに こたえてみよう！",
+          "quiz": {
+            "type": "addition",
+            "question": "うみに さかなが 1ぴき、タコが 2ひき いたよ。あわせて なんびき？",
+            "visualItems": ["🐟", "🐙", "🐙"],
+            "answer": "3",
+            "options": ["2", "3", "4"],
+            "successMessage": "すごい！3びきだね！うみの なかまたちが よろこんでいるよ！",
+            "hintMessage": "さかなと タコを ぜんぶ あわせてみよう！"
+          }
+        },
+        {
+          "id": "bookshelf_s3",
+          "order": 3,
+          "locationPrompt": "ひみつの しまに とうちゃく！",
+          "locationHint": "もうすぐ ぼうけん おわりだよ！",
+          "narration": "ひみつのしまに ついたよ！しまには たからばこが！あけてみると、なかには きんきらの ほしが はいっていたよ。きみへの おくりものだよ！",
+          "overlayEmojis": ["🏝️", "💎", "⭐️", "🌟", "🎁"],
+          "characterLine": "たからばこを みつけたね！さいごの クイズに こたえたら、たからが でてくるよ！",
+          "quiz": {
+            "type": "counting",
+            "question": "たからばこに ほしが はいっているよ。いくつ あるかな？",
+            "visualItems": ["⭐️", "⭐️", "⭐️", "⭐️"],
+            "answer": "4",
+            "options": ["3", "4", "5"],
+            "successMessage": "かんぺき！4こだね！たからものは ぜんぶ きみのものだよ！",
+            "hintMessage": "ほしを ひとつずつ かぞえてみよう！"
+          }
+        }
+      ]
+    },
+    {
+      "id": "adventure_bedroom",
+      "title": "くもの おしろ",
+      "subtitle": "ふわふわのくもで あそぼう！",
+      "theme": "bedroom",
+      "colorHex": "#87CEEB",
+      "locationName": "しんしつ",
+      "openingNarration": "ねむっているあいだに、へやが くものおしろに へんしんするよ！ふかふかの ベッドは まほうの くも。いっしょに そらのせかいを ぼうけんしよう！",
+      "scenes": [
+        {
+          "id": "bedroom_s1",
+          "order": 1,
+          "locationPrompt": "しんしつに はいろう！",
+          "locationHint": "ベッドや まくらが ある へやだよ",
+          "narration": "ベッドが ふわふわの くもに へんしんしたよ！くもの うえで とんでいると、てんしが あらわれた。「ようこそ そらのくにへ！」",
+          "overlayEmojis": ["☁️", "👼", "⭐️", "🌙", "✨"],
+          "characterLine": "そらのくにに ようこそ！ここは ふわふわで きもちいいね。クイズを といてくれる？",
+          "quiz": {
+            "type": "katakana",
+            "question": "くもに かかれている もじは なんかな？",
+            "visualItems": ["ウ"],
+            "answer": "ウ",
+            "options": ["ア", "イ", "ウ"],
+            "successMessage": "やったね！「ウ」だね！そらのくにが あかるくなったよ！",
+            "hintMessage": "「う」のかたかなだよ。3ばんめのやつを えらんでみて！"
+          }
+        },
+        {
+          "id": "bedroom_s2",
+          "order": 2,
+          "locationPrompt": "まくらのやまを さがそう！",
+          "locationHint": "まくらが いくつか かさなっている ところだよ",
+          "narration": "まくらの やまが たかい たかい やまに なったよ！てっぺんに ちいさな りゅうが すんでいる。「ぼくと いっしょに あそぼう！」",
+          "overlayEmojis": ["🏔️", "🐲", "🌈", "🦋", "🌸"],
+          "characterLine": "やまの りゅうだよ！いっしょに あそぼう！クイズに こたえてね！",
+          "quiz": {
+            "type": "addition",
+            "question": "やまに ちょうちょが 3びき、はなが 2ほん あるよ。あわせて いくつ？",
+            "visualItems": ["🦋", "🦋", "🦋", "🌸", "🌸"],
+            "answer": "5",
+            "options": ["4", "5", "6"],
+            "successMessage": "すごい！5つだね！りゅうも ジャンプして よろこんでいるよ！",
+            "hintMessage": "ちょうちょと はなを ぜんぶ あわせてみよう！"
+          }
+        },
+        {
+          "id": "bedroom_s3",
+          "order": 3,
+          "locationPrompt": "ながれぼしを みつけよう！",
+          "locationHint": "まどの そばで そらを みてみよう！",
+          "narration": "まどから ながれぼしが みえてきたよ！ながれぼしに のって そらを とんだよ。「きらきら！」ほしたちが てをふってくれているよ。",
+          "overlayEmojis": ["🌠", "💫", "⭐️", "🌟", "🎆"],
+          "characterLine": "ながれぼしに のれたね！そらから みる せかいは きれいだね！さいごのクイズだよ！",
+          "quiz": {
+            "type": "counting",
+            "question": "そらに ほしが ひかっているよ。いくつ あるかな？",
+            "visualItems": ["⭐️", "⭐️"],
+            "answer": "2",
+            "options": ["1", "2", "3"],
+            "successMessage": "かんぺき！2つだね！ほしたちも おまえのことが だいすきだよ！",
+            "hintMessage": "ほしを ゆびさして かぞえてみよう！"
+          }
+        }
+      ]
+    },
+    {
+      "id": "adventure_bathroom",
+      "title": "しゃぼんだまの くに",
+      "subtitle": "あわあわの まほうを みつけよう！",
+      "theme": "bathroom",
+      "colorHex": "#4FB3FF",
+      "locationName": "おふろ",
+      "openingNarration": "おふろには しゃぼんだまの まほうつかいが すんでいるよ！あわを ふくらませると まほうのせかいが あらわれるんだ。いっしょに さがしに いこう！",
+      "scenes": [
+        {
+          "id": "bathroom_s1",
+          "order": 1,
+          "locationPrompt": "おふろに いってみよう！",
+          "locationHint": "シャワーや バスタブが ある ところだよ",
+          "narration": "おふろに はいると、しゃぼんだまが いっぱい！そのなかに ちいさなにじいろの さかなが すんでいたよ。「あそびに きてくれたの？うれしいな！」",
+          "overlayEmojis": ["🫧", "🌈", "🐠", "💧", "✨"],
+          "characterLine": "しゃぼんだまの さかなだよ！きれいな いろだね！クイズに こたえてくれる？",
+          "quiz": {
+            "type": "katakana",
+            "question": "しゃぼんだまに かかれている もじは？",
+            "visualItems": ["エ"],
+            "answer": "エ",
+            "options": ["ウ", "エ", "オ"],
+            "successMessage": "やった！「エ」だね！しゃぼんだまが きらきら ひかった！",
+            "hintMessage": "「え」のかたかなだよ。まんなかの もじを みてみよう！"
+          }
+        },
+        {
+          "id": "bathroom_s2",
+          "order": 2,
+          "locationPrompt": "かがみを のぞいてみよう！",
+          "locationHint": "かがみは ピカピカ ひかって いるよ",
+          "narration": "かがみを のぞくと、うら がわに ふしぎな くに！かがみのなかに もうひとりの じぶんが いて、「いっしょに あそぼう！」と いってくれたよ。",
+          "overlayEmojis": ["🪞", "✨", "🦄", "💜", "🌟"],
+          "characterLine": "かがみのせかいに ようこそ！ここでは ぜんぶが さかさまだよ！クイズを といてみよう！",
+          "quiz": {
+            "type": "addition",
+            "question": "かがみに うさぎが 2わ、ねこが 1ぴき うつっているよ。あわせて なんびき？",
+            "visualItems": ["🐰", "🐰", "🐱"],
+            "answer": "3",
+            "options": ["2", "3", "4"],
+            "successMessage": "すごい！3びきだね！かがみのなかまたちも よろこんでいるよ！",
+            "hintMessage": "うさぎと ねこを あわせて かぞえてみよう！"
+          }
+        },
+        {
+          "id": "bathroom_s3",
+          "order": 3,
+          "locationPrompt": "おおきな しゃぼんだまに のろう！",
+          "locationHint": "おふろの そとに でてみよう！",
+          "narration": "おおきな しゃぼんだまが やってきた！のりこんで、そらを とんだよ！にじのいろに そまったせかいが きれいで、こころが ぽかぽかしてきたよ。",
+          "overlayEmojis": ["🫧", "🌈", "🕊️", "🌸", "🎀"],
+          "characterLine": "しゃぼんだまで そらをとんでいるよ！かぜが きもちいいね！さいごのクイズだよ！",
+          "quiz": {
+            "type": "counting",
+            "question": "にじに ちょうちょが とんでいるよ。なんびき いるかな？",
+            "visualItems": ["🦋", "🦋", "🦋", "🦋"],
+            "answer": "4",
+            "options": ["3", "4", "5"],
+            "successMessage": "かんぺき！4ひきだね！ちょうちょたちも いっしょに とんでくれているよ！",
+            "hintMessage": "ちょうちょを ゆびさして ひとつずつ かぞえてみよう！"
+          }
+        }
+      ]
+    },
+    {
+      "id": "adventure_garden",
+      "title": "みどりの にわ",
+      "subtitle": "はなと むしの おともだちに あおう！",
+      "theme": "garden",
+      "colorHex": "#4ECB71",
+      "locationName": "にわ・ベランダ",
+      "openingNarration": "きょうは にわや ベランダへ でかけよう！はなや くさの なかに ちいさな むしの おともだちが まっているよ。そっと のぞいてみようね！",
+      "scenes": [
+        {
+          "id": "garden_s1",
+          "order": 1,
+          "locationPrompt": "にわや ベランダに でよう！",
+          "locationHint": "そとに でて みどりを さがそう！",
+          "narration": "にわに でると、はなの なかから ちいさな こびとが でてきた！「ぼくは はなの こびと！きょうは にわの まほうを おしえてあげるよ！」",
+          "overlayEmojis": ["🌺", "🌻", "🦋", "🐝", "✨"],
+          "characterLine": "はなのこびとだよ！きょうは にわに すてきな まほうを かけてあげるよ！クイズに こたえてくれる？",
+          "quiz": {
+            "type": "counting",
+            "question": "はなが さいているよ。なんぼん あるかな？",
+            "visualItems": ["🌸", "🌸", "🌸"],
+            "answer": "3",
+            "options": ["2", "3", "4"],
+            "successMessage": "やった！3ぼんだね！はなたちも うれしそう！",
+            "hintMessage": "はなを ひとつずつ ゆびさして かぞえてみよう！"
+          }
+        },
+        {
+          "id": "garden_s2",
+          "order": 2,
+          "locationPrompt": "きのみを さがそう！",
+          "locationHint": "きや くさの ちかくを みてみよう！",
+          "narration": "きのみを みつけたよ！りすが やってきて「それ ぼくのだよ！でもすこし わけてあげる。いっしょに たべよう！」と にこにこ してくれたよ。",
+          "overlayEmojis": ["🌰", "🐿️", "🍁", "🌿", "🍀"],
+          "characterLine": "りすの ちいすけだよ！きのみが だいすき！クイズに こたえたら わけてあげるよ！",
+          "quiz": {
+            "type": "addition",
+            "question": "りすが きのみを 1こ もっていたよ。また 2こ みつけたよ。ぜんぶで なんこ？",
+            "visualItems": ["🌰", "🌰", "🌰"],
+            "answer": "3",
+            "options": ["2", "3", "4"],
+            "successMessage": "すごい！3こだね！りすも ありがとうって いってるよ！",
+            "hintMessage": "さいしょの きのみと みつけた きのみを あわせてみよう！"
+          }
+        },
+        {
+          "id": "garden_s3",
+          "order": 3,
+          "locationPrompt": "にじいろの はなを みつけよう！",
+          "locationHint": "もうすこしで ぼうけん かんりょう！",
+          "narration": "にわのおくに にじいろの はなを みつけたよ！このはなは まほうのちから をもっていて、さわると しあわせに なるんだって。そっと てを ふれてみよう。",
+          "overlayEmojis": ["🌈", "🌼", "🦄", "💫", "🎉"],
+          "characterLine": "にじいろのはなを みつけたね！このはなは まほうのちからを もっているよ！さいごのクイズだよ！",
+          "quiz": {
+            "type": "katakana",
+            "question": "はなに かいてある もじは なんかな？",
+            "visualItems": ["オ"],
+            "answer": "オ",
+            "options": ["エ", "オ", "カ"],
+            "successMessage": "かんぺき！「オ」だね！はながまばゆく かがやいたよ！",
+            "hintMessage": "「お」のかたかなだよ。まんなかの もじを みてみよう！"
+          }
+        }
+      ]
+    },
+    {
+      "id": "adventure_hallway",
+      "title": "かぜの かいろう",
+      "subtitle": "かぜに のって ぼうけんしよう！",
+      "theme": "hallway",
+      "colorHex": "#FFD700",
+      "locationName": "ろうか",
+      "openingNarration": "ろうかに ふしぎなかぜが ふいてきたよ！そのかぜに のると、ちがうせかいに いけるんだって。そっと かぜを かんじてみよう！",
+      "scenes": [
+        {
+          "id": "hallway_s1",
+          "order": 1,
+          "locationPrompt": "ろうかに でてみよう！",
+          "locationHint": "へやと へやを つなぐ ながい ところだよ",
+          "narration": "ろうかに でると、かぜのせいれいが あらわれた！「ここは かぜのかいろう。ふきぬけるかぜに のると、まほうのせかいへ いけるよ！」",
+          "overlayEmojis": ["💨", "🌀", "🍃", "🌬️", "✨"],
+          "characterLine": "かぜのせいれいだよ！このかぜは まほうのかぜ。いっしょに とおいところへ いこう！クイズに こたえてね！",
+          "quiz": {
+            "type": "katakana",
+            "question": "かぜのせいれいが もっているふだに かいてあるよ。なんと よむかな？",
+            "visualItems": ["カ"],
+            "answer": "カ",
+            "options": ["カ", "キ", "ク"],
+            "successMessage": "やった！「カ」だね！かぜが きもちよく ふいてきたよ！",
+            "hintMessage": "「か」のかたかなだよ。さいしょの もじを えらんでみよう！"
+          }
+        },
+        {
+          "id": "hallway_s2",
+          "order": 2,
+          "locationPrompt": "とびらのむこうを のぞこう！",
+          "locationHint": "あのとびらのむこうに なにかあるかも？",
+          "narration": "とびらを あけると、まほうの もりが！きのえだに ことりたちが うたっている。「ようこそ まほうのもりへ！ぼくたちが あんないするよ！」",
+          "overlayEmojis": ["🌳", "🐦", "🎵", "🍀", "🌟"],
+          "characterLine": "もりの ことりたちだよ！うたが きこえる？いっしょに うたいたいな！クイズに こたえたら いっしょに うたおう！",
+          "quiz": {
+            "type": "addition",
+            "question": "きのえだに ことりが 2わ とまっているよ。もう 1わ きたよ。ぜんぶで なんわ？",
+            "visualItems": ["🐦", "🐦", "🐦"],
+            "answer": "3",
+            "options": ["2", "3", "4"],
+            "successMessage": "すごい！3わだね！ことりたちが うれしそうに うたっているよ！",
+            "hintMessage": "さいしょの ことりに あとから きた ことりを あわせてみよう！"
+          }
+        },
+        {
+          "id": "hallway_s3",
+          "order": 3,
+          "locationPrompt": "かぜに のって もどってこよう！",
+          "locationHint": "ぼうけんの さいごだよ！",
+          "narration": "まほうのかぜに のって おうちに もどってきたよ。ぼうけんで であった なかまたちが てをふってくれている。「またあそぼうね！」",
+          "overlayEmojis": ["💨", "🏠", "🌈", "🎊", "💫"],
+          "characterLine": "ただいま！すてきなぼうけんだったね！さいごのクイズだよ！",
+          "quiz": {
+            "type": "counting",
+            "question": "かぜが つれてきた もみじは なんまい？",
+            "visualItems": ["🍁", "🍁", "🍁", "🍁", "🍁"],
+            "answer": "5",
+            "options": ["4", "5", "6"],
+            "successMessage": "かんぺき！5まいだね！もみじが きれいにまわっているよ！",
+            "hintMessage": "もみじを ひとつずつ ゆびさして かぞえてみよう！"
+          }
+        }
+      ]
+    },
+    {
+      "id": "adventure_night",
+      "title": "ほしの てんじょう",
+      "subtitle": "よるのまほうを さがそう！",
+      "theme": "night",
+      "colorHex": "#4B6CB7",
+      "locationName": "おへや（よる）",
+      "openingNarration": "よるになると、てんじょうが ほしのそらに へんしんするよ！まんてんのほしの なかに、すてきな まほうが かくれているよ。いっしょに みつけよう！",
+      "scenes": [
+        {
+          "id": "night_s1",
+          "order": 1,
+          "locationPrompt": "へやの てんじょうを みあげよう！",
+          "locationHint": "うえを むいて カメラを てんじょうに むけてみよう！",
+          "narration": "てんじょうが ほしのそらに へんしんしたよ！そのなかに、つきのうさぎが あらわれた。「こんばんは！つきのうえからみてると とても きれいだよ！」",
+          "overlayEmojis": ["🌙", "⭐️", "🐰", "✨", "💫"],
+          "characterLine": "つきのうさぎだよ！よるのそらは きれいだね。いっしょに ほしを かぞえよう！クイズに こたえてくれる？",
+          "quiz": {
+            "type": "counting",
+            "question": "よるのそらに ほしが あるよ。いくつ かがやいているかな？",
+            "visualItems": ["⭐️", "⭐️", "⭐️"],
+            "answer": "3",
+            "options": ["2", "3", "4"],
+            "successMessage": "やった！3つだね！ほしたちが ぴかぴか ひかったよ！",
+            "hintMessage": "ほしを ひとつずつ ゆびさして かぞえてみよう！"
+          }
+        },
+        {
+          "id": "night_s2",
+          "order": 2,
+          "locationPrompt": "まどの ちかくに いこう！",
+          "locationHint": "まどから そとの そらを みてみよう！",
+          "narration": "まどのそとに ながれぼしが ひかった！ねがいごとを いってごらん！すると まほうつかいが あらわれて「きみのねがいを かなえてあげるよ！」",
+          "overlayEmojis": ["🌠", "🔮", "✨", "🌌", "🪄"],
+          "characterLine": "まほうつかいだよ！ながれぼしに のって きたんだ。クイズに こたえたら、ねがいが かなうよ！",
+          "quiz": {
+            "type": "addition",
+            "question": "ながれぼしが 2こ とんで、また 3こ とんだよ。あわせて なんこ？",
+            "visualItems": ["🌠", "🌠", "🌠", "🌠", "🌠"],
+            "answer": "5",
+            "options": ["4", "5", "6"],
+            "successMessage": "すごい！5こだね！まほうつかいが ねがいを かなえてくれたよ！",
+            "hintMessage": "さいしょの ながれぼしと あとの ながれぼしを あわせてみよう！"
+          }
+        },
+        {
+          "id": "night_s3",
+          "order": 3,
+          "locationPrompt": "おやすみのうたを きこう！",
+          "locationHint": "ぼうけんの さいごだよ！おつかれさま！",
+          "narration": "ほしたちが おやすみのうたを うたってくれているよ。きょうの ぼうけんは おわり。またあした、あたらしいぼうけんが まっているよ。おやすみなさい！",
+          "overlayEmojis": ["🌙", "💤", "🌟", "🎵", "🌸"],
+          "characterLine": "きょうの ぼうけん、よくがんばったね！さいごのクイズに こたえてから おやすみしようね！",
+          "quiz": {
+            "type": "katakana",
+            "question": "つきに かかれている もじは なんかな？",
+            "visualItems": ["キ"],
+            "answer": "キ",
+            "options": ["カ", "キ", "ク"],
+            "successMessage": "かんぺき！「キ」だね！つきが にっこり わらったよ！おやすみなさい！",
+            "hintMessage": "「き」のかたかなだよ。まんなかの もじを みてみよう！"
+          }
+        }
+      ]
+    }
+  ]
+}
