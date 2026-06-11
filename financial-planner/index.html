@@ -1248,13 +1248,13 @@ const DEFAULTS = {
     {fromAge:52,delta:5000,  memo:'第2子 高校生 小遣い増額（10,000円/月）'},
     {fromAge:55,delta:-10000,memo:'第2子 独立 小遣い終了'},
     {fromAge:55,delta:-25000,memo:'第1子 独立・教育費半減（-2.5万）',category:'education'},
-    {fromAge:55,delta:10000, memo:'加齢による医療費増加（55歳〜 +1万/月）'},
+    {fromAge:55,delta:10000, memo:'加齢による医療費増加（55歳〜 +1万/月）',category:'medical'},
     {fromAge:55,delta:60000, memo:'退職後健康保険料（国保/任意継続・夫婦2人 月6万推計）',category:'insurance'},
     {fromAge:59,delta:-25000,memo:'第2子 大学卒業・教育費終了（-2.5万→累計0）',category:'education'},
     {fromAge:60,delta:-20000,memo:'メットライフ① 払込終了'},
     {fromAge:65,delta:-40000,memo:'後期高齢者医療移行（健康保険料大幅減・月2万へ）',category:'insurance'},
-    {fromAge:65,delta:20000, memo:'加齢による医療費増加（65歳〜 さらに+2万/月）'},
-    {fromAge:75,delta:20000, memo:'加齢による医療費増加（75歳〜 さらに+2万/月）'},
+    {fromAge:65,delta:20000, memo:'加齢による医療費増加（65歳〜 さらに+2万/月）',category:'medical'},
+    {fromAge:75,delta:20000, memo:'加齢による医療費増加（75歳〜 さらに+2万/月）',category:'medical'},
   ],
   // 3年前に7,000万円の家を購入（自宅評価額）
   assets:{cash:1900000,fixedDeposit:0,stocks:18978775,ideco:0,home:70000000,realEstate:0,insurance:0,other:270000},
@@ -2390,8 +2390,12 @@ function simulate(plan,irOverride=null){
     // --- Expenses (simulation totals: same logic as before) ---
     const nhEv=plan.events.find(ev=>ev.type==='nursing-home'&&age>=ev.age);
     let baseExpenses=ECATS.reduce((sum,k)=>sum+(data.expenses[k]||0)*((retired&&RETIRE_LEISURE.includes(k))?retireExpenseRatio:1.0),0)*12*inflF;
-    const stepDeltaVal=data.expenseSteps?.length?data.expenseSteps.filter(s=>age>=s.fromAge).reduce((sum,s)=>sum+s.delta,0):0;
-    if(stepDeltaVal) baseExpenses+=stepDeltaVal*12*inflF;
+    // カテゴリあり(保険・医療・教育等)=インフレ連動、カテゴリなし=名目固定（制度変更・ライフイベント）
+    const _steps=(data.expenseSteps||[]).filter(s=>age>=s.fromAge);
+    const stepCat=_steps.filter(s=>s.category&&ECATS.includes(s.category)).reduce((sum,s)=>sum+s.delta,0);
+    const stepFixed=_steps.filter(s=>!s.category||!ECATS.includes(s.category)).reduce((sum,s)=>sum+s.delta,0);
+    if(stepCat) baseExpenses+=stepCat*12*inflF;
+    if(stepFixed) baseExpenses+=stepFixed*12;
     if(nhEv) baseExpenses=nhEv.amount*12; // nursing home: 介護報酬は規制価格のためインフレ不適用
     let expenses=baseExpenses;
     if(!nhEv&&mortgageMonthly>0&&mortgageBalance>0) expenses+=mortgageMonthly*12;
@@ -4920,9 +4924,12 @@ function applyMigrations(d){
   if(!stepMemos.has('後期高齢者医療移行（健康保険料大幅減・月2万へ）'))
     d.expenseSteps.push({fromAge:65,delta:-40000,memo:'後期高齢者医療移行（健康保険料大幅減・月2万へ）',category:'insurance'});
   d.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
-  // v6: education カテゴリ付与（グラフ表示の正確性向上）
+  // v6: education カテゴリ付与
   const eduCatMemos=new Set(['第1子 小学校入学・保育料終了（-3.5万→塾等+2.5万）','第2子 小学校入学・保育料終了（-4万→塾等+2.5万）','第1子 独立・教育費半減（-2.5万）','第2子 大学卒業・教育費終了（-2.5万→累計0）']);
   d.expenseSteps.forEach(s=>{if(eduCatMemos.has(s.memo)&&!s.category)s.category='education';});
+  // v7: medical カテゴリ付与（インフレ連動すべき医療費増加ステップ）
+  const medCatMemos=new Set(['加齢による医療費増加（55歳〜 +1万/月）','加齢による医療費増加（65歳〜 さらに+2万/月）','加齢による医療費増加（75歳〜 さらに+2万/月）']);
+  d.expenseSteps.forEach(s=>{if(medCatMemos.has(s.memo)&&!s.category)s.category='medical';});
   // holdings に value 設定済みなら assets の投資系フィールドを自動同期
   // （prices.json 取得前でも既存の value を信頼できる値として使う）
   if(d.holdings?.some(h=>h.value>0)){
