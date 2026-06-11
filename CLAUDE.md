@@ -63,14 +63,14 @@
 - holdings の `shares` フィールドが必要（`refreshHoldingPrices` が price × shares → value を計算）
 
 ### 参考：2026-06-11 時点の実測値
-| 資産 | 値 |
-|-----|---|
-| assets.cash | 300万 |
-| assets.fixedDeposit | 200万 |
-| assets.stocks (holdings由来) | 約2,060万 |
-| assets.other (crypto+ESPP) | 約55万 |
-| assets.home | 7,000万 |
-| 株式比率（金融資産ベース） | 約79% |
+| 資産 | 値 | 備考 |
+|-----|---|------|
+| assets.cash | **190万** | 普通預金のみ |
+| assets.fixedDeposit | **0** | 定期預金なし |
+| assets.stocks (holdings由来) | 約2,060万 | 自動同期 |
+| assets.other (crypto+ESPP) | 約55万 | 自動同期 |
+| assets.home | 7,000万 | |
+| 株式比率（金融資産ベース） | 約89% | |
 
 ---
 
