@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "霧の村",
+    "slug": "kirino-mura",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1028"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.kirino.mura"
+    },
+    "android": {
+      "package": "com.kirino.mura"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
+    },
+    "plugins": [
+      "expo-notifications"
+    ]
+  }
+}

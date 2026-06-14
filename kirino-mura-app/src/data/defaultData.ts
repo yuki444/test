@@ -1,0 +1,88 @@
+import { NPC, VillageState } from '../types'
+
+const id = (n: number) => `npc-${n}`
+
+export const DEFAULT_NPCS: NPC[] = [
+  {
+    id: id(1),
+    name: 'リナ',
+    occupation: 'パン屋',
+    personality: '温かく世話好きだが、心配性。自分の感情を押し込める癖がある。',
+    backstory: '夫を10年前に亡くし、一人で息子カイを育ててきた。',
+    emotionalState: 'worried',
+    relationshipWithPlayer: 40,
+    conversationHistory: [],
+    wantsToTalk: true,
+    location: 'bakery',
+    avatarEmoji: '👩‍🍳',
+  },
+  {
+    id: id(2),
+    name: 'ゴルド',
+    occupation: '鍛冶屋',
+    personality: '口数が少なく不器用だが、誰より村のことを思っている。',
+    backstory: '若い頃は旅をしていた。ある出来事をきっかけにこの村に定住した。',
+    emotionalState: 'mysterious',
+    relationshipWithPlayer: 20,
+    conversationHistory: [],
+    wantsToTalk: false,
+    location: 'smithy',
+    avatarEmoji: '🔨',
+  },
+  {
+    id: id(3),
+    name: 'カイ',
+    occupation: 'リナの息子',
+    personality: '若くて感情的。夢を持っているが、母への罪悪感に縛られている。',
+    backstory: '旅に出たい気持ちを押し殺している。最近ふさぎ込んでいる。',
+    emotionalState: 'sad',
+    relationshipWithPlayer: 30,
+    conversationHistory: [],
+    wantsToTalk: false,
+    location: 'riverside',
+    avatarEmoji: '🧒',
+  },
+  {
+    id: id(4),
+    name: 'フィア',
+    occupation: '長老',
+    personality: '村の歴史を知る賢者。だが最近、何かを抱えている様子。',
+    backstory: 'この村に50年以上住み続けている。村の「秘密」を知っている。',
+    emotionalState: 'mysterious',
+    relationshipWithPlayer: 10,
+    conversationHistory: [],
+    wantsToTalk: false,
+    location: 'elderHouse',
+    avatarEmoji: '🧓',
+  },
+  {
+    id: id(5),
+    name: 'ミコ',
+    occupation: '旅人',
+    personality: 'この村に最近来た謎の旅人。何かを探している。',
+    backstory: '出自不明。村の古い歴史を調べているようだ。',
+    emotionalState: 'neutral',
+    relationshipWithPlayer: 0,
+    conversationHistory: [],
+    wantsToTalk: true,
+    location: 'plaza',
+    avatarEmoji: '🧳',
+  },
+]
+
+export const DEFAULT_VILLAGE_STATE: VillageState = {
+  atmosphere: 'peaceful',
+  currentSeason: {
+    number: 1,
+    dayNumber: 1,
+    totalDays: 30,
+    mysteryTitle: '長老の沈黙',
+    mysteryHint: '霧の向こうに、何かが見えた気がした。',
+    internalTruth:
+      '長老フィアは30日後にこの村を離れる決断をしようとしている。理由は20年前に起きた出来事への罪悪感。村人は誰も気づいていない。',
+    isResolved: false,
+    startDate: new Date().toISOString(),
+  },
+  npcs: DEFAULT_NPCS,
+  lastLoginDate: null,
+}
