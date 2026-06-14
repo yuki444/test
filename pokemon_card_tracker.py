@@ -145,25 +145,13 @@ def add_lottery_to_notion(
 ) -> str:
     """抽選管理DBに新しいエントリを追加する。"""
 
-    SITE_MAP = {
-        "ポケモンセンター": "ポケモンセンター",
-        "ヨドバシ": "ヨドバシ",
-        "ビックカメラ": "ビックカメラ",
-        "Amazon": "Amazon",
-        "楽天": "楽天",
-        "古本市場": "古本市場",
-        "プレミアムバンダイ": "プレミアムバンダイ",
-        "その他": "その他",
-    }
-
     props: dict = {
         "商品名": {"title": [{"text": {"content": product_name}}]},
         "ステータス": {"select": {"name": "応募前"}},
         "URL": {"url": url},
     }
 
-    site_name = SITE_MAP.get(site, "その他")
-    props["サイト"] = {"select": {"name": site_name}}
+    props["サイト"] = {"select": {"name": site}}
 
     if box_price:
         props["BOX定価(円)"] = {"number": box_price}
@@ -279,11 +267,6 @@ def register_lottery(
         memo, attraction,
     )
 
-    # A以上のみカレンダー登録対象（B/Cはスキップ）
-    if attraction in ("B", "C") and not skip_calendar:
-        print(f"  ℹ️  投資魅力度{attraction}のためカレンダー登録をスキップ（対象はA以上のみ）")
-        skip_calendar = True
-
     if not skip_calendar:
         service = get_calendar_service()
         create_lottery_calendar_events(
@@ -327,8 +310,7 @@ def main() -> None:
     reg = sub.add_parser("register", help="抽選をNotionとカレンダーに登録")
     reg.add_argument("--name",          required=True, help="商品名")
     reg.add_argument("--site",          required=True,
-                     choices=["ポケモンセンター","ヨドバシ","ビックカメラ","Amazon","楽天","古本市場","プレミアムバンダイ","その他"],
-                     help="販売サイト")
+                     help="販売サイト（例: ポケモンセンター、ヨドバシ、ビックカメラ、Amazon、楽天、古本市場、プレミアムバンダイ、その他）")
     reg.add_argument("--url",           required=True, help="抽選ページURL")
     reg.add_argument("--apply-start",   metavar="YYYY-MM-DD", help="応募開始日")
     reg.add_argument("--apply-end",     metavar="YYYY-MM-DD", help="応募締切日")
