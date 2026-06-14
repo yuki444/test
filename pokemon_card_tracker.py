@@ -234,6 +234,7 @@ def register_lottery(
     memo: str = "",
     skip_calendar: bool = False,
     attraction: str = "",
+    extra: bool = False,
 ) -> None:
     """
     抽選情報をNotion + Google Calendarに同時登録するメイン関数。
@@ -266,6 +267,11 @@ def register_lottery(
         apply_start, apply_end, result_date,
         memo, attraction,
     )
+
+    # A以上のみカレンダー対象（B/Cは追加抽選・他サイト指定時のみ許可）
+    if attraction in ("B", "C") and not extra and not skip_calendar:
+        print(f"  ℹ️  投資魅力度{attraction}のためカレンダー登録をスキップ（--extra で追加抽選・他サイトとして登録可）")
+        skip_calendar = True
 
     if not skip_calendar:
         service = get_calendar_service()
@@ -320,6 +326,8 @@ def main() -> None:
     reg.add_argument("--memo",          default="", help="メモ")
     reg.add_argument("--attraction",     default="",
                      choices=["S","A","B","C",""], help="投資魅力度 S=必須/A=強推奨/B=推奨/C=任意")
+    reg.add_argument("--extra",         action="store_true",
+                     help="追加抽選・他サイト抽選フラグ（B/C評価でもカレンダー登録する）")
     reg.add_argument("--skip-calendar", action="store_true", help="カレンダー登録をスキップ")
 
     # add-card サブコマンド
@@ -357,6 +365,7 @@ def main() -> None:
             memo=args.memo,
             skip_calendar=args.skip_calendar,
             attraction=args.attraction,
+            extra=args.extra,
         )
 
     elif args.cmd == "add-card":
