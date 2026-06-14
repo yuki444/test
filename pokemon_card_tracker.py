@@ -279,6 +279,11 @@ def register_lottery(
         memo, attraction,
     )
 
+    # A以上のみカレンダー登録対象（B/Cはスキップ）
+    if attraction in ("B", "C") and not skip_calendar:
+        print(f"  ℹ️  投資魅力度{attraction}のためカレンダー登録をスキップ（対象はA以上のみ）")
+        skip_calendar = True
+
     if not skip_calendar:
         service = get_calendar_service()
         create_lottery_calendar_events(

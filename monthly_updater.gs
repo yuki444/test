@@ -89,6 +89,10 @@ function createMonthlyTemplate() {
   createMonthlyCalendarEvent(year, month, label, pageId);
   Logger.log(`✅ カレンダー追加完了`);
 
+  // 投資魅力度A以上のエントリーを取得してカレンダーにリマインド登録
+  const addedCount = syncHighAttractionLotteriesToCalendar(token);
+  Logger.log(`✅ A以上の抽選リマインド登録: ${addedCount}件`);
+
   Logger.log(`🎉 ${label} の月次テンプレート作成が完了しました！`);
 }
 
@@ -271,8 +275,6 @@ function quote(text) {
 
 function createMonthlyCalendarEvent(year, month, label, notionPageId) {
   const notionUrl = `https://www.notion.so/${notionPageId.replace(/-/g, "")}`;
-  const siteLinks = LOTTERY_SITES.map(s => `■ ${s.name}\n${s.url}`).join("\n\n");
-
   const pokeSites = POKEMON_SITES.map(s => `■ ${s.name}\n${s.url}`).join("\n\n");
   const opSites   = ONEPIECE_SITES.map(s => `■ ${s.name}\n${s.url}`).join("\n\n");
   const dbSites   = DRAGONBALL_SITES.map(s => `■ ${s.name}\n${s.url}`).join("\n\n");
@@ -329,6 +331,99 @@ function notionRequest(token, method, path, body) {
     throw new Error(`Notion API error ${code}`);
   }
   return json;
+}
+
+// ─────────────────────────────────────────────
+// 投資魅力度A以上の抽選をカレンダーに自動同期
+// ─────────────────────────────────────────────
+
+function syncHighAttractionLotteriesToCalendar(token) {
+  // 抽選管理DBからS/Aエントリーを取得
+  const body = {
+    filter: {
+      and: [
+        {
+          property: "投資魅力度",
+          select: { is_not_empty: true },
+        },
+        {
+          or: [
+            { property: "投資魅力度", select: { equals: "S" } },
+            { property: "投資魅力度", select: { equals: "A" } },
+          ],
+        },
+        {
+          // 応募前・応募済みのみ対象（結果待ち/当選/落選は除外）
+          or: [
+            { property: "ステータス", select: { equals: "応募前" } },
+            { property: "ステータス", select: { equals: "応募済み" } },
+          ],
+        },
+      ],
+    },
+    page_size: 50,
+  };
+
+  const res = notionRequest(token, "POST", `/v1/databases/${LOTTERY_DB_ID}/query`, body);
+  if (!res.results) return 0;
+
+  const calendar = CalendarApp.getCalendarById(CALENDAR_ID);
+  let added = 0;
+
+  for (const page of res.results) {
+    const props = page.properties;
+    const name  = props["商品名"]?.title?.[0]?.plain_text || "（名称不明）";
+    const site  = props["サイト"]?.select?.name || "";
+    const rank  = props["投資魅力度"]?.select?.name || "";
+    const url   = props["URL"]?.url || "";
+    const memo  = props["メモ"]?.rich_text?.[0]?.plain_text || "";
+
+    const startStr = props["応募開始日"]?.date?.start;
+    const endStr   = props["応募締切日"]?.date?.start;
+    const resultStr = props["結果確認日"]?.date?.start;
+
+    const calTitle = `【抽選${rank}】${name}（${site}）`;
+
+    // 重複登録防止：同名イベントが既に存在するかチェック（±3日の範囲）
+    if (startStr) {
+      const startDate = new Date(startStr);
+      const searchStart = new Date(startDate); searchStart.setDate(searchStart.getDate() - 3);
+      const searchEnd   = new Date(startDate); searchEnd.setDate(searchEnd.getDate() + 3);
+      const existing = calendar.getEvents(searchStart, searchEnd, { search: name });
+      if (existing.length > 0) continue; // 既に登録済み
+
+      const endDate = new Date(startDate); endDate.setHours(startDate.getHours() + 1);
+      const desc = `投資魅力度: ${rank}\nサイト: ${site}\nURL: ${url}\n\n${memo}\n\nNotion抽選管理: https://www.notion.so/${LOTTERY_DB_ID.replace(/-/g, "")}`;
+      const ev = calendar.createEvent(`⚡【応募開始】${name}`, startDate, endDate, { description: desc });
+      ev.setColor(CalendarApp.EventColor.BLUEBERRY);
+      ev.addPopupReminder(0);
+      added++;
+    }
+
+    if (endStr) {
+      const endDate  = new Date(endStr);
+      const evEnd    = new Date(endDate); evEnd.setHours(endDate.getHours() + 1);
+      const desc = `⚠️ 本日が締切！\n投資魅力度: ${rank}\nサイト: ${site}\nURL: ${url}\n\n${memo}`;
+      const ev = calendar.createEvent(`⏰【締切】${name}`, endDate, evEnd, { description: desc });
+      ev.setColor(CalendarApp.EventColor.TANGERINE);
+      ev.addEmailReminder(60);
+      ev.addPopupReminder(0);
+      added++;
+    }
+
+    if (resultStr) {
+      const rDate = new Date(resultStr);
+      const rEnd  = new Date(rDate); rEnd.setHours(rDate.getHours() + 1);
+      const desc = `当落確認！\n投資魅力度: ${rank}\nサイト: ${site}\nURL: ${url}\n\nNotion抽選管理: https://www.notion.so/${LOTTERY_DB_ID.replace(/-/g, "")}`;
+      const ev = calendar.createEvent(`🏆【結果確認】${name}`, rDate, rEnd, { description: desc });
+      ev.setColor(CalendarApp.EventColor.TOMATO);
+      ev.addEmailReminder(60);
+      ev.addPopupReminder(0);
+      added++;
+    }
+  }
+
+  return added;
 }
 
 // ─────────────────────────────────────────────
