@@ -1,5 +1,6 @@
 /**
- * ポケモンカード投資 月次テンプレート自動生成
+ * カードゲーム投資 月次テンプレート自動生成
+ * 対象: ポケモンカード / ワンピースカード / ドラゴンボールカード
  * Google Apps Script
  *
  * 【セットアップ手順】
@@ -23,14 +24,44 @@ const CARD_DB_ID       = "8bdbbad309f642f5b2983ba28bd0b6c7"; // 注目カードD
 const PACK_DB_ID       = "668ab474daaf40b5a472c40f72a82638"; // 最新パック情報DB
 const CALENDAR_ID      = "mossan72.tsubaki@gmail.com";
 
-const LOTTERY_SITES = [
+// ポケモンカード 抽選サイト
+const POKEMON_SITES = [
   { name: "ポケモンセンターオンライン", url: "https://www.pokemon.co.jp/shop/pokemoncenter/" },
   { name: "ヨドバシ.com",               url: "https://www.yodobashi.com/" },
   { name: "ビックカメラ.com",           url: "https://www.biccamera.com/" },
-  { name: "Amazon（先行予約）",         url: "https://www.amazon.co.jp/" },
+  { name: "Amazon（招待販売）",         url: "https://www.amazon.co.jp/" },
   { name: "楽天市場",                   url: "https://www.rakuten.co.jp/" },
   { name: "古本市場",                   url: "https://www.furuhon-ichiba.com/" },
 ];
+
+// ワンピースカード 抽選サイト
+const ONEPIECE_SITES = [
+  { name: "プレミアムバンダイ",         url: "https://p-bandai.jp/item/item-1000108591/" },
+  { name: "ヨドバシ.com",               url: "https://www.yodobashi.com/" },
+  { name: "ビックカメラ.com",           url: "https://www.biccamera.com/" },
+  { name: "Amazon（招待販売）",         url: "https://www.amazon.co.jp/" },
+  { name: "楽天市場",                   url: "https://www.rakuten.co.jp/" },
+  { name: "バンダイナムコ Cross Store", url: "https://bandainamco-am.co.jp/official_shop/onepiece-cardgame/" },
+];
+
+// ドラゴンボールカード 抽選サイト
+const DRAGONBALL_SITES = [
+  { name: "プレミアムバンダイ",         url: "https://p-bandai.jp/" },
+  { name: "ヨドバシ.com",               url: "https://www.yodobashi.com/" },
+  { name: "ビックカメラ.com",           url: "https://www.biccamera.com/" },
+  { name: "Amazon",                     url: "https://www.amazon.co.jp/" },
+  { name: "楽天市場",                   url: "https://www.rakuten.co.jp/" },
+];
+
+// 後方互換（旧コードから参照している場合のため）
+const LOTTERY_SITES = POKEMON_SITES;
+
+// 投資魅力度評価基準
+const ATTRACTION_GUIDE = `【投資魅力度基準】
+S: 定価3倍超確実 / 記念・周年弾 / 新レアリティ初登場 → 必ず応募
+A: 定価2倍超見込み / 超人気キャラ/超高レアリティ封入 → 強く推奨
+B: 定価1.3〜2倍見込み / 標準クラス弾 → 応募推奨
+C: 定価割れリスクあり → 任意`;
 
 // ─────────────────────────────────────────────
 // メイン：月次テンプレート作成
@@ -70,15 +101,23 @@ function createNotionMonthlyPage(token, label, year, month) {
   const startStr = `${year}-${String(month).padStart(2, "0")}-01`;
   const endStr   = `${year}-${String(month).padStart(2, "0")}-${lastDay}`;
 
-  // 各サイトのチェックリスト行を生成
-  const siteChecklist = LOTTERY_SITES.map(s =>
-    `- [ ] [${s.name}](${s.url})`
-  ).join("\n");
+  // 各カードゲームのチェックリスト行を生成
+  const pokemonChecklist  = POKEMON_SITES.map(s  => `- [ ] [${s.name}](${s.url})`).join("\n");
+  const onepieceChecklist = ONEPIECE_SITES.map(s => `- [ ] [${s.name}](${s.url})`).join("\n");
+  const dbChecklist       = DRAGONBALL_SITES.map(s => `- [ ] [${s.name}](${s.url})`).join("\n");
 
   const content = `## 📋 今月のアクション
 
 ### 1. 抽選サイト巡回チェック
-${siteChecklist}
+
+#### 🎴 ポケモンカード
+${pokemonChecklist}
+
+#### 🏴‍☠️ ワンピースカード
+${onepieceChecklist}
+
+#### 🐉 ドラゴンボールカード
+${dbChecklist}
 
 ---
 
@@ -94,35 +133,45 @@ ${siteChecklist}
 > [注目カードDB](https://www.notion.so/${CARD_DB_ID}) の推定相場を更新する
 
 参考サイト:
-- [カードラッシュ買取](https://www.cardrush-pokemon.jp/buylist)
-- [トレカMOLT 相場](https://www.torecamolt.com/)
+- [カードラッシュ買取(ポケカ)](https://www.cardrush-pokemon.jp/buylist)
+- [カードラッシュ買取(ワンピース)](https://www.cardrush-onepiece.jp/buylist)
+- [スニーカーダンク 相場](https://snkrdunk.com/)
 - [メルカリ（売れた順）](https://www.mercari.com/jp/)
-- [カードトレード](https://cardtrader.jp/)
 
-- [ ] SAR・ACE SPECカードの相場を記録
+ポケモンカード注目レアリティ: MUR(~50BOX/枚) / FUR / BWR / SAR
+ワンピースカード注目レアリティ: TR(~456BOX/枚) / コミックパラレル / SAR
+ドラゴンボールカード注目レアリティ: SCR スーパーパラレル版
+
+- [ ] 各ゲームの超高レアリティカードの相場を記録
 - [ ] 大きく動いたカードがあればNotionの推定相場を更新
 
 ---
 
 ### 4. 新パック情報 確認
-> [最新パック情報DB](https://www.notion.so/${PACK_DB_ID}) に新パックを追加
 
+#### ポケモンカード
 - [ ] [公式サイト](https://www.pokemon-card.com/products/) で新パック発表を確認
-- [ ] 新パックがあれば「最新パック情報DB」に追加
-- [ ] 注目カードがあれば「注目カードDB」にも追加
+- [ ] MEGAシリーズ次回弾の抽選スケジュール確認
+
+#### ワンピースカード
+- [ ] [公式サイト](https://onepiece-cardgame.bandai.co.jp/) で次回OP弾を確認
+- [ ] プレミアムバンダイ抽選スケジュール確認
+
+#### ドラゴンボールカード
+- [ ] [公式サイト](https://dbs-cardgame.com/fw/) で次回FB弾を確認
+- [ ] プレミアムバンダイ / バンダイナムコ店舗抽選確認
 
 ---
 
 ### 5. 今月の投資活動まとめ
 
-| 項目 | 内容 |
-|---|---|
-| 応募した抽選 |  |
-| 当選した商品 |  |
-| 今月の出費 |  |
-| 今月の売却益 |  |
-| 保有カード変動 |  |
-| 来月の狙い目 |  |
+| 項目 | ポケモン | ワンピース | ドラゴンボール |
+|---|---|---|---|
+| 応募した抽選 |  |  |  |
+| 当選した商品 |  |  |  |
+| 今月の出費 |  |  |  |
+| 今月の売却益 |  |  |  |
+| 来月の狙い目 |  |  |  |
 
 ---
 
@@ -224,21 +273,28 @@ function createMonthlyCalendarEvent(year, month, label, notionPageId) {
   const notionUrl = `https://www.notion.so/${notionPageId.replace(/-/g, "")}`;
   const siteLinks = LOTTERY_SITES.map(s => `■ ${s.name}\n${s.url}`).join("\n\n");
 
-  const desc = `${label} のポケモンカード投資チェックリストです。\n\n` +
+  const pokeSites = POKEMON_SITES.map(s => `■ ${s.name}\n${s.url}`).join("\n\n");
+  const opSites   = ONEPIECE_SITES.map(s => `■ ${s.name}\n${s.url}`).join("\n\n");
+  const dbSites   = DRAGONBALL_SITES.map(s => `■ ${s.name}\n${s.url}`).join("\n\n");
+
+  const desc = `${label} のカードゲーム投資チェックリストです。\n\n` +
     `📋 Notionチェックリスト:\n${notionUrl}\n\n` +
-    `【抽選サイト巡回】\n${siteLinks}\n\n` +
+    `${ATTRACTION_GUIDE}\n\n` +
+    `🎴【ポケモンカード 抽選サイト】\n${pokeSites}\n\n` +
+    `🏴‍☠️【ワンピースカード 抽選サイト】\n${opSites}\n\n` +
+    `🐉【ドラゴンボールカード 抽選サイト】\n${dbSites}\n\n` +
     `【今月のやること】\n` +
-    `① 各サイトの新着抽選を確認・応募\n` +
+    `① 各サイトの新着抽選を確認・応募（魅力度S/Aを最優先）\n` +
     `② 応募済み抽選の結果確認\n` +
     `③ 注目カードの相場チェック & Notion更新\n` +
-    `④ 新パック情報の確認 & Notion追加`;
+    `④ 各カードゲームの新弾情報確認 & Notion追加`;
 
   const startDate = new Date(year, month - 1, 1, 9, 0, 0);  // 月初1日 9:00
   const endDate   = new Date(year, month - 1, 1, 10, 0, 0); // 月初1日 10:00
 
   const calendar = CalendarApp.getCalendarById(CALENDAR_ID);
   const event = calendar.createEvent(
-    `🎴【ポケモンカード】${label} 月次チェック`,
+    `🃏【カードゲーム投資】${label} 月次チェック`,
     startDate,
     endDate,
     { description: desc }

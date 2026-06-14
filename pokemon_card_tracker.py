@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ポケモンカード投資トラッカー
+カードゲーム投資トラッカー（ポケモン / ワンピース / ドラゴンボール）
 各主要サイトの抽選情報をNotion・Googleカレンダーに自動登録するスクリプト。
 
 セットアップ:
@@ -141,6 +141,7 @@ def add_lottery_to_notion(
     apply_end: Optional[datetime] = None,
     result_date: Optional[datetime] = None,
     memo: str = "",
+    attraction: str = "",
 ) -> str:
     """抽選管理DBに新しいエントリを追加する。"""
 
@@ -151,6 +152,8 @@ def add_lottery_to_notion(
         "Amazon": "Amazon",
         "楽天": "楽天",
         "古本市場": "古本市場",
+        "プレミアムバンダイ": "プレミアムバンダイ",
+        "その他": "その他",
     }
 
     props: dict = {
@@ -174,6 +177,8 @@ def add_lottery_to_notion(
         props["結果確認日"] = {"date": {"start": result_date.strftime("%Y-%m-%d")}}
     if memo:
         props["メモ"] = {"rich_text": [{"text": {"content": memo}}]}
+    if attraction in ("S", "A", "B", "C"):
+        props["投資魅力度"] = {"select": {"name": attraction}}
 
     page = notion.pages.create(
         parent={"database_id": lottery_db_id},
@@ -240,6 +245,7 @@ def register_lottery(
     result_date_str: Optional[str] = None,
     memo: str = "",
     skip_calendar: bool = False,
+    attraction: str = "",
 ) -> None:
     """
     抽選情報をNotion + Google Calendarに同時登録するメイン関数。
@@ -270,7 +276,7 @@ def register_lottery(
         product_name, site, url,
         box_price, resale_price,
         apply_start, apply_end, result_date,
-        memo,
+        memo, attraction,
     )
 
     if not skip_calendar:
@@ -316,7 +322,7 @@ def main() -> None:
     reg = sub.add_parser("register", help="抽選をNotionとカレンダーに登録")
     reg.add_argument("--name",          required=True, help="商品名")
     reg.add_argument("--site",          required=True,
-                     choices=["ポケモンセンター","ヨドバシ","ビックカメラ","Amazon","楽天","古本市場","その他"],
+                     choices=["ポケモンセンター","ヨドバシ","ビックカメラ","Amazon","楽天","古本市場","プレミアムバンダイ","その他"],
                      help="販売サイト")
     reg.add_argument("--url",           required=True, help="抽選ページURL")
     reg.add_argument("--apply-start",   metavar="YYYY-MM-DD", help="応募開始日")
@@ -325,6 +331,8 @@ def main() -> None:
     reg.add_argument("--box-price",     type=int, help="BOX定価（円）")
     reg.add_argument("--resale",        type=int, help="当選時想定二次流通価格（円）")
     reg.add_argument("--memo",          default="", help="メモ")
+    reg.add_argument("--attraction",     default="",
+                     choices=["S","A","B","C",""], help="投資魅力度 S=必須/A=強推奨/B=推奨/C=任意")
     reg.add_argument("--skip-calendar", action="store_true", help="カレンダー登録をスキップ")
 
     # add-card サブコマンド
@@ -332,8 +340,8 @@ def main() -> None:
     card.add_argument("--name",     required=True, help="カード名")
     card.add_argument("--pack",     required=True, help="収録パック名")
     card.add_argument("--rarity",   required=True,
-                      choices=["SAR","ACE SPEC","SR","HR","UR","AR","RRR","RR","R"],
-                      help="レアリティ")
+                      choices=["MUR","FUR","BWR","TR","SCR","SAR","ACE SPEC","SR","HR","UR","AR","RRR","RR","R"],
+                      help="レアリティ (MUR=メガウルトラレア/FUR=フューチャリスティックレア/BWR=B&Wレア/TR=トレジャーレア/SCR=シークレット)")
     card.add_argument("--enc-rate", default="不明", help="封入率（例: 約1/8BOX）")
     card.add_argument("--price",    type=int, required=True, help="推定相場（円）")
     card.add_argument("--rating",   default="B",
@@ -361,6 +369,7 @@ def main() -> None:
             result_date_str=args.result,
             memo=args.memo,
             skip_calendar=args.skip_calendar,
+            attraction=args.attraction,
         )
 
     elif args.cmd == "add-card":
