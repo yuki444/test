@@ -234,6 +234,7 @@
     .positive{color:var(--secondary);font-weight:700}.negative{color:var(--danger);font-weight:700}
     .highlight-row td{background:#eff6ff!important;font-weight:700}
     .retire-row td{background:#ecfdf5!important}
+    .lump-row td{background:#fef9c3!important;border-left:3px solid #eab308!important}
 
     /* ===== DETAIL BREAKDOWN TABLE ===== */
     .detail-wrap{overflow-x:auto;max-height:72vh;overflow-y:auto;border:1px solid var(--border);border-radius:10px}
@@ -2672,13 +2673,20 @@ function renderSimulation(){
   const depletionRow=base.find(r=>r.netWorth<0);
   const monthlyIncome=data.income.self+data.income.spouse+data.income.side;
   const monthlyExp=Object.values(data.expenses).reduce((a,b)=>a+b,0);
+  // ① 退職後月収・資産持続年数
+  const pension65Row=base.find(r=>r.isRetired&&r.age>=65);
+  const retireMonthly=pension65Row?Math.round(pension65Row.income/12):Math.round(retireRow.income/12);
+  const retireAgeCalc=data.settings.retireAge||retireRow.age;
+  const sustainYears=depletionRow?Math.max(0,depletionRow.age-retireAgeCalc):data.settings.endAge-retireAgeCalc;
 
   // Summary
   document.getElementById('sim-summary').innerHTML=`
     <div class="summary-card"><div class="label">現在の純資産</div><div class="value value-neutral">${fmtM(totalA-totalD)}</div><div class="sub">資産${fmtM(totalA)} 負債${fmtM(totalD)}</div></div>
     <div class="summary-card"><div class="label">退職時純資産見込み</div><div class="value ${retireRow.netWorth>=0?'value-positive':'value-negative'}">${fmtM(retireRow.netWorth)}</div><div class="sub">${retireRow.age}歳・${retireRow.year}年</div></div>
     <div class="summary-card"><div class="label">${lastRow.age}歳時純資産</div><div class="value ${lastRow.netWorth>=0?'value-positive':'value-negative'}">${fmtM(lastRow.netWorth)}</div><div class="sub">${lastRow.year}年時点</div></div>
-    <div class="summary-card"><div class="label">資産枯渇リスク</div><div class="value ${depletionRow?'value-negative':'value-positive'}">${depletionRow?depletionRow.age+'歳頃':'問題なし'}</div><div class="sub">${depletionRow?'資産がマイナスに':data.settings.endAge+'歳まで持続'} <span style="font-size:10px;opacity:.7">(${(irOverride!==null?irOverride:data.settings.investReturn).toFixed(1)}%)</span></div></div>`;
+    <div class="summary-card"><div class="label">資産枯渇リスク</div><div class="value ${depletionRow?'value-negative':'value-positive'}">${depletionRow?depletionRow.age+'歳頃':'問題なし'}</div><div class="sub">${depletionRow?'資産がマイナスに':data.settings.endAge+'歳まで持続'} <span style="font-size:10px;opacity:.7">(${(irOverride!==null?irOverride:data.settings.investReturn).toFixed(1)}%)</span></div></div>
+    <div class="summary-card"><div class="label">退職後月収（年金+投資）</div><div class="value value-positive">${fmt(retireMonthly)}円</div><div class="sub">65歳以降の月額収入見込み</div></div>
+    <div class="summary-card"><div class="label">退職後資産持続年数</div><div class="value ${sustainYears>=30?'value-positive':sustainYears>=20?'value-neutral':'value-negative'}">${sustainYears}年</div><div class="sub">${depletionRow?depletionRow.age+'歳頃に枯渇':'退職後'+sustainYears+'年分を確保'}</div></div>`;
 
   // Legend
   document.getElementById('sim-legend').innerHTML=allSims.map(s=>`
@@ -2754,23 +2762,38 @@ function renderSimulation(){
             return `純資産合計: ${fmt((top.raw||0)+(debt?.raw||0))}万円`;
           }
         }},
-        annotation:retireIdx>=0?{annotations:{retire:{type:'line',xMin:retireIdx,xMax:retireIdx,
-          borderColor:'#94a3b8',borderWidth:1,borderDash:[4,4],label:{content:'退職',enabled:true,font:{size:10}}}}}:{}},
+        annotation:{annotations:(()=>{
+          const an={};
+          an.zero={type:'line',yMin:0,yMax:0,borderColor:'#334155',borderWidth:2};
+          if(retireIdx>=0) an.retire={type:'line',xMin:retireIdx,xMax:retireIdx,borderColor:'#94a3b8',borderWidth:1,borderDash:[4,4],label:{content:'退職',display:true,font:{size:9},position:'start'}};
+          base.forEach((r,i)=>{
+            const lump=r.d.lump;
+            if(Math.abs(lump)<5000000) return;
+            const pos=lump>0;
+            an['ev'+i]={type:'line',xMin:i,xMax:i,borderColor:pos?'#10b98188':'#ef444488',borderWidth:2,
+              label:{content:(pos?'+':'')+fmt(Math.round(lump/10000))+'万',display:true,font:{size:8},
+                backgroundColor:pos?'#d1fae5dd':'#fee2e2dd',color:pos?'#065f46':'#991b1b',position:'end'}};
+          });
+          return an;
+        })()},
       scales:{y:{ticks:{callback:v=>fmt(v)+'万'},grid:{color:'#f1f5f9'}},x:{ticks:{maxTicksLimit:12}}}}
   });
 
   // Cash flow chart
   destroyChart('cashflow');
   const cfData=base;
+  const cfBorderColor=v=>{const m=Math.round(v/10000);return m>=200?'#059669':m>=0?'#10b981':m>=-200?'#ef4444':'#991b1b';};
+  const cfBgColor=v=>{const m=Math.round(v/10000);return m>=200?'#05966966':m>=0?'#10b98166':m>=-200?'#ef444466':'#991b1b66';};
   charts.cashflow=new Chart(document.getElementById('chart-cashflow'),{
     type:'bar',
     data:{labels:cfData.map(r=>`${r.age}歳`),datasets:[{
       label:'年間収支',data:cfData.map(r=>Math.round(r.cashFlow/10000)),
-      backgroundColor:cfData.map(r=>r.cashFlow>=0?'#10b98170':'#dc262670'),
-      borderColor:cfData.map(r=>r.cashFlow>=0?'#10b981':'#dc2626'),
+      backgroundColor:cfData.map(r=>cfBgColor(r.cashFlow)),
+      borderColor:cfData.map(r=>cfBorderColor(r.cashFlow)),
       borderWidth:1}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${fmt(ctx.raw)}万円`}}},
+      annotation:{annotations:{zero:{type:'line',yMin:0,yMax:0,borderColor:'#334155',borderWidth:2}}},
       scales:{y:{ticks:{callback:v=>fmt(v)+'万'},grid:{color:'#f1f5f9'}},x:{ticks:{maxTicksLimit:12}}}}
   });
 
@@ -2861,6 +2884,10 @@ function renderSimulation(){
      data:base.map(r=>Math.round(Math.abs(r.d.lumpExp||0)/10000)),
      backgroundColor:'#7c3aed'+'bb',borderColor:'#7c3aed',borderWidth:0,stack:'exp'},
   ];
+  const nhStartIdx=base.findIndex(r=>nhActive(r));
+  const nhAnnotation=nhStartIdx>=0?{nhPeriod:{type:'box',xMin:nhStartIdx-0.5,xMax:base.length-0.5,
+    backgroundColor:'#fca5a520',borderColor:'#ef444455',borderWidth:1,
+    label:{content:'老人ホーム期間',display:true,position:'start',font:{size:9},color:'#dc2626'}}}:{};
   charts.expenseBreak=new Chart(document.getElementById('chart-expense-breakdown'),{
     type:'bar',
     data:{labels:base.map(r=>`${r.age}歳`),datasets:expDatasets},
@@ -2870,6 +2897,7 @@ function renderSimulation(){
           label:ctx=>ctx.raw!==0?` ${ctx.dataset.label}: ${fmt(ctx.raw)}万円`:null,
           footer:items=>`合計: ${fmt(items.reduce((s,i)=>s+i.raw,0))}万円`
         }}},
+      annotation:{annotations:nhAnnotation},
       scales:{x:{stacked:true,ticks:{maxTicksLimit:12}},
         y:{stacked:true,ticks:{callback:v=>fmt(v)+'万'},grid:{color:'#f1f5f9'}}}}
   });
@@ -2890,8 +2918,10 @@ function renderTable(){
   const rows=simulate(plan,_simIrOverride);
   document.getElementById('cashflow-tbody').innerHTML=rows.map(r=>{
     const badge=r.isRetired&&r.age===data.settings.retireAge?' 🎉退職':'';
-    return `<tr class="${r.isRetired?'retire-row':''}">
-      <td>${r.year}年${badge}</td>
+    const bigLump=Math.abs(r.d.lump)>=1000000;
+    const lumpLabel=bigLump?` <span style="font-size:10px;font-weight:700;color:${r.d.lump>=0?'var(--secondary)':'var(--danger)'}">[${r.d.lump>=0?'+':''}${fmt(Math.round(r.d.lump/10000))}万]</span>`:'';
+    return `<tr class="${r.isRetired?'retire-row':''}${bigLump?' lump-row':''}">
+      <td>${r.year}年${badge}${lumpLabel}</td>
       <td>${r.age}歳${r.spouseAge?'/'+r.spouseAge+'歳':''}</td>
       <td class="positive">+${fmtM(r.income)}</td>
       <td class="negative">-${fmtM(r.expenses)}</td>
@@ -3192,6 +3222,19 @@ function renderAdvice(){
     } else {
       advice.push({section:'住宅',type:'warn',icon:'🏠',title:'住宅ローン残高が残っています',
         desc:`残債${fmtM(data.debts.mortgage)}があります。ローン金利（${mortgageRate}%）が投資リターンを上回る場合は繰上げ返済を優先してください。固定金利か変動金利かも再確認しましょう。`});
+    }
+    if(data.debts.mortgageMonthly>0){
+      const repayRatio=monthlyIncome>0?data.debts.mortgageMonthly/monthlyIncome*100:0;
+      if(repayRatio>35){
+        advice.push({section:'住宅',type:'alert',icon:'📊',title:`返済比率${repayRatio.toFixed(1)}%は高水準です`,
+          desc:`月収${fmt(Math.round(monthlyIncome))}円に対しローン返済${fmt(data.debts.mortgageMonthly)}円。返済比率${repayRatio.toFixed(1)}%は一般的な安全ライン（25%以内）を大きく超えています。返済期間延長・繰上げ返済・借換えを検討してください。`});
+      } else if(repayRatio>25){
+        advice.push({section:'住宅',type:'warn',icon:'📊',title:`返済比率${repayRatio.toFixed(1)}%は要注意水準です`,
+          desc:`月収${fmt(Math.round(monthlyIncome))}円に対しローン返済${fmt(data.debts.mortgageMonthly)}円（${repayRatio.toFixed(1)}%）。25%以内が理想です。収入増やボーナス返済で余裕を確保しましょう。`});
+      } else {
+        advice.push({section:'住宅',type:'good',icon:'📊',title:`返済比率${repayRatio.toFixed(1)}%は適正範囲内です`,
+          desc:`月収${fmt(Math.round(monthlyIncome))}円に対しローン返済${fmt(data.debts.mortgageMonthly)}円（${repayRatio.toFixed(1)}%）。25%以内の安全水準です。余剰資金を投資に回す余力があります。`});
+      }
     }
   } else {
     const homePlanEvent=data.plans[0]?.events?.find(e=>e.type==='buy-home');
@@ -3871,20 +3914,36 @@ function generateComment(h, info, gainPct){
   return `${sector}セクター（${region}）。定期的な業績確認とポートフォリオ内ウェイト管理を推奨。`;
 }
 
+function setHoldingSort(key){
+  _holdingSort=key;
+  renderHoldings();
+}
+
 function renderHoldings(){
   const container=document.getElementById('holdings-container');
   if(!container) return;
-  const h=data.holdings||[];
-  if(h.length===0){
+  if((data.holdings||[]).length===0){
     container.innerHTML=`<div style="text-align:center;padding:24px;color:var(--text-muted);background:var(--bg);border-radius:8px;border:1px dashed var(--border)">
       <div style="font-size:24px;margin-bottom:6px">📂</div>
       <div style="font-size:13px;font-weight:700">明細がありません</div>
       <div style="font-size:11px;margin-top:3px">「＋ 追加」から口座・銘柄を登録</div></div>`;
     return;
   }
+  const sortFns={
+    value:(a,b)=>b.value-a.value,
+    gain:(a,b)=>(b.cost>0?b.value-b.cost:-Infinity)-(a.cost>0?a.value-a.cost:-Infinity),
+    divYield:(a,b)=>(b.value>0?(b.annualDividend||0)/b.value:0)-(a.value>0?(a.annualDividend||0)/a.value:0)
+  };
+  const h=(data.holdings||[]).map((x,i)=>({...x,_origIdx:i})).sort(sortFns[_holdingSort]||sortFns.value);
+  const sortBtns=['value:評価額順','gain:含み益順','divYield:配当利回り順'].map(s=>{
+    const [k,lbl]=s.split(':');
+    return `<button onclick="setHoldingSort('${k}')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--border);font-size:11px;cursor:pointer;font-weight:${_holdingSort===k?'700':'400'};background:${_holdingSort===k?'var(--primary)':'var(--bg)'};color:${_holdingSort===k?'white':'var(--text-muted)'}">${lbl}</button>`;
+  }).join('');
   const totalGain=h.reduce((s,x)=>s+(x.cost>0?x.value-x.cost:0),0);
   const totalAnnualDiv=h.reduce((s,x)=>s+(x.annualDividend||0),0);
-  let html=`<div style="overflow-x:auto"><table style="width:100%;font-size:12px;border-collapse:collapse">
+  let html=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+    <span style="font-size:11px;color:var(--text-muted)">並び替え:</span>${sortBtns}</div>
+  <div style="overflow-x:auto"><table style="width:100%;font-size:12px;border-collapse:collapse">
     <thead><tr style="border-bottom:2px solid var(--border);color:var(--text-muted)">
       <th style="text-align:left;padding:6px 8px">口座名</th>
       <th style="text-align:left;padding:6px 8px">銘柄・資産名</th>
@@ -3927,7 +3986,7 @@ function renderHoldings(){
       <td style="text-align:right;padding:8px;color:var(--text-muted)">${x.cost>0?fmtM(x.cost):'—'}</td>
       <td style="text-align:right;padding:8px;color:${gainColor}">${gainStr}</td>
       <td style="text-align:right;padding:8px">${divStr}</td>
-      <td style="padding:4px;white-space:nowrap"><button class="btn btn-secondary btn-sm" onclick="openHoldingModal(${i})">編集</button> <button class="btn btn-danger btn-sm" onclick="deleteHolding(${i})">削除</button></td>
+      <td style="padding:4px;white-space:nowrap"><button class="btn btn-secondary btn-sm" onclick="openHoldingModal(${x._origIdx})">編集</button> <button class="btn btn-danger btn-sm" onclick="deleteHolding(${x._origIdx})">削除</button></td>
     </tr>`;
   });
   const totalVal=h.reduce((s,x)=>s+x.value,0);
@@ -5545,6 +5604,7 @@ async function autoCalcDividends(){
 
 // ── Return-rate slider ──────────────────────────────────────────
 let _simIrOverride=null;
+let _holdingSort='value';
 
 function setSimReturn(v){
   v=+v;
