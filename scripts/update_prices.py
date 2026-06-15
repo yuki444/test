@@ -81,6 +81,34 @@ def get_annual_dividend(ticker_obj):
     return 0.0
 
 
+def get_history_weekly(ticker_obj, n=52):
+    """週次終値をn週分取得。(dates_list, prices_list) または (None, None)。"""
+    try:
+        hist = ticker_obj.history(period='1y', interval='1wk', auto_adjust=True)
+        if hist.empty or len(hist) < 3:
+            return None, None
+        closes = hist['Close'].squeeze().dropna().tail(n)
+        dates = [d.strftime('%Y-%m-%d') for d in closes.index]
+        vals = [round(float(v), 2) for v in closes.values]
+        return dates, vals
+    except Exception:
+        return None, None
+
+
+def get_history_daily(ticker_obj, n=21):
+    """日次終値をn日分取得。(dates_list, prices_list) または (None, None)。"""
+    try:
+        hist = ticker_obj.history(period='1mo', interval='1d', auto_adjust=True)
+        if hist.empty or len(hist) < 3:
+            return None, None
+        closes = hist['Close'].squeeze().dropna().tail(n)
+        dates = [d.strftime('%Y-%m-%d') for d in closes.index]
+        vals = [round(float(v), 2) for v in closes.values]
+        return dates, vals
+    except Exception:
+        return None, None
+
+
 all_tickers = JP_TICKERS + US_TICKERS + CRYPTO_TICKERS + [FX_TICKER]
 print(f"Fetching {len(all_tickers)} tickers...")
 
@@ -100,9 +128,17 @@ for sym in all_tickers:
         elif sym in CRYPTO_TICKERS:
             short = sym.replace('-JPY', '')
             prices[short] = {"p": round(price, 0), "d": 0}
+            dw, pw = get_history_weekly(t)
+            dd, pd = get_history_daily(t)
+            if dw: prices[short]['hw'] = {'d': dw, 'p': pw}
+            if dd: prices[short]['hd'] = {'d': dd, 'p': pd}
         else:
             div = get_annual_dividend(t)
             prices[sym] = {"p": round(price, 4), "d": div}
+            dw, pw = get_history_weekly(t)
+            dd, pd = get_history_daily(t)
+            if dw: prices[sym]['hw'] = {'d': dw, 'p': pw}
+            if dd: prices[sym]['hd'] = {'d': dd, 'p': pd}
             flag = f" div={div}" if div > 0 else ""
             print(f"  {sym}: {price:.2f}{flag}")
     except Exception as e:

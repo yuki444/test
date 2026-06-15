@@ -702,6 +702,28 @@
         <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px">口座・銘柄ごとに資産を記録。「合計を反映」で上の資産欄を自動更新します。</p>
         <div id="holdings-container"></div>
       </div>
+      <!-- パフォーマンスチャート -->
+      <div class="card" id="portfolio-performance-card" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+          <div class="card-title" style="margin:0">📈 ポートフォリオ推移</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm perf-period" data-p="日" onclick="setPerformancePeriod('日')">日</button>
+            <button class="btn btn-secondary btn-sm perf-period" data-p="週" onclick="setPerformancePeriod('週')">週</button>
+            <button class="btn btn-secondary btn-sm perf-period active" data-p="月" onclick="setPerformancePeriod('月')">月</button>
+            <button class="btn btn-secondary btn-sm perf-period" data-p="3ヶ月" onclick="setPerformancePeriod('3ヶ月')">3ヶ月</button>
+            <button class="btn btn-secondary btn-sm perf-period" data-p="半年" onclick="setPerformancePeriod('半年')">半年</button>
+            <button class="btn btn-secondary btn-sm perf-period" data-p="年" onclick="setPerformancePeriod('年')">年</button>
+          </div>
+        </div>
+        <div id="perf-chart-meta" style="font-size:11px;color:var(--text-muted);margin-bottom:8px"></div>
+        <div style="position:relative">
+          <div class="chart-container" style="height:220px"><canvas id="chart-performance"></canvas></div>
+          <div id="perf-no-data" style="display:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:12px;flex-direction:column;gap:6px">
+            <div style="font-size:24px">📊</div>
+            <div>「📈 価格・配当を更新」で期間別推移が表示されます</div>
+          </div>
+        </div>
+      </div>
       <!-- ポートフォリオ分析 -->
       <div class="card" id="portfolio-analysis-card" style="display:none">
         <div class="card-title">📊 ポートフォリオ分析</div>
@@ -3923,6 +3945,9 @@ function renderHoldings(){
   </tr></tfoot></table></div>`;
   container.innerHTML=html;
   renderPortfolioCharts();
+  const perfCard=document.getElementById('portfolio-performance-card');
+  if(perfCard) perfCard.style.display='';
+  renderPerformanceChart();
 }
 
 function openHoldingModal(editIdx){
@@ -4027,6 +4052,109 @@ function syncHoldingsToAssets(){
 // ============================================================
 // ADD HOUSING SCENARIOS (migration helper)
 // ============================================================
+// ── パフォーマンスチャート ──
+let _perfPeriod='月';
+function setPerformancePeriod(p){
+  _perfPeriod=p;
+  document.querySelectorAll('.perf-period').forEach(b=>b.classList.toggle('active',b.dataset.p===p));
+  renderPerformanceChart();
+}
+function renderPerformanceChart(){
+  const card=document.getElementById('portfolio-performance-card');
+  if(!card) return;
+  const noData=document.getElementById('perf-no-data');
+  const canvasWrap=document.querySelector('#portfolio-performance-card .chart-container');
+  const raw=localStorage.getItem('fp-ph');
+  if(!raw){
+    if(noData){noData.style.display='flex';noData.style.position='static';}
+    if(canvasWrap) canvasWrap.style.display='none';
+    return;
+  }
+  const ph=JSON.parse(raw);
+  const isDaily=['日','週','月'].includes(_perfPeriod);
+  const sliceN={日:5,週:10,月:21,'3ヶ月':13,'半年':26,'年':52}[_perfPeriod]||21;
+  const fx=ph.fxRate||150;
+  // 参照日付配列を取得（いずれかのティッカーの日付を基準にする）
+  let refDates=null;
+  for(const entry of Object.values(ph.prices||{})){
+    const h=isDaily?entry.hd:entry.hw;
+    if(h&&h.d&&h.d.length>=3){refDates=h.d.slice(-sliceN);break;}
+  }
+  if(!refDates||refDates.length===0){
+    if(noData){noData.style.display='flex';noData.style.position='static';}
+    if(canvasWrap) canvasWrap.style.display='none';
+    return;
+  }
+  if(noData) noData.style.display='none';
+  if(canvasWrap) canvasWrap.style.display='';
+  // 各日付時点のポートフォリオ評価額を計算
+  const portVals=new Array(refDates.length).fill(0);
+  (data.holdings||[]).forEach(h=>{
+    if(!h.value&&!h.shares) return;
+    const ticker=extractTicker(h.name);
+    const pe=ticker?(ph.prices||{})[ticker]:null;
+    const hist=pe?(isDaily?pe.hd:pe.hw):null;
+    const isUSD=ticker&&!ticker.endsWith('.T')&&ticker!=='BTC'&&ticker!=='ETH';
+    if(!hist||!hist.d||!hist.p||hist.p.length===0){
+      for(let i=0;i<portVals.length;i++) portVals[i]+=(h.value||0);
+      return;
+    }
+    const hd=hist.d,hp=hist.p;
+    refDates.forEach((rd,i)=>{
+      // 参照日付以前の最新価格を探す
+      let idx=0;
+      for(let j=hd.length-1;j>=0;j--){if(hd[j]<=rd){idx=j;break;}}
+      const price=hp[idx];
+      if(!price){portVals[i]+=(h.value||0);return;}
+      const shares=h.shares||(h.value/(pe.p||price));
+      portVals[i]+=Math.round(shares*price*(isUSD?fx:1));
+    });
+  });
+  const first=portVals[0]||1,last=portVals[portVals.length-1]||0;
+  const diff=last-first,diffPct=(diff/first*100).toFixed(1);
+  const meta=document.getElementById('perf-chart-meta');
+  if(meta){
+    const sign=diff>=0?'+':'',col=diff>=0?'var(--secondary)':'var(--danger)';
+    meta.innerHTML=`期間変動: <span style="color:${col};font-weight:700">${sign}${fmtM(diff)} (${sign}${diffPct}%)</span> ｜ 株価更新: ${ph.updated||'-'} <span style="color:var(--text-muted);font-size:10px">※ ティッカー未登録銘柄は現在価額で固定</span>`;
+  }
+  const fmtLbl=d=>{
+    if(isDaily) return d.slice(5).replace('-','/');
+    const [,m]=d.split('-');return m+'月';
+  };
+  destroyChart('performance');
+  const ctx=document.getElementById('chart-performance');
+  if(!ctx) return;
+  const lineCol=diff>=0?'#10b981':'#ef4444';
+  charts.performance=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:refDates.map(fmtLbl),
+      datasets:[{
+        data:portVals.map(v=>Math.round(v/10000)),
+        borderColor:lineCol,
+        backgroundColor:diff>=0?'rgba(16,185,129,0.07)':'rgba(239,68,68,0.07)',
+        fill:true,tension:0.3,
+        pointRadius:refDates.length<=12?3:0,pointHoverRadius:4,borderWidth:2
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          title:items=>refDates[items[0].dataIndex],
+          label:ctx=>`${addCommas(ctx.raw)}万円`
+        }}
+      },
+      scales:{
+        y:{ticks:{callback:v=>v+'万',font:{size:10}},grid:{color:'#f1f5f9'}},
+        x:{ticks:{font:{size:10},maxTicksLimit:12},grid:{display:false}}
+      }
+    }
+  });
+}
+
 function extractTicker(name){
   const m=name.match(/\(([^)]+)\)\s*$/);
   if(!m) return null;
@@ -4043,6 +4171,8 @@ async function refreshHoldingPrices(silent=false){
     const res=await fetch('./prices.json?_='+Date.now());
     if(!res.ok) throw new Error('prices.json not found');
     const pd=await res.json();
+    // 履歴データをキャッシュ（パフォーマンスチャート用）
+    localStorage.setItem('fp-ph',JSON.stringify(pd));
     const fx=pd.fxRate||145;
     let updatedVal=0,updatedDiv=0,skipped=0;
     data.holdings.forEach(h=>{
