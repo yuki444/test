@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>らーめん専門 いっぽし｜神戸・六甲道の鶏白湯ラーメン</title>
+  <style>
+    :root {
+      --primary: #8B1A1A;
+      --accent: #D4A017;
+      --bg: #FFF9F0;
+      --text: #2C1810;
+      --muted: #7A6055;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      background: linear-gradient(160deg, #1A0A00 0%, #4A1C00 60%, #8B1A1A 100%);
+      color: #fff;
+      padding: 100px 24px 80px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="30" cy="30" r="1.5" fill="%23ffffff08"/></svg>') repeat;
+    }
+    .hero-badge {
+      display: inline-block;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      padding: 4px 16px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 900;
+      line-height: 1.2;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .hero h1 span {
+      display: block;
+      font-size: 0.45em;
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      color: #ddd;
+      margin-bottom: 8px;
+    }
+    .hero-sub {
+      font-size: 1rem;
+      color: #ccc;
+      letter-spacing: 0.1em;
+      margin-top: 20px;
+    }
+    .hero-award {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(212,160,23,0.15);
+      border: 1px solid rgba(212,160,23,0.4);
+      border-radius: 4px;
+      padding: 8px 20px;
+      margin-top: 32px;
+      font-size: 0.85rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Section Base ── */
+    section { padding: 72px 24px; }
+    .container { max-width: 860px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 900;
+      margin-bottom: 32px;
+      line-height: 1.3;
+    }
+    h2::after {
+      content: '';
+      display: block;
+      width: 48px;
+      height: 3px;
+      background: var(--accent);
+      margin-top: 12px;
+    }
+
+    /* ── Concept ── */
+    .concept {
+      background: #fff;
+    }
+    .concept-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .concept-text p {
+      line-height: 1.9;
+      color: var(--muted);
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+    .concept-visual {
+      background: linear-gradient(135deg, #3D1200, #8B1A1A);
+      border-radius: 4px;
+      aspect-ratio: 4/3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      gap: 12px;
+    }
+    .concept-visual .bowl {
+      font-size: 5rem;
+      line-height: 1;
+    }
+    .concept-visual p {
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* ── Menu ── */
+    .menu { background: var(--bg); }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+    }
+    .menu-card {
+      background: #fff;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .menu-card-header {
+      background: var(--primary);
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    .menu-card-header .icon { font-size: 2rem; }
+    .menu-card-header h3 { font-size: 1rem; margin-top: 8px; letter-spacing: 0.05em; }
+    .menu-card-body { padding: 20px; }
+    .menu-card-body .price {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--primary);
+    }
+    .menu-card-body .price span { font-size: 0.8rem; color: var(--muted); }
+    .menu-card-body p { font-size: 0.82rem; color: var(--muted); line-height: 1.7; margin-top: 8px; }
+    .menu-note {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: rgba(139,26,26,0.05);
+      border-left: 3px solid var(--primary);
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── Craft ── */
+    .craft { background: #1A0A00; color: #fff; }
+    .craft h2 { color: #fff; }
+    .craft h2::after { background: var(--accent); }
+    .craft-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 32px;
+      margin-top: 40px;
+    }
+    .craft-item {
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 24px;
+    }
+    .craft-item .num {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 12px;
+      font-family: 'Arial', sans-serif;
+    }
+    .craft-item h3 { font-size: 1rem; margin-bottom: 10px; }
+    .craft-item p { font-size: 0.85rem; color: rgba(255,255,255,0.65); line-height: 1.8; }
+
+    /* ── Reviews ── */
+    .reviews { background: #fff; }
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .review-card {
+      background: var(--bg);
+      border-radius: 4px;
+      padding: 28px 24px;
+      position: relative;
+    }
+    .review-card::before {
+      content: '❝';
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      font-size: 3rem;
+      color: var(--accent);
+      opacity: 0.3;
+      line-height: 1;
+    }
+    .review-card p {
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: var(--text);
+      padding-top: 20px;
+    }
+    .review-card .reviewer {
+      margin-top: 16px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .stars { color: var(--accent); letter-spacing: 2px; }
+
+    /* ── Info ── */
+    .info { background: var(--bg); }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    .info-table { width: 100%; border-collapse: collapse; }
+    .info-table tr { border-bottom: 1px solid #eee; }
+    .info-table th {
+      text-align: left;
+      padding: 14px 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 400;
+      width: 110px;
+      vertical-align: top;
+    }
+    .info-table td {
+      padding: 14px 0;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .map-placeholder {
+      background: linear-gradient(135deg, #3D1200, #8B1A1A);
+      border-radius: 4px;
+      height: 100%;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      gap: 12px;
+    }
+    .map-placeholder .pin { font-size: 3rem; }
+    .map-placeholder p { font-size: 0.85rem; letter-spacing: 0.1em; }
+    .map-btn {
+      margin-top: 16px;
+      padding: 10px 24px;
+      background: var(--accent);
+      color: #1A0A00;
+      font-weight: 700;
+      font-size: 0.82rem;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: #0D0500;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 40px 24px;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+    }
+    footer .name { color: #fff; font-size: 1rem; margin-bottom: 8px; letter-spacing: 0.2em; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .concept-body, .info-grid { grid-template-columns: 1fr; }
+      .map-placeholder { min-height: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <p class="hero-badge">RAMEN SPECIALTY SHOP</p>
+    <h1>
+      <span>らーめん専門</span>
+      いっぽし
+    </h1>
+    <p class="hero-sub">神戸が誇る、濃厚鶏白湯の一杯。</p>
+    <div class="hero-award">
+      🏆 食べログ ラーメン WEST 百名店 2023・2024 選出
+    </div>
+  </div>
+</section>
+
+<!-- Concept -->
+<section class="concept">
+  <div class="container">
+    <p class="section-label">CONCEPT</p>
+    <h2>一杯に、すべてを。</h2>
+    <div class="concept-body">
+      <div class="concept-text">
+        <p>
+          「しぇからしか」での修行を経て、ホテルやイタリアンで培った技術を融合させたオーナーシェフが
+          2013年に創業。大阪で人気を博していた濃厚鶏白湯を、いち早く神戸に持ち込んだ先駆け的存在です。
+        </p>
+        <p>
+          2種類の鶏を厳選したスープは約6時間かけて炊き上げ、さらに1時間をかけて丁寧に濾し、
+          冷却・熟成を経て完成。「濃厚な旨みを出しつつ、ドライでシャープな味わい」という
+          一貫したコンセプトが、根強いファンを生み続けています。
+        </p>
+        <p>
+          麺は池村製麺所への毎日特注。素材の声に耳を傾け、妥協のない一杯を届けます。
+        </p>
+      </div>
+      <div class="concept-visual">
+        <div class="bowl">🍜</div>
+        <p>創業 2013年</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Menu -->
+<section class="menu">
+  <div class="container">
+    <p class="section-label">MENU</p>
+    <h2>メニュー</h2>
+    <div class="menu-grid">
+      <div class="menu-card">
+        <div class="menu-card-header">
+          <div class="icon">🍜</div>
+          <h3>らーめん</h3>
+        </div>
+        <div class="menu-card-body">
+          <div class="price">850<span>円（税込）</span></div>
+          <p>鶏の旨みが凝縮した看板の濃厚白湯スープ。特注麺との相性は抜群。</p>
+        </div>
+      </div>
+      <div class="menu-card">
+        <div class="menu-card-header">
+          <div class="icon">🥩</div>
+          <h3>チャーシューめん</h3>
+        </div>
+        <div class="menu-card-body">
+          <div class="price">1,050<span>円（税込）</span></div>
+          <p>とろける低温チャーシューをたっぷり乗せた贅沢な一杯。</p>
+        </div>
+      </div>
+      <div class="menu-card">
+        <div class="menu-card-header">
+          <div class="icon">🥢</div>
+          <h3>つけ麺</h3>
+        </div>
+        <div class="menu-card-body">
+          <div class="price">900<span>円〜（税込）</span></div>
+          <p>200g / 900円、大盛300g / 1,000円。濃厚つけ汁でずるずると。</p>
+        </div>
+      </div>
+    </div>
+    <div class="menu-note">
+      ※ メニューは季節限定品が登場する場合があります。最新情報は X（@ipposhi_kobe）または Instagram をご確認ください。
+    </div>
+  </div>
+</section>
+
+<!-- Craft -->
+<section class="craft">
+  <div class="container">
+    <p class="section-label" style="color: rgba(212,160,23,0.7)">OUR CRAFT</p>
+    <h2>こだわり</h2>
+    <div class="craft-grid">
+      <div class="craft-item">
+        <div class="num">01</div>
+        <h3>厳選2種の鶏スープ</h3>
+        <p>異なる2品種の鶏を使い、それぞれの旨みを引き出した白湯スープ。6時間以上の炊き込みで、臭みゼロのコクを実現。</p>
+      </div>
+      <div class="craft-item">
+        <div class="num">02</div>
+        <h3>毎日特注の麺</h3>
+        <p>池村製麺所と共同開発したいっぽしオリジナル麺を毎日仕入れ。濃厚スープに負けない弾力と風味を追求。</p>
+      </div>
+      <div class="craft-item">
+        <div class="num">03</div>
+        <h3>ホテル仕込みの技術</h3>
+        <p>ホテルやイタリアンで研鑽を積んだオーナーが、洋食のエッセンスをラーメンに昇華。繊細なバランス感覚がスープに宿る。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Reviews -->
+<section class="reviews">
+  <div class="container">
+    <p class="section-label">VOICE</p>
+    <h2>お客様の声</h2>
+    <div class="review-grid">
+      <div class="review-card">
+        <p>「開店前から行列ができるのも納得。スープの濃厚さと後味のキレが絶妙で、週1で通いたいくらい」</p>
+        <div class="reviewer"><span class="stars">★★★★★</span> 食べログ 口コミより</div>
+      </div>
+      <div class="review-card">
+        <p>「鶏の旨みが爆発的に広がるのに、しつこさゼロ。チャーシューもトロトロで、最後の一滴まで飲み干してしまった」</p>
+        <div class="reviewer"><span class="stars">★★★★★</span> Retty 口コミより</div>
+      </div>
+      <div class="review-card">
+        <p>「スシローのコラボ監修もした実力店とは知らずに入ったが、一口でファンになった。これは神戸が誇る一杯」</p>
+        <div class="reviewer"><span class="stars">★★★★☆</span> Google Maps 口コミより</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Info -->
+<section class="info">
+  <div class="container">
+    <p class="section-label">ACCESS</p>
+    <h2>店舗情報</h2>
+    <div class="info-grid">
+      <table class="info-table">
+        <tr>
+          <th>住所</th>
+          <td>〒657-0065<br>神戸市灘区友田町3-3-11</td>
+        </tr>
+        <tr>
+          <th>電話</th>
+          <td>078-855-4874</td>
+        </tr>
+        <tr>
+          <th>営業時間</th>
+          <td>11:30〜16:00<br><small style="color:var(--muted)">※スープ切れ次第終了</small></td>
+        </tr>
+        <tr>
+          <th>定休日</th>
+          <td>月曜日（月に不定休あり）<br><small style="color:var(--muted)">※X・Instagram で要確認</small></td>
+        </tr>
+        <tr>
+          <th>アクセス</th>
+          <td>阪神新在家駅 徒歩3分<br>JR六甲道駅 徒歩9分</td>
+        </tr>
+        <tr>
+          <th>席数</th>
+          <td>カウンター10席（全席禁煙）</td>
+        </tr>
+        <tr>
+          <th>SNS</th>
+          <td>X: @ipposhi_kobe<br>Instagram: @ipposhi_kobe</td>
+        </tr>
+      </table>
+      <div class="map-placeholder">
+        <div class="pin">📍</div>
+        <p>神戸市灘区友田町3-3-11</p>
+        <a class="map-btn" href="https://maps.google.com/?q=らーめん専門+いっぽし+神戸" target="_blank" rel="noopener">
+          Google マップで開く
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="name">らーめん専門 いっぽし</div>
+  神戸市灘区友田町3-3-11 ｜ TEL: 078-855-4874
+</footer>
+
+</body>
+</html>

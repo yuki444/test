@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>六甲道 高評価店舗 HP ドラフト一覧</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', sans-serif;
+      background: #F0EDE8;
+      color: #1A1A1A;
+    }
+    header {
+      background: #1A1A2E;
+      color: #fff;
+      padding: 56px 24px;
+      text-align: center;
+    }
+    header p.sub { font-size: 0.75rem; letter-spacing: 0.3em; color: rgba(255,255,255,0.5); margin-bottom: 16px; }
+    header h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 900; line-height: 1.4; }
+    header .note {
+      margin-top: 20px;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.8;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 56px 24px;
+    }
+
+    .criteria {
+      background: #fff;
+      border-radius: 6px;
+      padding: 28px 32px;
+      margin-bottom: 48px;
+      border-left: 4px solid #C8A96E;
+    }
+    .criteria h2 { font-size: 0.9rem; margin-bottom: 12px; color: #8B6914; letter-spacing: 0.05em; }
+    .criteria ul { list-style: none; padding: 0; }
+    .criteria ul li {
+      font-size: 0.87rem;
+      color: #555;
+      padding: 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .criteria ul li:last-child { border: none; }
+    .criteria ul li::before { content: '✓'; color: #2C5F2E; font-weight: 700; }
+
+    .shops { display: grid; gap: 28px; }
+    .shop-card {
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      display: grid;
+      grid-template-columns: 5px 1fr;
+    }
+    .shop-card .accent-bar { background: var(--color); }
+    .shop-card-inner { padding: 28px 32px; }
+    .shop-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .shop-card-top .genre {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .shop-card-top h2 { font-size: 1.3rem; font-weight: 900; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .badge {
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-rating { background: #FFF3CD; color: #856404; }
+    .badge-nohp { background: #D1E7DD; color: #155724; }
+    .badge-award { background: #CFF4FC; color: #0A4C6A; }
+
+    .shop-card p {
+      font-size: 0.88rem;
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+    .shop-meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: #777;
+      margin-bottom: 20px;
+    }
+    .shop-meta span { display: flex; align-items: center; gap: 4px; }
+
+    .shop-card-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      padding: 10px 22px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 3px;
+      letter-spacing: 0.02em;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #1A1A2E; color: #fff; }
+    .btn-outline { background: transparent; color: #1A1A2E; border: 1.5px solid #1A1A2E; }
+
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      font-size: 0.78rem;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <p class="sub">HP DRAFT / ROKKŌMICHI KOBE</p>
+  <h1>六甲道 高評価店舗<br>ウェブサイト ドラフト</h1>
+  <p class="note">
+    Googleマップ評価4以上・独自ウェブサイトなし<br>
+    口コミ・SNS・メディア掲載情報をベースに作成
+  </p>
+</header>
+
+<main>
+
+  <div class="criteria">
+    <h2>ピックアップ基準</h2>
+    <ul>
+      <li>JR六甲道駅・阪神新在家駅周辺（徒歩10分圏内）</li>
+      <li>Googleマップ・食べログ等で実質評価4以上（食べログ換算3.5〜）</li>
+      <li>独自ドメインの公式ウェブサイトを持たない（SNSや予約サイトのみ）</li>
+      <li>口コミ・メディア掲載・SNSから情報が充分に得られる店舗</li>
+    </ul>
+  </div>
+
+  <div class="shops">
+
+    <!-- いっぽし -->
+    <div class="shop-card" style="--color: #8B1A1A">
+      <div class="accent-bar"></div>
+      <div class="shop-card-inner">
+        <div class="shop-card-top">
+          <div>
+            <p class="genre">ラーメン・鶏白湯</p>
+            <h2>らーめん専門 いっぽし</h2>
+          </div>
+          <div class="badges">
+            <span class="badge badge-rating">⭐ 食べログ 3.66</span>
+            <span class="badge badge-nohp">HP なし</span>
+            <span class="badge badge-award">🏆 百名店 2023・2024</span>
+          </div>
+        </div>
+        <p>
+          2種の鶏を6時間以上炊き込んだ濃厚鶏白湯スープと、池村製麺所との共同開発特注麺。
+          食べログラーメンWEST百名店に2年連続選出。スシローとのコラボ監修実績もある
+          六甲道を代表するラーメン店。公式SNSのみで独自HPなし。
+        </p>
+        <div class="shop-meta">
+          <span>📍 神戸市灘区友田町3-3-11</span>
+          <span>🕐 11:30〜16:00</span>
+          <span>🚃 阪神新在家駅 徒歩3分</span>
+          <span>💰 850円〜</span>
+        </div>
+        <div class="shop-card-actions">
+          <a href="ipposhi.html" class="btn btn-primary">HP ドラフトを見る</a>
+          <a href="https://x.com/ipposhi_kobe" target="_blank" rel="noopener" class="btn btn-outline">公式 X</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 赤裸裸 -->
+    <div class="shop-card" style="--color: #1C3A2E">
+      <div class="accent-bar"></div>
+      <div class="shop-card-inner">
+        <div class="shop-card-top">
+          <div>
+            <p class="genre">鮨・おまかせコース</p>
+            <h2>鮨 赤裸裸（せきらら）</h2>
+          </div>
+          <div class="badges">
+            <span class="badge badge-rating">⭐ Google 4.5前後</span>
+            <span class="badge badge-nohp">HP なし</span>
+          </div>
+        </div>
+        <p>
+          完全予約制・カウンター8席のみ。全国から厳選した旬の素材を「赤裸裸」に握る鮨店。
+          赤酢を使わない白酢シャリと、やや大ぶりの握りが特徴。コースのみの提供。
+          Instagramのみで独自HPなし。
+        </p>
+        <div class="shop-meta">
+          <span>📍 神戸市灘区桜口町5-3-3 ウェルブ六甲道6番街</span>
+          <span>🕐 18:00〜22:00</span>
+          <span>🚃 JR六甲道駅 徒歩3分</span>
+          <span>💰 ¥10,000〜14,999</span>
+        </div>
+        <div class="shop-card-actions">
+          <a href="sekirara.html" class="btn btn-primary">HP ドラフトを見る</a>
+          <a href="https://www.instagram.com/sekirara_sushi_kobe/" target="_blank" rel="noopener" class="btn btn-outline">Instagram</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottega MAMU -->
+    <div class="shop-card" style="--color: #2C5F2E">
+      <div class="accent-bar"></div>
+      <div class="shop-card-inner">
+        <div class="shop-card-top">
+          <div>
+            <p class="genre">イタリアン・ピッツェリア</p>
+            <h2>Bottega MAMU（ボッテガ マム）</h2>
+          </div>
+          <div class="badges">
+            <span class="badge badge-rating">⭐ 一休 4.5</span>
+            <span class="badge badge-nohp">HP なし</span>
+            <span class="badge badge-award">🆕 2026年1月開店</span>
+          </div>
+        </div>
+        <p>
+          イタリア修業シェフとイタリア人の妻が手がける本格ピッツェリア。
+          石窯で焼き上げるナポリスタイルのピッツァは外カリッと中もちもち。
+          2026年1月オープンながら一休.com評価4.5を獲得。独自HPなし。
+        </p>
+        <div class="shop-meta">
+          <span>📍 神戸市灘区桜口町3-1-1 パニエ六甲1F</span>
+          <span>🕐 11:30〜/18:00〜</span>
+          <span>🚃 JR六甲道駅 徒歩7分</span>
+          <span>💰 ¥1,600〜</span>
+        </div>
+        <div class="shop-card-actions">
+          <a href="bottega-mamu.html" class="btn btn-primary">HP ドラフトを見る</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  作成日: 2026年6月21日 ｜ 情報出典: Google Maps・食べログ・Retty・各種メディア掲載情報をもとに作成<br>
+  ※ 掲載情報は取材時点のものです。最新情報は各店舗の公式SNSをご確認ください。
+</footer>
+
+</body>
+</html>

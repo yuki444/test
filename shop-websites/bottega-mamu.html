@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bottega MAMU｜六甲道 本格イタリアン・ピッツェリア</title>
+  <style>
+    :root {
+      --primary: #2C5F2E;
+      --accent: #E8C547;
+      --red: #C0392B;
+      --bg: #FDFAF4;
+      --text: #1A1A1A;
+      --muted: #6B6055;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #1A3A1C 0%, #2C5F2E 50%, #1E4820 100%);
+      color: #fff;
+      padding: 100px 24px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 40%, rgba(232,197,71,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 70%, rgba(192,57,43,0.1) 0%, transparent 50%);
+    }
+    .hero-flag {
+      display: inline-flex;
+      gap: 3px;
+      margin-bottom: 28px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .hero-flag span {
+      display: block;
+      width: 20px;
+      height: 36px;
+    }
+    .flag-g { background: #009246; }
+    .flag-w { background: #fff; }
+    .flag-r { background: #CE2B37; }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .hero h1 .sub {
+      display: block;
+      font-size: 0.4em;
+      font-weight: 400;
+      letter-spacing: 0.4em;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 12px;
+    }
+    .hero-tagline {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.75);
+      letter-spacing: 0.05em;
+      line-height: 1.9;
+      margin-top: 24px;
+    }
+    .hero-open {
+      display: inline-block;
+      margin-top: 28px;
+      padding: 6px 20px;
+      border: 1px solid rgba(232,197,71,0.6);
+      border-radius: 2px;
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+    }
+
+    /* ── Section Base ── */
+    section { padding: 72px 24px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      color: var(--primary);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    h2 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 900;
+      margin-bottom: 40px;
+      line-height: 1.3;
+      position: relative;
+      padding-bottom: 20px;
+    }
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 40px;
+      height: 3px;
+      background: var(--accent);
+    }
+
+    /* ── Story ── */
+    .story { background: #fff; }
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: start;
+    }
+    .story-text p {
+      font-size: 0.93rem;
+      line-height: 2;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .story-visual {
+      background: var(--primary);
+      border-radius: 4px;
+      aspect-ratio: 3/4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      gap: 20px;
+      padding: 32px;
+      text-align: center;
+    }
+    .story-visual .icon { font-size: 4rem; }
+    .story-visual h3 { font-size: 1.1rem; line-height: 1.6; }
+    .story-visual p { font-size: 0.8rem; color: rgba(255,255,255,0.6); line-height: 1.8; }
+
+    /* ── Pizza ── */
+    .pizza { background: var(--bg); }
+    .pizza-intro {
+      font-size: 0.93rem;
+      color: var(--muted);
+      line-height: 2;
+      margin-bottom: 40px;
+      max-width: 640px;
+    }
+    .pizza-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .pizza-card {
+      background: #fff;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      transition: transform 0.2s;
+    }
+    .pizza-card:hover { transform: translateY(-3px); }
+    .pizza-card-img {
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+    }
+    .pizza-card-img.tipo1 { background: linear-gradient(135deg, #8B1A1A, #C0392B); }
+    .pizza-card-img.tipo2 { background: linear-gradient(135deg, #1A3A1C, #2C5F2E); }
+    .pizza-card-img.tipo3 { background: linear-gradient(135deg, #4A3A00, #8B6914); }
+    .pizza-card-img.tipo4 { background: linear-gradient(135deg, #1A1A4A, #2C2C8B); }
+    .pizza-card-body { padding: 20px; }
+    .pizza-card-body h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+    .pizza-card-body .price { font-size: 1.2rem; font-weight: 900; color: var(--primary); }
+    .pizza-card-body .price span { font-size: 0.75rem; font-weight: 400; color: var(--muted); }
+    .pizza-card-body p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin-top: 8px; }
+
+    /* ── Kiln ── */
+    .kiln {
+      background: var(--red);
+      color: #fff;
+      text-align: center;
+      padding: 80px 24px;
+    }
+    .kiln h2 { color: #fff; margin: 0 auto 20px; }
+    .kiln h2::after { background: var(--accent); margin: 12px auto 0; }
+    .kiln p {
+      font-size: 1rem;
+      line-height: 2;
+      color: rgba(255,255,255,0.85);
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .kiln-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 48px;
+      flex-wrap: wrap;
+    }
+    .kiln-stat { text-align: center; }
+    .kiln-stat .num {
+      font-size: 3rem;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--accent);
+    }
+    .kiln-stat .unit { font-size: 1rem; }
+    .kiln-stat p { font-size: 0.8rem; color: rgba(255,255,255,0.65); margin-top: 6px; letter-spacing: 0.1em; }
+
+    /* ── Pasta ── */
+    .pasta { background: #fff; }
+    .pasta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .pasta-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 20px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .pasta-item .pasta-icon { font-size: 2rem; flex-shrink: 0; }
+    .pasta-item h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .pasta-item .price { font-size: 1rem; font-weight: 900; color: var(--primary); }
+    .pasta-item p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin-top: 6px; }
+
+    /* ── Reviews ── */
+    .reviews { background: var(--bg); }
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .review-card {
+      background: #fff;
+      border-radius: 4px;
+      padding: 28px 24px;
+      border-top: 3px solid var(--primary);
+    }
+    .review-card p { font-size: 0.88rem; line-height: 1.9; color: var(--text); }
+    .review-card .meta { margin-top: 16px; font-size: 0.75rem; color: var(--muted); }
+    .stars { color: var(--accent); }
+
+    /* ── Info ── */
+    .info { background: var(--primary); color: #fff; }
+    .info h2 { color: #fff; }
+    .info h2::after { background: var(--accent); }
+    .info-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+    }
+    .info-table { width: 100%; border-collapse: collapse; }
+    .info-table tr { border-bottom: 1px solid rgba(255,255,255,0.12); }
+    .info-table th {
+      text-align: left; padding: 13px 0;
+      font-size: 0.78rem; color: rgba(232,197,71,0.85);
+      font-weight: 400; width: 100px; vertical-align: top;
+    }
+    .info-table td {
+      padding: 13px 0; font-size: 0.88rem;
+      color: rgba(255,255,255,0.85); line-height: 1.7;
+    }
+    .map-box {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      padding: 32px;
+      text-align: center;
+    }
+    .map-box .pin { font-size: 3rem; margin-bottom: 16px; display: block; }
+    .map-box p { font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.8; margin-bottom: 20px; }
+    .map-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background: var(--accent);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.82rem;
+      text-decoration: none;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+    }
+
+    footer {
+      background: #0D1F0E;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      padding: 40px 24px;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+    }
+    footer .name { color: #fff; font-size: 1rem; margin-bottom: 6px; letter-spacing: 0.2em; }
+
+    @media (max-width: 640px) {
+      .story-grid, .info-inner { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-flag" aria-label="イタリア国旗">
+    <span class="flag-g"></span>
+    <span class="flag-w"></span>
+    <span class="flag-r"></span>
+  </div>
+  <h1>
+    <span class="sub">BOTTEGA MAMU</span>
+    ボッテガ マム
+  </h1>
+  <p class="hero-tagline">
+    イタリアから六甲道へ。<br>
+    夫婦のAmore（愛）が焼き上げる、本物のピッツァ。
+  </p>
+  <div class="hero-open">2026年1月 グランドオープン</div>
+</section>
+
+<!-- Story -->
+<section class="story">
+  <div class="container">
+    <p class="section-label">OUR STORY</p>
+    <h2>なぜ六甲道に、<br>本場イタリアの味を。</h2>
+    <div class="story-grid">
+      <div class="story-text">
+        <p>
+          イタリアで修業を重ねたシェフと、イタリア人の妻。二人が選んだのは神戸・六甲道という地でした。
+          「Bottega（工房）」という名の通り、ここは毎日素材と向き合う職人の場所です。
+        </p>
+        <p>
+          「MAMU」は妻への愛称から。イタリアの家庭で受け継がれる料理の温かさと、
+          職人が本場で身につけた技術を掛け合わせた、六甲道には他にない本格イタリアンです。
+        </p>
+        <p>
+          新鮮な素材を毎日仕入れ、石窯で一枚一枚焼き上げるピッツァは、
+          外はカリッと、中はもちもちの本場ナポリスタイル。
+          「また来たい」と感じてもらえる場所を目指しています。
+        </p>
+      </div>
+      <div class="story-visual">
+        <div class="icon">🍕</div>
+        <h3>イタリア修業シェフ×<br>イタリア人の妻</h3>
+        <p>夫婦でつくる温かいイタリアン。六甲道の隠れ家的存在として、地域に根ざしたお店づくりを続けています。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pizza -->
+<section class="pizza">
+  <div class="container">
+    <p class="section-label">PIZZA</p>
+    <h2>看板ピッツァ</h2>
+    <p class="pizza-intro">
+      石窯の高温で短時間焼き上げることで、生地のふちがぷっくりと膨らみ外はパリッと香ばしく、
+      中はしっとりもちもちの食感に。トマトソースはイタリア産ホールトマトを使用。
+    </p>
+    <div class="pizza-grid">
+      <div class="pizza-card">
+        <div class="pizza-card-img tipo1">🍅</div>
+        <div class="pizza-card-body">
+          <h3>マルゲリータ</h3>
+          <div class="price">1,600<span>円（税込）</span></div>
+          <p>トマト・モッツァレラ・バジル。シンプルイズベスト。</p>
+        </div>
+      </div>
+      <div class="pizza-card">
+        <div class="pizza-card-img tipo2">🧀</div>
+        <div class="pizza-card-body">
+          <h3>クアットロフォルマッジ</h3>
+          <div class="price">2,000<span>円（税込）</span></div>
+          <p>4種のチーズをふんだんに使用した濃厚な一枚。蜂蜜との相性抜群。</p>
+        </div>
+      </div>
+      <div class="pizza-card">
+        <div class="pizza-card-img tipo3">🥓</div>
+        <div class="pizza-card-body">
+          <h3>カルボナーラピッツァ</h3>
+          <div class="price">1,900<span>円（税込）</span></div>
+          <p>クリームソース・パンチェッタ・玉子の濃厚コンビ。</p>
+        </div>
+      </div>
+      <div class="pizza-card">
+        <div class="pizza-card-img tipo4">🌿</div>
+        <div class="pizza-card-body">
+          <h3>季節の野菜ピッツァ</h3>
+          <div class="price">1,800<span>円〜（税込）</span></div>
+          <p>旬の野菜を使ったヘルシーな一枚。内容は季節により異なります。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Kiln -->
+<section class="kiln">
+  <div class="container">
+    <p class="section-label" style="color:rgba(232,197,71,0.7)">STONE KILN</p>
+    <h2>石窯の力</h2>
+    <p>
+      ナポリスタイルの石窯は400〜500℃の高温に達します。
+      この高温で短時間焼くことで生まれる「ふくらんだコルニチョーネ（耳）」と
+      「しっとりした中身」のコントラストが、本場ピッツァの証。
+    </p>
+    <div class="kiln-stats">
+      <div class="kiln-stat">
+        <div class="num">480<span class="unit">℃</span></div>
+        <p>石窯温度</p>
+      </div>
+      <div class="kiln-stat">
+        <div class="num">90<span class="unit">秒</span></div>
+        <p>焼き上げ時間</p>
+      </div>
+      <div class="kiln-stat">
+        <div class="num">48<span class="unit">h</span></div>
+        <p>生地発酵時間</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pasta -->
+<section class="pasta">
+  <div class="container">
+    <p class="section-label">PASTA</p>
+    <h2>パスタ</h2>
+    <div class="pasta-grid">
+      <div class="pasta-item">
+        <span class="pasta-icon">🍝</span>
+        <div>
+          <h3>カチョエペペ</h3>
+          <div class="price">1,400円</div>
+          <p>ローマ伝統の黒胡椒×チーズ。シンプルな材料で深い味わい。</p>
+        </div>
+      </div>
+      <div class="pasta-item">
+        <span class="pasta-icon">🦐</span>
+        <div>
+          <h3>海老のトマトソース</h3>
+          <div class="price">1,600円</div>
+          <p>有頭海老の旨みをたっぷり吸い込んだリコッタ入りトマトソース。</p>
+        </div>
+      </div>
+      <div class="pasta-item">
+        <span class="pasta-icon">🍄</span>
+        <div>
+          <h3>きのこのクリームソース</h3>
+          <div class="price">1,500円</div>
+          <p>旬きのこと自家製クリームソース。秋冬の定番人気メニュー。</p>
+        </div>
+      </div>
+      <div class="pasta-item">
+        <span class="pasta-icon">🐟</span>
+        <div>
+          <h3>季節のパスタ（日替わり）</h3>
+          <div class="price">時価</div>
+          <p>その日の仕入れで変わる日替わりパスタ。シェフにお聞きください。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Reviews -->
+<section class="reviews">
+  <div class="container">
+    <p class="section-label">VOICE</p>
+    <h2>お客様の声</h2>
+    <div class="review-grid">
+      <div class="review-card">
+        <p>「何を食べてもおいしかったです！オーナーご夫婦のお人柄も素敵で、またすぐに行きたいと思えるお店。六甲道にこんな場所ができて嬉しい」</p>
+        <div class="meta"><span class="stars">★★★★★</span> 一休.com レストラン（評価4.5）</div>
+      </div>
+      <div class="review-card">
+        <p>「クアットロフォルマッジがとにかく絶品。4種のチーズの塩気と蜂蜜の甘みが最高のバランス。本場のピッツァってこういうことかと感動しました」</p>
+        <div class="meta"><span class="stars">★★★★★</span> Google Maps 口コミより</div>
+      </div>
+      <div class="review-card">
+        <p>「石窯で焼かれた生地が本当においしい。外のカリカリと中のモチモチのギャップにやられた。神戸にいながらイタリアを感じられる貴重なお店」</p>
+        <div class="meta"><span class="stars">★★★★☆</span> 神戸ジャーナル 読者コメントより</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Info -->
+<section class="info">
+  <div class="container">
+    <p class="section-label" style="color:rgba(232,197,71,0.7)">ACCESS</p>
+    <h2>店舗情報</h2>
+    <div class="info-inner">
+      <table class="info-table">
+        <tr>
+          <th>住所</th>
+          <td>〒657-0065<br>神戸市灘区桜口町3-1-1<br>パニエ六甲 1F</td>
+        </tr>
+        <tr>
+          <th>電話</th>
+          <td>078-891-4881</td>
+        </tr>
+        <tr>
+          <th>営業時間</th>
+          <td>ランチ 11:30〜14:00<br>ディナー 18:00〜22:00</td>
+        </tr>
+        <tr>
+          <th>定休日</th>
+          <td>月曜日・火曜日<br><small style="color:rgba(255,255,255,0.4)">※Instagramで確認</small></td>
+        </tr>
+        <tr>
+          <th>アクセス</th>
+          <td>JR六甲道駅 徒歩7分<br>阪神新在家駅 徒歩5分<br>（国道2号線沿い 桜口交差点近く）</td>
+        </tr>
+        <tr>
+          <th>予算</th>
+          <td>ランチ ¥1,500〜2,000<br>ディナー ¥3,000〜5,000</td>
+        </tr>
+      </table>
+      <div class="map-box">
+        <span class="pin">📍</span>
+        <p>神戸市灘区桜口町3-1-1<br>パニエ六甲 1F<br><br>JR六甲道駅より国道2号線沿いに<br>徒歩約7分</p>
+        <a class="map-btn" href="https://maps.google.com/?q=Bottega+MAMU+神戸市灘区桜口町3-1-1" target="_blank" rel="noopener">
+          Google マップで開く
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="name">Bottega MAMU（ボッテガ マム）</div>
+  神戸市灘区桜口町3-1-1 パニエ六甲1F ｜ TEL: 078-891-4881
+</footer>
+
+</body>
+</html>
