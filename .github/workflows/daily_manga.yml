@@ -1,0 +1,63 @@
+name: Daily Manga Generation
+
+on:
+  schedule:
+    # 毎日 07:00 JST (UTC 22:00 前日)
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '日付 (YYYY-MM-DD、空欄=今日)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Set date
+        run: |
+          DATE="${{ github.event.inputs.date }}"
+          if [ -z "$DATE" ]; then
+            DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+          fi
+          echo "DATE=$DATE" >> $GITHUB_ENV
+
+      - name: Check scenario exists
+        run: |
+          if [ ! -f "manga/scenario/master.md" ]; then
+            echo "ERROR: manga/scenario/master.md が見つかりません。"
+            echo "先に manga_init.py を実行してシナリオを作成してください。"
+            exit 1
+          fi
+
+      - name: Generate manga draft
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/manga_draft.py --date "$DATE"
+
+      - name: Commit draft and state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add manga/chapters/ manga/state.json
+          if git diff --staged --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "chore: manga draft for $DATE"
+            git push
+          fi
