@@ -1,6 +1,14 @@
+# Suno AI 自動作曲・YouTube 投稿システム 依存パッケージ
+
+# Agent②: Playwright ブラウザ自動化（Suno AI 接続）
+playwright>=1.44.0
+aiohttp>=3.9.0
+
+# Agent③: 画像生成 / 動画化
 requests>=2.31.0
-google-api-python-client>=2.0.0
-google-auth>=2.0.0
-google-auth-oauthlib>=1.0.0
-google-auth-httplib2>=0.2.0
-yfinance>=0.2.40
+Pillow>=10.0.0
+
+# Agent④: YouTube 投稿
+google-auth>=2.29.0
+google-auth-oauthlib>=1.2.0
+google-api-python-client>=2.128.0

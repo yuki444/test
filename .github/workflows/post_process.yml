@@ -1,0 +1,76 @@
+name: Post Process (Agent③④)
+
+# Agent②（作曲）がローカルで results.json を push したら自動起動
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+    paths:
+      - 'output/**/results.json'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '処理する日付 (YYYY-MM-DD、空欄=今日)'
+        required: false
+        default: ''
+
+jobs:
+  post_process:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Resolve date
+        run: |
+          DATE="${{ github.event.inputs.date }}"
+          if [ -z "$DATE" ]; then
+            DATE=$(date +%Y-%m-%d)
+          fi
+          echo "DATE=$DATE" >> $GITHUB_ENV
+
+      - name: Check results.json exists
+        run: |
+          if [ ! -f "output/$DATE/results.json" ]; then
+            echo "results.json が見つかりません: output/$DATE/results.json"
+            echo "SKIP=true" >> $GITHUB_ENV
+          fi
+
+      - name: Install ffmpeg
+        if: env.SKIP != 'true'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Agent③ — 動画化 (Pollinations 画像 + ffmpeg)
+        if: env.SKIP != 'true'
+        run: python scripts/make_videos.py --date "$DATE"
+
+      - name: Agent④ — YouTube 投稿
+        if: env.SKIP != 'true'
+        env:
+          YOUTUBE_CLIENT_ID:     ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: python scripts/upload_youtube.py --date "$DATE" --privacy unlisted
+
+      - name: Commit results (YouTube URL 等を保存)
+        if: env.SKIP != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # 大きなMP4は除外、メタデータのみコミット
+          git add "output/$DATE/results.json"
+          if git diff --staged --quiet; then
+            echo "変更なし — コミットをスキップ"
+          else
+            git commit -m "chore: Agent③④完了 $DATE (動画化・YouTube投稿)"
+            git push
+          fi
