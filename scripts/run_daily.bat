@@ -60,4 +60,13 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo. >> "%LOG_FILE%"
+echo 📋 PM エージェント: Notion 日報を投稿中... >> "%LOG_FILE%"
+%PYTHON% scripts\pm_agent.py --date %TODAY% >> "%LOG_FILE%" 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo ⚠️  PM エージェント失敗（NOTION_TOKEN が未設定の可能性）。ログを確認してください。 >> "%LOG_FILE%"
+) else (
+    echo ✅ Notion 日報投稿完了 >> "%LOG_FILE%"
+)
+
+echo. >> "%LOG_FILE%"
 echo ✅ ローカル処理完了: %TODAY% %TIME% >> "%LOG_FILE%"

@@ -41,7 +41,7 @@ async def main():
             ignore_default_args=["--enable-automation"],
         )
         page = await context.new_page()
-        await page.goto("https://suno.com", wait_until="networkidle")
+        await page.goto("https://suno.com", wait_until="load", timeout=60_000)
 
         print("ブラウザが開きました。")
         print("まだログインしていない場合は右上の「Sign In」からログインしてください。")
@@ -50,7 +50,7 @@ async def main():
         input()
 
         # ログイン確認
-        await page.goto("https://suno.com", wait_until="networkidle")
+        await page.goto("https://suno.com", wait_until="load", timeout=60_000)
         url = page.url
 
         if any(kw in url for kw in ("sign-in", "login", "auth")):

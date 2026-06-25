@@ -74,3 +74,11 @@ jobs:
             git commit -m "chore: Agent③④完了 $DATE (動画化・YouTube投稿)"
             git push
           fi
+
+      - name: PM エージェント — Notion 日報投稿
+        if: always()
+        env:
+          NOTION_TOKEN:       ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        run: |
+          python scripts/pm_agent.py --date "$DATE" || echo "PM agent failed (non-fatal)"
