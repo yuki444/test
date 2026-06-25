@@ -8,6 +8,9 @@ aiohttp>=3.9.0
 requests>=2.31.0
 Pillow>=10.0.0
 
+# Agent③ オプション: Whisper 歌詞タイミング同期（重いので任意）
+# openai-whisper>=20231117
+
 # Agent④: YouTube 投稿
 google-auth>=2.29.0
 google-auth-oauthlib>=1.2.0

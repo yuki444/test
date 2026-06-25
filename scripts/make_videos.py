@@ -10,6 +10,7 @@ Agent③ v4 — 動画化（タイトルスクリーン + 歌詞テキスト + �
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -120,6 +121,89 @@ def parse_lyrics_file(date_str):
         })
 
     return {"title": title, "sections": sections, "raw": body}
+
+
+# ── セクション時間計算 ────────────────────────────────────────────────────────
+
+def calc_section_durations(sections, total_dur, audio_path=None):
+    """
+    各セクションの表示時間を計算する。
+
+    1. Whisper が使える場合: 音声認識で歌詞の開始位置を検出してタイミング同期
+    2. 使えない場合: 歌詞の文字数に比例した時間配分（均等より自然）
+    """
+    n = len(sections)
+    if n == 0:
+        return []
+
+    # --- Whisper で音声認識タイミング取得 ---
+    if audio_path is not None:
+        try:
+            import whisper
+            print("  [Whisper] 音声認識でタイミング検出中...")
+            model = whisper.load_model("base")
+            result = model.transcribe(
+                str(audio_path),
+                language="ja",
+                word_timestamps=False,
+                verbose=False,
+            )
+            segments = result.get("segments", [])
+            if segments:
+                return _whisper_to_section_durations(sections, segments, total_dur)
+        except ImportError:
+            pass  # Whisper 未インストール → 文字数比例にフォールバック
+        except Exception as e:
+            print(f"  [Whisper] エラー: {e} → 文字数比例にフォールバック")
+
+    # --- 文字数比例 ---
+    return _char_proportional_durations(sections, total_dur)
+
+
+def _char_proportional_durations(sections, total_dur):
+    """歌詞の文字数に比例して各セクションに時間を割り当てる。"""
+    # セクション種別ごとの重みを加味（サビは長め、イントロは短め）
+    SECTION_WEIGHTS = {
+        "intro":      0.7,
+        "outro":      0.6,
+        "pre-chorus": 0.8,
+        "bridge":     0.9,
+        "verse":      1.0,
+        "chorus":     1.1,
+    }
+
+    weights = []
+    for sec in sections:
+        name_lower = sec["name"].lower()
+        char_count = max(len(re.sub(r'\s', '', sec.get("lyrics", ""))), 1)
+        weight_key = next((k for k in SECTION_WEIGHTS if name_lower.startswith(k)), None)
+        w = SECTION_WEIGHTS.get(weight_key, 1.0) if weight_key else 1.0
+        weights.append(char_count * w)
+
+    total_w = sum(weights)
+    return [total_dur * w / total_w for w in weights]
+
+
+def _whisper_to_section_durations(sections, segments, total_dur):
+    """Whisperセグメントから各セクションの推定継続時間を算出する。"""
+    n = len(sections)
+    if not segments or n == 0:
+        return [total_dur / n] * n
+
+    # セグメントを均等にセクション数で分割
+    segs_per_sec = len(segments) / n
+    durations = []
+    for i in range(n):
+        start_idx = int(i * segs_per_sec)
+        end_idx   = int((i + 1) * segs_per_sec)
+        seg_slice = segments[start_idx:end_idx] if end_idx > start_idx else [segments[min(start_idx, len(segments)-1)]]
+        sec_start = seg_slice[0]["start"]
+        sec_end   = seg_slice[-1]["end"]
+        durations.append(max(sec_end - sec_start, 1.0))
+
+    # 合計を total_dur に正規化
+    total_w = sum(durations)
+    return [total_dur * d / total_w for d in durations]
 
 
 # ── Pollinations 画像生成 ──────────────────────────────────────────────────
@@ -253,22 +337,7 @@ def add_lyrics_overlay(base_img_path, section_name, lyrics, out_path):
         alpha = int(200 * (y - grad_y) / (VIDEO_H - grad_y))
         draw.rectangle([(0, y), (VIDEO_W, y)], fill=(0, 0, 0, alpha))
 
-    font_label  = find_font(26)
     font_lyrics = find_font(44)
-
-    # セクション名（左上）
-    if font_label:
-        label = f"♪  {section_name}"
-        # 背景ボックス（半透明）
-        try:
-            bbox = font_label.getbbox(label)
-            bw = bbox[2] - bbox[0] + 24
-            bh = bbox[3] - bbox[1] + 12
-            draw.rectangle([(14, 14), (14 + bw, 14 + bh)], fill=(0, 0, 0, 120))
-        except Exception:
-            pass
-        draw.text((22, 22), label, font=font_label, fill=(0, 0, 0, 160))
-        draw.text((20, 20), label, font=font_label, fill=(255, 255, 160, 230))
 
     # 歌詞テキスト（下部）
     lines = [l for l in lyrics.split("\n") if l.strip()][:LYRICS_LINES_MAX]
@@ -515,7 +584,8 @@ def make_video(song, out_dir, date_str, force=False):
             except Exception:
                 total_dur = 200.0
 
-        sec_dur = total_dur / len(sections)
+        section_durations_list = calc_section_durations(sections, total_dur, audio_path)
+        sec_dur = total_dur / len(sections)  # fallback avg for display
         print(f"  {len(sections)} sections x {sec_dur:.1f}s = {total_dur:.0f}s")
 
         # タイトル背景画像
@@ -569,7 +639,7 @@ def make_video(song, out_dir, date_str, force=False):
             overlay_img = tmp / f"sec_{i:02d}.jpg"
             add_lyrics_overlay(raw_img, sec_name, sec_lyrics, overlay_img)
             section_images.append(overlay_img)
-            section_durations.append(sec_dur)
+            section_durations.append(section_durations_list[i])
 
         success = build_video_from_sections(
             section_images, section_durations, audio_path, mp4_path, total_dur,
