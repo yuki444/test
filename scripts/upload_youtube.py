@@ -233,7 +233,9 @@ def main():
     failed  = 0
 
     for song in songs:
-        if song.get("status") != "complete":
+        # status フィールドがない場合は complete 扱い（generate_music.py の仕様）
+        status = song.get("status", "complete")
+        if status not in ("complete", ""):
             continue
 
         # 既に投稿済みならスキップ

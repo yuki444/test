@@ -75,10 +75,5 @@ jobs:
             git push
           fi
 
-      - name: PM エージェント — Notion 日報投稿
-        if: always()
-        env:
-          NOTION_TOKEN:       ${{ secrets.NOTION_TOKEN }}
-          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
-        run: |
-          python scripts/pm_agent.py --date "$DATE" || echo "PM agent failed (non-fatal)"
+      # Notion 日報は Cowork スケジュールタスク (suno-daily-report) が 10:30 に自動投稿します
+      # GitHub Secrets への NOTION_TOKEN 設定は不要です

@@ -2,7 +2,7 @@ name: Daily Music Generation
 
 on:
   schedule:
-    # 毎日 11:00 JST (UTC 02:00) — Agent①: 歌詞生成のみ
+    # 毎日 11:00 JST (UTC 02:00)
     - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
@@ -11,12 +11,13 @@ on:
         required: false
         default: ''
 
-# NOTE: Agent② (Suno作曲) はローカルPCの scripts/run_daily.sh で実行。
-#       作曲完了後 results.json が push されると post_process.yml が起動し
-#       Agent③④ (動画化・YouTube投稿) を自動実行します。
+# NOTE: このワークフローは歌詞の品質チェックを行う。
+#       歌詞は Cowork PM エージェント (10:00 AM) が自動生成して push する。
+#       作曲 (Agent②) はローカルPCの run_daily.bat で実行。
+#       作曲後 results.json が push されると post_process.yml が起動する。
 
 jobs:
-  generate_lyrics:
+  preflight:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,24 +36,37 @@ jobs:
           fi
           echo "DATE=$DATE" >> $GITHUB_ENV
 
-      - name: Agent① — 歌詞ファイルを作成（なければテンプレートをコピー）
+      - name: PM Agent — 歌詞品質チェック
+        id: quality_check
         run: |
-          LYRICS_DIR="lyrics/$DATE"
-          LYRICS_FILE="$LYRICS_DIR/song.txt"
-          if [ -f "$LYRICS_FILE" ]; then
-            echo "歌詞ファイルは既にあります: $LYRICS_FILE"
-          else
-            mkdir -p "$LYRICS_DIR"
+          LYRICS_FILE="lyrics/$DATE/song.txt"
+          if [ ! -f "$LYRICS_FILE" ]; then
+            echo "⚠️  歌詞ファイルなし: $LYRICS_FILE"
+            echo "   Cowork PM エージェントが 10:00 に自動生成するはずです"
+            echo "   テンプレートでフォールバックします"
+            mkdir -p "lyrics/$DATE"
             cp lyrics/template/song.txt "$LYRICS_FILE"
-            echo "テンプレートをコピーしました: $LYRICS_FILE"
-            echo "NEEDS_COMMIT=true" >> $GITHUB_ENV
+            echo "USED_TEMPLATE=true" >> $GITHUB_ENV
           fi
+          pip install -q requests 2>/dev/null || true
+          python scripts/pm_agent.py --date "$DATE" --check-only
+          echo "QUALITY_OK=true" >> $GITHUB_ENV
 
-      - name: 歌詞ファイルをコミット
-        if: env.NEEDS_COMMIT == 'true'
+      - name: テンプレート使用時はコミット
+        if: env.USED_TEMPLATE == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add "lyrics/$DATE/song.txt"
-          git commit -m "chore: $DATE の歌詞テンプレートを追加"
+          git commit -m "fallback: $DATE 歌詞テンプレートを使用 (PM Agent未実行)"
           git push
+
+      - name: 品質チェック結果サマリ
+        if: always()
+        run: |
+          echo "=== 品質チェック結果 ==="
+          echo "日付: $DATE"
+          if [ -f "lyrics/$DATE/song.txt" ]; then
+            echo "歌詞: $(head -1 lyrics/$DATE/song.txt)"
+            echo "セクション数: $(grep -c '^\[' lyrics/$DATE/song.txt || echo 0)"
+          fi

@@ -1,288 +1,328 @@
 # coding: utf-8
 """
-PM エージェント — 日次実行サマリを Notion に投稿する
+PM エージェント — 品質チェック & Notion 日報
 
-必要な環境変数（GitHub Secrets / .env）:
-  NOTION_TOKEN        : Notion Integration トークン（secret_xxx...）
-  NOTION_DATABASE_ID  : レポートを書き込む Notion データベースの ID
+役割:
+  - 歌詞ファイルの品質を検査（テンプレートテキスト検出）
+  - 生成結果の品質スコアを算出
+  - GitHub Actions の pre-flight チェック
+  - Notion への日報投稿（NOTION_TOKEN 環境変数が必要な場合のみ）
 
-使い方（手動）:
-  python scripts/pm_agent.py --date 2026-06-25
-
-run_daily.bat / post_process.yml の末尾から自動呼出しされます。
+使い方:
+  python scripts/pm_agent.py --date 2026-06-25           # 品質チェックのみ
+  python scripts/pm_agent.py --date 2026-06-25 --notify  # Notion 投稿あり
 """
 
 import argparse
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
-import requests
+REPO_ROOT = Path(__file__).parent.parent
+LYRICS_DIR = REPO_ROOT / "lyrics"
 
-# ── 設定 ──────────────────────────────────────────────────────────────────────
+# ── テンプレートテキスト検出 ──────────────────────────────────────────────
 
-NOTION_API_BASE = "https://api.notion.com/v1"
-NOTION_VERSION  = "2022-06-28"
+PLACEHOLDER_KEYWORDS = [
+    "ここに曲のタイトルを入力",
+    "1番の歌詞をここに書く",
+    "メロディーラインに合わせて",
+    "自然な区切りで改行する",
+    "サビの歌詞 — 一番印象的なフレーズ",
+    "繰り返しが多いと覚えやすい",
+    "この曲の核心となる言葉",
+    "2番の歌詞をここに書く",
+    "インストロ部分 — 任意",
+    "サビへの繋ぎ",
+    "気持ちが高まっていく",
+]
 
-# ── ヘルパー ──────────────────────────────────────────────────────────────────
+def check_lyrics_quality(date_str: str) -> dict:
+    """歌詞ファイルの品質を検査する。"""
+    path = LYRICS_DIR / date_str / "song.txt"
 
-def notion_headers(token: str) -> dict:
+    if not path.exists():
+        return {
+            "status": "missing",
+            "score": 0,
+            "message": f"歌詞ファイルなし: {path}",
+            "issues": ["lyrics file not found"],
+        }
+
+    content = path.read_text(encoding="utf-8")
+
+    issues = []
+
+    # プレースホルダー検出
+    found_placeholders = [kw for kw in PLACEHOLDER_KEYWORDS if kw in content]
+    if found_placeholders:
+        issues.append(f"テンプレートテキスト検出: {found_placeholders[:2]}")
+
+    # セクション数チェック
+    sections = [l.strip() for l in content.split("\n")
+                if l.strip().startswith("[") and l.strip().endswith("]")]
+    if len(sections) < 5:
+        issues.append(f"セクション数が少なすぎます: {len(sections)} (最低5つ必要)")
+
+    # 歌詞行数チェック（タイトル・セクション名・区切り線を除く）
+    lyric_lines = [l for l in content.split("\n")
+                   if l.strip()
+                   and not l.strip().startswith("[")
+                   and not l.strip().startswith("title:")
+                   and l.strip() != "---"]
+    if len(lyric_lines) < 20:
+        issues.append(f"歌詞が短すぎます: {len(lyric_lines)}行 (最低20行必要)")
+
+    # タイトル取得
+    title = ""
+    for line in content.split("\n"):
+        if line.lower().startswith("title:"):
+            title = line.split(":", 1)[1].strip()
+            break
+    if not title or title in PLACEHOLDER_KEYWORDS:
+        issues.append("タイトルが未設定またはプレースホルダー")
+
+    score = 100
+    if found_placeholders:
+        score -= 60
+    if len(sections) < 5:
+        score -= 20
+    if len(lyric_lines) < 20:
+        score -= 15
+    if not title or title in PLACEHOLDER_KEYWORDS:
+        score -= 20
+    score = max(0, score)
+
+    status = "ok" if score >= 80 else ("low_quality" if score >= 40 else "failed")
+
     return {
-        "Authorization": f"Bearer {token}",
-        "Notion-Version": NOTION_VERSION,
-        "Content-Type": "application/json",
+        "status": status,
+        "score": score,
+        "title": title,
+        "sections": len(sections),
+        "lyric_lines": len(lyric_lines),
+        "issues": issues,
+        "message": f"スコア:{score} / セクション:{len(sections)} / 行数:{len(lyric_lines)}",
     }
 
 
-def load_results(date_str: str) -> dict | None:
-    """output/YYYY-MM-DD/results.json を読み込む。なければ None。"""
-    p = Path("output") / date_str / "results.json"
-    if not p.exists():
-        return None
-    try:
-        return json.loads(p.read_text(encoding="utf-8"))
-    except Exception as e:
-        print(f"⚠️  results.json の読み込み失敗: {e}")
-        return None
+# ── results.json 品質チェック ────────────────────────────────────────────
 
+def check_results_quality(date_str: str) -> dict:
+    """生成結果の品質を検査する。"""
+    path = REPO_ROOT / "output" / date_str / "results.json"
 
-# ── 分析 ──────────────────────────────────────────────────────────────────────
+    if not path.exists():
+        return {"status": "missing", "issues": ["results.json not found"]}
 
-def analyze(data: dict, date_str: str) -> dict:
-    """
-    results.json を分析してレポート用 dict を返す。
+    data = json.loads(path.read_text(encoding="utf-8"))
+    songs  = data.get("songs", [])
+    errors = data.get("errors", [])
+    issues = []
 
-    results.json の期待フォーマット:
-    {
-      "date": "2026-06-25",
-      "songs": [
-        {
-          "id": "...",
-          "title": "...",
-          "tags": "pop rock",
-          "duration": 210.5,        # 秒
-          "status": "complete",
-          "audio_url": "https://...",
-          "video_url": "https://...",
-          "youtube_url": "https://...",  # upload_youtube.py が書き込む
-          "style_key": "pop"
-        }, ...
-      ],
-      "errors": ["エラーメッセージ1", ...]
-    }
-    """
-    songs   = data.get("songs", [])
-    errors  = data.get("errors", [])
+    seen_ids = set()
+    unique_songs = []
+    for s in songs:
+        sid = s.get("id")
+        if sid and sid not in seen_ids:
+            seen_ids.add(sid)
+            unique_songs.append(s)
 
-    total   = len(songs)
-    ok      = [s for s in songs if s.get("status") == "complete"]
-    failed  = [s for s in songs if s.get("status") in ("error", "failed")]
+    if not unique_songs:
+        issues.append("生成された曲が0曲")
 
-    durations = [s.get("duration", 0) for s in ok if s.get("duration")]
-    avg_dur   = sum(durations) / len(durations) if durations else 0
+    short_songs = [s for s in unique_songs
+                   if (s.get("duration_sec") or s.get("duration") or 0) < 180]
+    if short_songs:
+        issues.append(f"短い曲あり: {len(short_songs)}曲 (3分未満)")
 
-    short_songs = [s for s in ok if s.get("duration", 999) < 180]  # 3 分未満
-    yt_uploaded = [s for s in ok if s.get("youtube_url")]
+    if errors:
+        issues.append(f"エラー: {len(errors)}件")
 
-    # スタイル別集計
-    styles_done: dict[str, int] = {}
-    for s in ok:
-        key = s.get("style_key") or s.get("tags", "unknown")
-        styles_done[key] = styles_done.get(key, 0) + 1
+    yt_count = sum(1 for s in unique_songs if s.get("youtube_url"))
+    video_count = sum(1 for s in unique_songs if s.get("video_path"))
 
-    # 全体ステータス判定
-    if total == 0 or len(errors) > 0 and total == 0:
-        overall = "❌ 失敗"
-    elif failed:
-        overall = "⚠️ 一部失敗"
+    avg_dur = 0
+    if unique_songs:
+        durations = [(s.get("duration_sec") or s.get("duration") or 0)
+                     for s in unique_songs]
+        avg_dur = sum(durations) / len(durations)
+
+    if errors or not unique_songs:
+        status = "failed"
     elif short_songs:
-        overall = "⚠️ 短い曲あり"
+        status = "warning"
+    else:
+        status = "ok"
+
+    return {
+        "status": status,
+        "total": len(unique_songs),
+        "avg_duration_sec": avg_dur,
+        "youtube_count": yt_count,
+        "video_count": video_count,
+        "errors": errors,
+        "issues": issues,
+        "songs": unique_songs,
+    }
+
+
+# ── Notion 投稿 ───────────────────────────────────────────────────────────
+
+def post_to_notion(date_str: str, lyrics_qc: dict, results_qc: dict):
+    """results.json の内容を Notion に投稿する。"""
+    import urllib.request
+    import urllib.error
+
+    token = os.environ.get("NOTION_TOKEN", "")
+    db_id = os.environ.get("NOTION_DATABASE_ID", "")
+
+    if not token or not db_id:
+        print("  NOTION_TOKEN / NOTION_DATABASE_ID が未設定のためスキップ")
+        return None
+
+    # 総合ステータス判定
+    if results_qc["status"] == "failed" or lyrics_qc["status"] == "failed":
+        overall = "❌ 失敗"
+    elif results_qc["status"] == "warning" or lyrics_qc["status"] in ("low_quality",):
+        overall = "⚠️ 要確認"
+    elif results_qc["status"] == "missing":
+        overall = "⚠️ 作曲未実行"
     else:
         overall = "✅ 正常"
 
-    # 問題点の列挙
-    issues = list(errors)
-    if failed:
-        issues.append(f"{len(failed)} 曲が生成失敗しました (IDs: {[s['id'] for s in failed]})")
-    if short_songs:
-        for s in short_songs:
-            issues.append(
-                f"曲 「{s.get('title','?')}」の尺が短い: {s.get('duration',0):.0f}秒 "
-                f"（目標: 240秒以上）→ 歌詞を増やしてください"
-            )
+    songs = results_qc.get("songs", [])
+    avg_dur = results_qc.get("avg_duration_sec", 0)
+    avg_str = f"{int(avg_dur // 60)}:{int(avg_dur % 60):02d}" if avg_dur > 0 else "—"
 
-    return {
-        "date":         date_str,
-        "overall":      overall,
-        "total":        total,
-        "ok":           len(ok),
-        "failed":       len(failed),
-        "avg_dur_sec":  round(avg_dur, 1),
-        "avg_dur_min":  f"{int(avg_dur//60)}:{int(avg_dur%60):02d}",
-        "short_count":  len(short_songs),
-        "yt_count":     len(yt_uploaded),
-        "styles_done":  styles_done,
-        "issues":       issues,
-        "songs":        ok,
-    }
+    song_list = "\n".join(
+        f"- [{s.get('style_label','')}] {s.get('title','')} / "
+        f"{int((s.get('duration_sec') or s.get('duration') or 0) // 60)}:"
+        f"{int((s.get('duration_sec') or s.get('duration') or 0) % 60):02d}"
+        + (f" → [{s['youtube_url']}]({s['youtube_url']})" if s.get("youtube_url") else "")
+        for s in songs
+    ) or "（なし）"
 
+    issues_all = lyrics_qc.get("issues", []) + results_qc.get("issues", [])
+    issues_str = "\n".join(f"- {i}" for i in issues_all) if issues_all else "問題なし"
 
-# ── Notion 投稿 ───────────────────────────────────────────────────────────────
+    content_md = f"""## 📊 実行サマリ
 
-def build_notion_page(db_id: str, r: dict) -> dict:
-    """Notion ページ作成用のペイロードを組み立てる。"""
+| 項目 | 値 |
+|------|-----|
+| ステータス | {overall} |
+| 生成曲数 | {results_qc.get('total', 0)} 曲 |
+| 平均尺 | {avg_str} |
+| YouTube 投稿 | {results_qc.get('youtube_count', 0)} 曲 |
+| 動画生成 | {results_qc.get('video_count', 0)} 曲 |
 
-    # --- 本文ブロック ---
-    blocks = []
+## 🎵 生成曲一覧
 
-    def h2(text):
-        return {"object": "block", "type": "heading_2",
-                "heading_2": {"rich_text": [{"type": "text", "text": {"content": text}}]}}
+{song_list}
 
-    def bullet(text):
-        return {"object": "block", "type": "bulleted_list_item",
-                "bulleted_list_item": {"rich_text": [{"type": "text", "text": {"content": text}}]}}
+## 🎤 歌詞品質チェック
 
-    def para(text):
-        return {"object": "block", "type": "paragraph",
-                "paragraph": {"rich_text": [{"type": "text", "text": {"content": text}}]}}
+- スコア: {lyrics_qc.get('score', 0)} / 100
+- タイトル: {lyrics_qc.get('title', '—')}
+- セクション数: {lyrics_qc.get('sections', 0)}
+- 歌詞行数: {lyrics_qc.get('lyric_lines', 0)}
 
-    # サマリ
-    blocks.append(h2("📊 実行サマリ"))
-    blocks.append(bullet(f"ステータス  : {r['overall']}"))
-    blocks.append(bullet(f"生成曲数    : {r['ok']} / {r['total']} 曲"))
-    blocks.append(bullet(f"平均尺      : {r['avg_dur_min']} ({r['avg_dur_sec']}秒)"))
-    blocks.append(bullet(f"YouTube投稿 : {r['yt_count']} 曲"))
+## ⚠️ 問題点
 
-    # スタイル別
-    if r["styles_done"]:
-        blocks.append(h2("🎵 スタイル別"))
-        for style, cnt in r["styles_done"].items():
-            blocks.append(bullet(f"{style}: {cnt} 曲"))
+{issues_str}
+"""
 
-    # 問題点
-    if r["issues"]:
-        blocks.append(h2("⚠️ 問題・推奨アクション"))
-        for issue in r["issues"]:
-            blocks.append(bullet(issue))
-    else:
-        blocks.append(h2("✅ 問題なし"))
-
-    # 曲リスト
-    blocks.append(h2("🎶 生成曲一覧"))
-    for s in r["songs"]:
-        dur = s.get("duration", 0)
-        yt  = s.get("youtube_url", "未投稿")
-        line = (
-            f"[{s.get('title','?')}]  尺: {int(dur//60)}:{int(dur%60):02d}  "
-            f"タグ: {s.get('tags','?')}  YouTube: {yt}"
-        )
-        blocks.append(bullet(line))
-
-    # --- プロパティ（データベースのカラム）---
-    # データベースには以下のプロパティが必要:
-    #   Name (title), 日付 (date), ステータス (select),
-    #   生成曲数 (number), 平均尺 (rich_text), 問題数 (number)
-    properties = {
-        "Name": {
-            "title": [{"type": "text", "text": {
-                "content": f"{r['date']} Suno 日報"
-            }}]
-        },
-        "日付": {
-            "date": {"start": r["date"]}
-        },
-        "ステータス": {
-            "select": {"name": r["overall"]}
-        },
-        "生成曲数": {
-            "number": r["ok"]
-        },
-        "平均尺": {
-            "rich_text": [{"type": "text", "text": {"content": r["avg_dur_min"]}}]
-        },
-        "問題数": {
-            "number": len(r["issues"])
-        },
-    }
-
-    return {
+    payload = {
         "parent": {"database_id": db_id},
-        "properties": properties,
-        "children": blocks,
+        "properties": {
+            "日報名": {"title": [{"text": {"content": f"{date_str} Suno 日報"}}]},
+            "date": {"date": {"start": date_str}},
+            "ステータス": {"select": {"name": overall}},
+            "生成曲数": {"number": results_qc.get("total", 0)},
+            "平均尺": {"rich_text": [{"text": {"content": avg_str}}]},
+            "問題数": {"number": len(issues_all)},
+        },
+        "children": [
+            {
+                "object": "block",
+                "type": "paragraph",
+                "paragraph": {
+                    "rich_text": [{"type": "text", "text": {"content": content_md}}]
+                }
+            }
+        ]
     }
 
-
-def post_to_notion(token: str, db_id: str, payload: dict) -> dict:
-    resp = requests.post(
-        f"{NOTION_API_BASE}/pages",
-        headers=notion_headers(token),
-        json=payload,
-        timeout=30,
+    body = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        "https://api.notion.com/v1/pages",
+        data=body,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28",
+        },
+        method="POST",
     )
-    resp.raise_for_status()
-    return resp.json()
+
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            result = json.loads(resp.read())
+            url = result.get("url", "")
+            print(f"  ✅ Notion 投稿完了: {url}")
+            return url
+    except urllib.error.HTTPError as e:
+        body_err = e.read().decode("utf-8", errors="replace")
+        print(f"  ❌ Notion 投稿失敗 ({e.code}): {body_err[:200]}")
+        return None
 
 
 # ── メイン ────────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Suno 日報を Notion に投稿する")
-    parser.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"),
-                        help="対象日 (YYYY-MM-DD)")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Notion への投稿はせずレポートだけ表示する")
+    parser = argparse.ArgumentParser(description="PM エージェント — 品質チェック & Notion 日報")
+    parser.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"))
+    parser.add_argument("--notify", action="store_true", help="Notion に投稿する")
+    parser.add_argument("--check-only", action="store_true", help="品質チェックのみ（CI 用）")
     args = parser.parse_args()
 
-    token = os.environ.get("NOTION_TOKEN", "")
-    db_id = os.environ.get("NOTION_DATABASE_ID", "")
+    print(f"\n=== PM Agent : {args.date} ===\n")
 
-    if not args.dry_run and (not token or not db_id):
-        print("❌ NOTION_TOKEN / NOTION_DATABASE_ID が未設定です。")
-        print("   --dry-run オプションでテスト表示だけ行えます。")
-        sys.exit(1)
+    # 歌詞品質チェック
+    print("--- 歌詞品質チェック ---")
+    lyrics_qc = check_lyrics_quality(args.date)
+    print(f"  ステータス : {lyrics_qc['status']}")
+    print(f"  {lyrics_qc['message']}")
+    for issue in lyrics_qc.get("issues", []):
+        print(f"  ⚠️  {issue}")
 
-    print(f"📋 PM エージェント起動: {args.date}")
+    # 生成結果品質チェック
+    print("\n--- 生成結果チェック ---")
+    results_qc = check_results_quality(args.date)
+    print(f"  ステータス : {results_qc['status']}")
+    for issue in results_qc.get("issues", []):
+        print(f"  ⚠️  {issue}")
+    if results_qc.get("total", 0) > 0:
+        print(f"  曲数: {results_qc['total']} / 平均尺: "
+              f"{int(results_qc['avg_duration_sec']//60)}:"
+              f"{int(results_qc['avg_duration_sec']%60):02d}")
 
-    # --- results.json 読み込み ---
-    data = load_results(args.date)
-    if data is None:
-        print(f"⚠️  output/{args.date}/results.json が見つかりません。")
-        # Notion に「実行なし」を記録
-        data = {"date": args.date, "songs": [], "errors": ["results.json が見つかりません"]}
-
-    # --- 分析 ---
-    report = analyze(data, args.date)
-
-    print(f"\n{'='*50}")
-    print(f"  日付      : {report['date']}")
-    print(f"  ステータス: {report['overall']}")
-    print(f"  生成曲数  : {report['ok']} / {report['total']}")
-    print(f"  平均尺    : {report['avg_dur_min']}")
-    print(f"  YouTube   : {report['yt_count']} 曲")
-    if report["issues"]:
-        print(f"\n  ⚠️  問題点:")
-        for issue in report["issues"]:
-            print(f"    - {issue}")
-    print(f"{'='*50}\n")
-
-    if args.dry_run:
-        print("（--dry-run: Notion には投稿しません）")
+    # CI チェックモード: 歌詞が失敗なら exit 1
+    if args.check_only:
+        if lyrics_qc["status"] == "failed":
+            print(f"\n❌ 歌詞品質チェック失敗 — GitHub Actions を中断します")
+            sys.exit(1)
+        print("\n✅ 品質チェック通過")
         return
 
-    # --- Notion 投稿 ---
-    payload = build_notion_page(db_id, report)
-    try:
-        result = post_to_notion(token, db_id, payload)
-        page_url = result.get("url", "")
-        print(f"✅ Notion に日報を投稿しました: {page_url}")
-    except requests.HTTPError as e:
-        body = e.response.text if e.response else ""
-        print(f"❌ Notion 投稿エラー: {e}")
-        print(f"   レスポンス: {body[:400]}")
-        sys.exit(1)
+    # Notion 投稿
+    if args.notify:
+        print("\n--- Notion 投稿 ---")
+        post_to_notion(args.date, lyrics_qc, results_qc)
+
+    print("\n=== PM Agent 完了 ===")
 
 
 if __name__ == "__main__":

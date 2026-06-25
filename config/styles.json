@@ -1,32 +1,86 @@
 [
   {
-    "name": "electronic_ambient",
-    "label": "Electronic / Ambient",
-    "tags": "electronic, ambient, atmospheric, synthesizer, ethereal, dreamy, cinematic",
-    "image_prompt": "ethereal abstract digital landscape, glowing neon gradients, soft ambient light, dreamy atmosphere, cinematic, 16:9"
+    "name": "jpop",
+    "label": "J-POP",
+    "day_of_week": 0,
+    "day_name": "月曜",
+    "tags": "j-pop, japanese pop, catchy, melodic, uplifting, female vocal, piano, synth, bright",
+    "gender": "female",
+    "vocal_hint": "female vocals, bright tone",
+    "mood": "明るく感情的、キャッチーなメロディ",
+    "lyric_style": "感情豊かな日本語J-POP。サビは耳に残るキャッチフレーズ。英語フレーズ少々OK。女性視点の歌詞が多い。",
+    "image_prompt": "vibrant japanese city pop aesthetic, cherry blossoms, bright pastel colors, young woman, emotional, 16:9"
   },
   {
-    "name": "dance_edm",
-    "label": "Dance / EDM",
-    "tags": "dance, EDM, high energy, upbeat, four-on-the-floor, bass drop, synth, club, euphoric",
-    "image_prompt": "vibrant nightclub scene, laser lights, energetic crowd silhouettes, electric colors, high energy festival stage, 16:9"
+    "name": "dance",
+    "label": "ダンスミュージック",
+    "day_of_week": 1,
+    "day_name": "火曜",
+    "tags": "dance pop, dance music, upbeat, four-on-the-floor, bass, synth, club, energetic, japanese dance",
+    "gender": "unisex",
+    "vocal_hint": "energetic vocals, auto-tune accent",
+    "mood": "クラブ・フェス向け、踊りたくなるアップテンポ",
+    "lyric_style": "ノリのいい日本語ダンスポップ。英語混じりOK。短く繰り返すフック。ポジティブで解放感のある歌詞。",
+    "image_prompt": "vibrant nightclub scene, laser lights, energetic crowd silhouettes, neon colors, dance floor, 16:9"
   },
   {
-    "name": "rock_alternative",
-    "label": "Rock / Alternative",
-    "tags": "rock, alternative rock, electric guitar, energetic, indie, powerful drums",
-    "image_prompt": "gritty rock concert stage, electric guitar, dramatic spotlight, raw energy, moody industrial backdrop, 16:9"
+    "name": "rock",
+    "label": "ロック",
+    "day_of_week": 2,
+    "day_name": "水曜",
+    "tags": "japanese rock, rock, electric guitar, drums, energetic, band, powerful, distortion",
+    "gender": "male",
+    "vocal_hint": "powerful male vocals, raw emotion",
+    "mood": "エネルギッシュ、反骨精神、バンドサウンド",
+    "lyric_style": "力強い日本語ロック歌詞。叫びたくなるサビ。反骨・自由・仲間をテーマに。英語フレーズOK。",
+    "image_prompt": "rock concert stage, electric guitar closeup, dramatic spotlight, crowd silhouettes, raw energy, dark backdrop, 16:9"
   },
   {
-    "name": "acoustic_fingerpicking",
-    "label": "Acoustic Guitar / Singer-Songwriter",
-    "tags": "acoustic guitar, singer-songwriter, fingerpicking, intimate, folk, heartfelt, unplugged",
-    "image_prompt": "warm intimate room with acoustic guitar, soft golden hour light, cozy wooden interior, folk aesthetic, 16:9"
+    "name": "acoustic",
+    "label": "弾き語り",
+    "day_of_week": 3,
+    "day_name": "木曜",
+    "tags": "acoustic guitar, singer-songwriter, fingerpicking, intimate, folk, heartfelt, unplugged, japanese folk",
+    "gender": "unisex",
+    "vocal_hint": "intimate vocals, soft and warm",
+    "mood": "親密・温かみ・生演奏の空気感",
+    "lyric_style": "アコースティックギター弾き語りの温かい日本語歌詞。個人的な体験談や日常の情景。繊細な感情表現。",
+    "image_prompt": "warm intimate coffee shop, acoustic guitar, golden hour light, cozy wooden interior, soft bokeh, 16:9"
   },
   {
-    "name": "ballad",
-    "label": "Ballad",
-    "tags": "ballad, emotional, piano, orchestral, heartfelt, strings, cinematic",
-    "image_prompt": "emotional cinematic scene, grand piano, soft dramatic lighting, orchestral mood, tender atmosphere, 16:9"
+    "name": "edm",
+    "label": "EDM・電子音楽",
+    "day_of_week": 4,
+    "day_name": "金曜",
+    "tags": "EDM, electronic, synthesizer, future bass, drop, ambient electronic, hypnotic, japanese EDM",
+    "gender": "unisex",
+    "vocal_hint": "electronic processed vocals, ethereal",
+    "mood": "未来的・没入感・電子音の世界",
+    "lyric_style": "EDM・電子音楽向け。短いフレーズの繰り返し、英語混じりOK。浮遊感・未来・夜のイメージ。",
+    "image_prompt": "futuristic electronic music festival, neon lights, geometric visuals, laser show, cyberpunk aesthetic, 16:9"
+  },
+  {
+    "name": "anime",
+    "label": "アニメ調",
+    "day_of_week": 5,
+    "day_name": "土曜",
+    "tags": "anime, j-anime, anime opening, anime pop, dramatic, cute, japanese anime style, orchestra hit, uplifting",
+    "gender": "female",
+    "vocal_hint": "anime style female vocals, expressive",
+    "mood": "アニメOPED風、ドラマチック・元気・少し切ない",
+    "lyric_style": "アニメOPED風日本語歌詞。英雄的な旅立ち・仲間・希望がテーマ。サビで盛り上がる展開。英語フレーズ混在OK。",
+    "image_prompt": "anime style landscape, dramatic sky, japanese anime aesthetic, colorful, expressive character silhouette, sunset, 16:9"
+  },
+  {
+    "name": "hiphop",
+    "label": "ヒップホップ",
+    "day_of_week": 6,
+    "day_name": "日曜",
+    "tags": "japanese hip-hop, hip-hop, rap, urban, beat, rhythm, flow, j-rap, street",
+    "gender": "male",
+    "vocal_hint": "male rap vocals, rhythmic flow",
+    "mood": "ライム・ストーリーテリング・都市の情景",
+    "lyric_style": "日本語ヒップホップ。ライミングを意識したヴァース。英語混じりOK。リアルな日常や夢・葛藤をテーマに。",
+    "image_prompt": "urban japanese street at night, hip-hop aesthetic, graffiti, neon signs, moody atmosphere, cinematic, 16:9"
   }
 ]
