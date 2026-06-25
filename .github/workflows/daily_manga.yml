@@ -50,6 +50,12 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python scripts/manga_draft.py --date "$DATE"
 
+      - name: Generate panel images (ChatGPT / DALL-E 3)
+        if: ${{ secrets.OPENAI_API_KEY != '' }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python scripts/manga_images.py --date "$DATE"
+
       - name: Commit draft and state
         run: |
           git config user.name "github-actions[bot]"
