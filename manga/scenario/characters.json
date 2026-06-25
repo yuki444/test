@@ -1,0 +1,38 @@
+{
+  "焔宮燈": {
+    "role": "protagonist",
+    "visual_en": "teenage boy, silver-white hair with dark crimson tips, pale grey eyes with subtle red flecks, lean wiry build, tattered grey academy uniform repaired with rust-colored stitching, small black spiral mark on right wrist",
+    "personality_jp": "寡黙で内省的だが、一度決めたことは絶対に曲げない。皮肉屋だが根は優しい。感情が高ぶると右手首の呪印が熱を持つ。大声で叫ぶタイプではなく、静かな確信で前進する。",
+    "first_appearance": 1
+  },
+  "蒼原椎那": {
+    "role": "rival",
+    "visual_en": "teenage girl, dark navy blue hair in severe asymmetric cut one side longer, steel-blue eyes, tall lean figure, pristine ice-blue academy uniform with silver trim, always carries slender metal stylus",
+    "personality_jp": "冷静沈着な完璧主義者。首席の座に誇りを持ち、感情を表に出すことを弱さと見なす。燈の炎術を「危険な逸脱」と断じるが、その結果を否定できずにいる。",
+    "first_appearance": 1
+  },
+  "煙霞律": {
+    "role": "mentor",
+    "visual_en": "middle-aged man, short dark brown hair greying at temples, deep amber eyes, weathered face with faint scar on chin, worn dark forest green traveler's coat with faded gold embroidery, long curved pipe always in hand",
+    "personality_jp": "炎術研究を理由に追放された元学院教授。表面は投げやりで皮肉屋だが、本物の才能への情熱は失っていない。煙草を吸いながら核心をつく言葉を放つ。秘密を多く抱えている。",
+    "first_appearance": 2
+  },
+  "禊白夜": {
+    "role": "antagonist",
+    "visual_en": "teenage boy, white hair in single long braid reaching waist, one deep red eye one opaque white eye, extremely pale skin, formal black high-collar prefect uniform with gold crescent badge, rigid upright posture",
+    "personality_jp": "火の呪いを「魔法の腐敗の極み」と信じ、燈を排除しようとする学院首席監督生。実は自身も別種の呪いを抱えており、それを鉄の意志で抑制している。恐怖が憎悪に変わった存在。",
+    "first_appearance": 3
+  },
+  "棗葵": {
+    "role": "support",
+    "visual_en": "teenage girl, short choppy auburn hair with blunt fringe, warm brown eyes, light freckles across nose and cheeks, medium build, standard academy uniform modified with many sewn-on pockets, ink stains on right-hand fingers",
+    "personality_jp": "学院随一の「記録者」で、ありとあらゆることをノートに書き留める。好奇心旺盛で損得勘定なし。燈に近づいたのは純粋な学術的興味からで、気づけば最初の友になっていた。",
+    "first_appearance": 2
+  },
+  "影詠嵐": {
+    "role": "support",
+    "visual_en": "teenage boy, dark olive skin, long dark purple hair in loose high ponytail secured with white cord, sharp yellow-green eyes, tall athletic build, academy combat uniform with left sleeve rolled up revealing geometric tattoo",
+    "personality_jp": "名家出身の生徒会副会長。表向きは規則に従うが、内心では型破りなやり方を尊重している。燈の炎術に秘かに魅了され、やがて予想外の形で手を貸す。二面性を自覚して生きている。",
+    "first_appearance": 4
+  }
+}
