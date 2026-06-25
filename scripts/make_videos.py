@@ -337,19 +337,32 @@ def add_lyrics_overlay(base_img_path, section_name, lyrics, out_path):
         alpha = int(200 * (y - grad_y) / (VIDEO_H - grad_y))
         draw.rectangle([(0, y), (VIDEO_W, y)], fill=(0, 0, 0, alpha))
 
-    font_lyrics = find_font(44)
+    font_lyrics = find_font(36)
 
-    # 歌詞テキスト（下部）
+    # ズーム時に見切れないよう左右に余白を確保（ズーム15%分 = 約100px）
+    SIDE_MARGIN = 120
+    CENTER_X = VIDEO_W // 2
+
+    # 歌詞テキスト（下部・中央寄せ）
     lines = [l for l in lyrics.split("\n") if l.strip()][:LYRICS_LINES_MAX]
     if font_lyrics and lines:
-        line_h = 58
-        y = VIDEO_H - len(lines) * line_h - 40
+        BOTTOM_MARGIN = 80
+        line_h = 50
+        y = VIDEO_H - len(lines) * line_h - BOTTOM_MARGIN
         for line in lines:
-            # 影（複数重ね）
+            # テキスト幅を測定して中央揃え
+            try:
+                bbox = font_lyrics.getbbox(line)
+                tw = bbox[2] - bbox[0]
+            except Exception:
+                tw = len(line) * 20
+            # 幅が広すぎる場合はSIDE_MARGINに収まるよう切り詰め
+            x = max(SIDE_MARGIN, CENTER_X - tw // 2)
+            # 影
             for dx, dy in [(2, 2), (3, 3)]:
-                draw.text((20 + dx, y + dy), line, font=font_lyrics, fill=(0, 0, 0, 160))
+                draw.text((x + dx, y + dy), line, font=font_lyrics, fill=(0, 0, 0, 180))
             # 本文（白）
-            draw.text((20, y), line, font=font_lyrics, fill=(255, 255, 255, 255))
+            draw.text((x, y), line, font=font_lyrics, fill=(255, 255, 255, 255))
             y += line_h
 
     result = Image.alpha_composite(base.convert("RGBA"), overlay)
