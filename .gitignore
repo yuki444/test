@@ -1,8 +1,7 @@
 # Generated media — large binaries, regenerated each run. Metadata lives in results.json.
 output/**/media/
-output/push_log.txt
-output/bat_test.txt
-output/task_*.txt
+output/*.txt
+output/*.log
 *.mp4
 *.mp3
 *.png
