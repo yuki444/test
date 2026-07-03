@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__b145ca08-12e8-4868-889d-0aedb6abbf8b__notion-update-page",
+      "mcp__b145ca08-12e8-4868-889d-0aedb6abbf8b__notion-create-pages",
+      "mcp__b145ca08-12e8-4868-889d-0aedb6abbf8b__notion-fetch",
+      "mcp__b145ca08-12e8-4868-889d-0aedb6abbf8b__notion-search",
+      "mcp__b145ca08-12e8-4868-889d-0aedb6abbf8b__notion-query-database-view",
+      "mcp__b145ca08-12e8-4868-889d-0aedb6abbf8b__notion-query-data-sources"
+    ]
+  }
+}
