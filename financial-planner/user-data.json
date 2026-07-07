@@ -125,6 +125,12 @@
       "category": "housing"
     },
     {
+      "fromAge": 38,
+      "delta": 43334,
+      "memo": "家政婦（週1万円×52週=年52万）次男独立まで",
+      "category": "other"
+    },
+    {
       "fromAge": 39,
       "delta": -31000,
       "memo": "オリックス 払込終了（2027年3月）",
@@ -213,6 +219,12 @@
       "delta": -37500,
       "memo": "第2子 大学入学・塾等終了（教育費0）",
       "category": "education"
+    },
+    {
+      "fromAge": 55,
+      "delta": -43334,
+      "memo": "家政婦終了（次男大学入学・独立）",
+      "category": "other"
     },
     {
       "fromAge": 56,

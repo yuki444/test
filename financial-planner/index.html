@@ -5134,6 +5134,11 @@ function applyMigrations(d){
     d.expenseSteps.push({fromAge:55,delta:60000,memo:'退職後健康保険料（国保/任意継続・夫婦2人 月6万推計）',category:'insurance'});
   if(!stepMemos.has('後期高齢者医療移行（健康保険料大幅減・月2万へ）'))
     d.expenseSteps.push({fromAge:65,delta:-40000,memo:'後期高齢者医療移行（健康保険料大幅減・月2万へ）',category:'insurance'});
+  // v8: 家政婦（週1万円・次男独立まで）
+  if(!stepMemos.has('家政婦（週1万円×52週=年52万）次男独立まで')){
+    d.expenseSteps.push({fromAge:38,delta:43334,memo:'家政婦（週1万円×52週=年52万）次男独立まで',category:'other'});
+    d.expenseSteps.push({fromAge:55,delta:-43334,memo:'家政婦終了（次男大学入学・独立）',category:'other'});
+  }
   d.expenseSteps.sort((a,b)=>a.fromAge-b.fromAge);
   // v6: education カテゴリ付与
   const eduCatMemos=new Set(['第1子 小学校入学・保育料終了（-3.5万→塾等+2.5万）','第2子 小学校入学・保育料終了（-4万→塾等+2.5万）','第1子 独立・教育費半減（-2.5万）','第2子 大学卒業・教育費終了（-2.5万→累計0）']);
