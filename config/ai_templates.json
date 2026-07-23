@@ -1,0 +1,20 @@
+[
+  {
+    "name": "anime",
+    "label": "アニメ風テンプレート",
+    "prompt_suffix": "anime style, japanese anime aesthetic, vibrant colors, cel shading, studio quality",
+    "shots": ["wide establishing shot", "close-up emotional moment", "dramatic action pose"]
+  },
+  {
+    "name": "cinematic",
+    "label": "映画風テンプレート",
+    "prompt_suffix": "cinematic photography, dramatic lighting, film grain, shallow depth of field, 35mm",
+    "shots": ["opening wide shot", "medium shot with rim light", "closing sunset shot"]
+  },
+  {
+    "name": "retro_vhs",
+    "label": "レトロVHS風テンプレート",
+    "prompt_suffix": "retro VHS aesthetic, 80s style, grainy film, faded colors, nostalgic glow",
+    "shots": ["night city wide shot", "neon close-up", "hazy fade-out shot"]
+  }
+]
