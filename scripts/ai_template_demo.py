@@ -39,6 +39,11 @@ OUT_DIR = REPO_ROOT / "output" / "ai_template_demo"
 FONT_CANDIDATES = [
     "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
     "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",
+    "/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf",
+    "C:\\Windows\\Fonts\\meiryo.ttc",
+    "C:\\Windows\\Fonts\\YuGothM.ttc",
+    "C:\\Windows\\Fonts\\msgothic.ttc",
     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
 ]
 
@@ -118,6 +123,9 @@ def build_video(images, out_path):
             filter_parts.append(f"[xf{i-1}][v{i}]xfade=transition=fade:duration={CROSSFADE_SEC}:offset={offset:.2f}[xf{i}]")
         last = f"xf{n-1}"
 
+    # xfadeで結合した合計尺（各クロスフェード分だけ短くなる）
+    total_dur = SHOT_DURATION * n - CROSSFADE_SEC * (n - 1)
+
     filter_complex = "; ".join(filter_parts)
     cmd = [
         "ffmpeg", "-y", *inputs,
@@ -125,9 +133,16 @@ def build_video(images, out_path):
         "-map", f"[{last}]",
         "-c:v", "libx264", "-preset", "fast", "-crf", "20",
         "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+        # NOTE: zoompan -> xfade はこのffmpegバージョンでEOFが伝播せず、
+        # -t を付けないとxfadeが最終フレームを無限に出力し続けて終わらない。
+        "-t", f"{total_dur:.2f}",
         str(out_path),
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+    except subprocess.TimeoutExpired:
+        print("ffmpeg error: timed out after 180s (encoding stalled)")
+        return False
     if result.returncode != 0:
         print("ffmpeg error:", result.stderr[-2000:])
         return False
@@ -167,7 +182,13 @@ def main():
         for i, shot in enumerate(tpl["shots"]):
             prompt = f"{subject}, {shot}, {tpl['prompt_suffix']}, no text, no watermark, high quality"
             raw = tmp / f"raw_{i}.jpg"
-            download_image(prompt, raw, seed=i * 11 + 5)
+            try:
+                download_image(prompt, raw, seed=i * 11 + 5)
+            except Exception as e:
+                print(f"\nERROR: 画像生成に失敗しました ({e})")
+                print("  image.pollinations.ai への接続を確認してください"
+                      "（社内プロキシ/ファイアウォールでブロックされていないか等）。")
+                sys.exit(1)
 
             overlay = tmp / f"shot_{i}.jpg"
             title = subject if i == 0 else ""
