@@ -1,0 +1,10 @@
+[
+  {
+    "name": "printer_clone",
+    "label": "Print-on-Demand Mockup",
+    "description": "指定した被写体を、Tシャツ・マグカップ・ポスターなどの印刷商品モックアップとして生成する",
+    "prompt_template": "professional product photography, {subject}, printed graphic design centered on a plain white t-shirt, flat lay mockup, studio lighting, clean neutral background, commercial catalog photo, high resolution, sharp focus, no watermark, no text overlay",
+    "width": 1024,
+    "height": 1024
+  }
+]
