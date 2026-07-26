@@ -16,5 +16,15 @@
     "label": "レトロVHS風テンプレート",
     "prompt_suffix": "retro VHS aesthetic, 80s style, grainy film, faded colors, nostalgic glow",
     "shots": ["night city wide shot", "neon close-up", "hazy fade-out shot"]
+  },
+  {
+    "name": "printer_clone",
+    "label": "プリンター大量増殖ネタ",
+    "prompt_suffix": "comedic photorealistic, funny meme style, bright indoor lighting, high quality, exaggerated",
+    "shots": [
+      "sitting calmly on an office desk in front of a large printer, curious expression, close-up",
+      "being gently placed into the printer paper tray, printer lights blinking, motion blur of printing",
+      "dozens of identical copies pouring out of the printer and flooding the entire room, comedic chaotic scene"
+    ]
   }
 ]
