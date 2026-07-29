@@ -252,7 +252,7 @@
     }
   ],
   "assets": {
-    "cash": 1900000,
+    "cash": 2848000,
     "fixedDeposit": 0,
     "stocks": 978775,
     "ideco": 0,
@@ -279,14 +279,6 @@
       "value": 190950,
       "cost": 178950,
       "annualDividend": 9220
-    },
-    {
-      "account": "楽天証券（国内）",
-      "name": "NF日経ダブルインバース (1357)",
-      "category": "stocks",
-      "shares": 90,
-      "value": 249840,
-      "cost": 504149
     },
     {
       "account": "楽天証券（国内）",
@@ -332,15 +324,6 @@
       "value": 309200,
       "cost": 315400,
       "annualDividend": 3000
-    },
-    {
-      "account": "楽天証券（国内）",
-      "name": "ニチレイ (2871)",
-      "category": "stocks",
-      "shares": 300,
-      "value": 572250,
-      "cost": 543000,
-      "annualDividend": 15000
     },
     {
       "account": "楽天証券（国内）",
@@ -5399,6 +5382,32 @@
       "fee": 0,
       "realizedGain": 0,
       "memo": "投信（円/口）"
+    },
+    {
+      "id": 1003023,
+      "date": "2026-07-29",
+      "type": "sell",
+      "account": "楽天証券（国内）",
+      "name": "NF日経ダブルインバース (1357)",
+      "ticker": "1357",
+      "qty": 90,
+      "price": 3200,
+      "fee": 99,
+      "realizedGain": -216149,
+      "memo": "損切り。取得単価5,601円。日経高騰による評価損確定。損益通算利用予定"
+    },
+    {
+      "id": 1003024,
+      "date": "2026-07-29",
+      "type": "sell",
+      "account": "楽天証券（国内）",
+      "name": "ニチレイ (2871)",
+      "ticker": "2871",
+      "qty": 300,
+      "price": 2200,
+      "fee": 99,
+      "realizedGain": 117000,
+      "memo": "サイバー攻撃後回復・目標価格到達で利確。株主優待500株積み増しは見送り"
     }
   ]
 }
