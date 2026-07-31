@@ -1,0 +1,72 @@
+name: Daily Stock Pipeline
+
+# このリポジトリのデフォルトブランチ上に置くことでcron定期実行を有効化しつつ、
+# 実際の処理対象は main ブランチ（update-prices.yml と同じパターン）。
+on:
+  schedule:
+    # 毎日 00:00 UTC (09:00 JST)
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '処理する日付 (YYYY-MM-DD、空欄=今日)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements_stock.txt
+
+      - name: Resolve date
+        run: |
+          DATE="${{ github.event.inputs.date }}"
+          if [ -z "$DATE" ]; then
+            DATE=$(date +%Y-%m-%d)
+          fi
+          echo "DATE=$DATE" >> $GITHUB_ENV
+
+      - name: Fetch market data
+        run: python scripts/fetch_data.py --date "$DATE"
+
+      - name: Score stocks
+        run: python scripts/score_stocks.py --date "$DATE"
+
+      - name: Run virtual trading
+        run: python scripts/auto_trade.py --date "$DATE"
+
+      - name: Generate dashboard
+        run: python scripts/generate_dashboard.py --date "$DATE"
+
+      - name: Commit and push to main if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ docs/ reports/ config/scoring_weights.json
+          if git diff --staged --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "chore(stock): daily pipeline run for $DATE"
+            git push origin HEAD:main
+          fi
+
+      - name: Trigger Pages redeploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --repo "$GITHUB_REPOSITORY" --ref main
