@@ -7,6 +7,7 @@ on:
       - 'static/**'
       - 'financial-planner/**'
       - 'pokapoka-garden/**'
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
@@ -34,6 +35,7 @@ jobs:
           cp static/index.html _deploy/index.html
           cp -r financial-planner _deploy/financial-planner
           cp -r pokapoka-garden _deploy/pokapoka-garden
+          if [ -d docs ]; then cp -r docs _deploy/stock-sim; fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

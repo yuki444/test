@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>週次振り返りレポート - {{ date }}</title>
+<style>
+  :root {
+    --bg: #0f1116; --panel: #171a21; --panel-border: #262b36;
+    --text: #e6e8ee; --text-dim: #8b93a7;
+    --accent: #4f8cff; --green: #33c481; --red: #ff5c5c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Hiragino Sans", "Yu Gothic", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.6; padding: 24px 16px 64px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 24px; }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 1.05rem; border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 14px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--panel-border); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; min-width: 520px; background: var(--panel); }
+  th, td { padding: 10px 12px; text-align: left; font-size: 0.85rem; white-space: nowrap; }
+  th { color: var(--text-dim); font-weight: 500; border-bottom: 1px solid var(--panel-border); }
+  tbody tr { border-bottom: 1px solid var(--panel-border); }
+  tbody tr:last-child { border-bottom: none; }
+  .positive { color: var(--green); }
+  .negative { color: var(--red); }
+  .empty { color: var(--text-dim); padding: 20px; text-align: center; }
+  .axis-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .axis-name { width: 120px; color: var(--text-dim); font-size: 0.85rem; }
+  .axis-bar-track { flex: 1; background: #262b36; border-radius: 4px; height: 10px; position: relative; overflow: hidden; }
+  .axis-bar-fill { position: absolute; top: 0; bottom: 0; }
+  .axis-value { width: 60px; text-align: right; font-size: 0.85rem; }
+  .weight-compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .weight-card { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 10px; padding: 14px; }
+  .weight-card .axis-name { width: auto; margin-bottom: 6px; }
+  .weight-change { font-size: 1.1rem; font-weight: 700; }
+  pre.reason { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 10px; padding: 14px; white-space: pre-wrap; font-family: inherit; font-size: 0.85rem; color: var(--text-dim); }
+  footer { color: var(--text-dim); font-size: 0.75rem; text-align: center; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>週次振り返りレポート</h1>
+  <div class="subtitle">{{ date }} 時点（先週推奨銘柄の実績を評価し、スコア重みを自動調整）</div>
+
+  {% if insufficient %}
+    <section>
+      <div class="empty">{{ insufficient_reason }}</div>
+    </section>
+  {% else %}
+    <section>
+      <h2>予測精度（{{ week_ago_date }}のTOP10 → {{ date }}時点の実績）</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>コード</th><th>銘柄名</th><th>予想スコア</th><th>実績リターン</th><th>判定</th></tr></thead>
+          <tbody>
+          {% for r in accuracy_table %}
+            <tr>
+              <td>{{ r.code }}</td>
+              <td>{{ r.name }}</td>
+              <td>{{ '%.1f'|format(r.predictedScore) }}pt</td>
+              <td class="{{ 'positive' if r.actualReturnPct >= 0 else 'negative' }}">{{ '+' if r.actualReturnPct >= 0 else '' }}{{ '%.2f'|format(r.actualReturnPct) }}%</td>
+              <td>{{ '上昇 ✓' if r.hit else '下落 ✗' }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="empty">データがありません</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>軸別精度（スコアと実績リターンの相関係数）</h2>
+      {% for a in axis_stats %}
+        <div class="axis-bar-row">
+          <div class="axis-name">{{ a.axis }}</div>
+          <div class="axis-bar-track">
+            <div class="axis-bar-fill" style="
+              {% if a.correlation >= 0 %}left: 50%; width: {{ (a.correlation * 50) | round(1) }}%; background: var(--green);
+              {% else %}right: 50%; width: {{ (-a.correlation * 50) | round(1) }}%; background: var(--red);{% endif %}"></div>
+          </div>
+          <div class="axis-value">{{ '%.2f'|format(a.correlation) }}</div>
+        </div>
+      {% endfor %}
+    </section>
+
+    <section>
+      <h2>重み変更（前後比較）</h2>
+      <div class="weight-compare">
+        {% for axis, before in weight_before.items() %}
+          <div class="weight-card">
+            <div class="axis-name">{{ axis }}</div>
+            <div class="weight-change">{{ '%.2f'|format(before) }} → {{ '%.2f'|format(weight_after[axis]) }}</div>
+          </div>
+        {% endfor %}
+      </div>
+      <pre class="reason">{{ update_reason }}</pre>
+    </section>
+
+    <section>
+      <h2>来週の注目銘柄</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>コード</th><th>銘柄名</th><th>最新スコア</th><th>株価</th></tr></thead>
+          <tbody>
+          {% for s in next_week_watch %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ s.code }}</td>
+              <td>{{ s.name }}</td>
+              <td>{{ '%.1f'|format(s.totalScore) }}pt</td>
+              <td>¥{{ '{:,.0f}'.format(s.currentPrice) }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="empty">データがありません</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  <footer>日本株推奨・自律運用システム 週次振り返り（<a href="../docs/index.html" style="color:var(--accent);">ダッシュボードへ戻る</a>）</footer>
+</div>
+</body>
+</html>
