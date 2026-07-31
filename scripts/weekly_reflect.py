@@ -63,6 +63,15 @@ def pearson(xs: list, ys: list) -> float:
     return cov / (var_x ** 0.5 * var_y ** 0.5)
 
 
+def _write_report(date: str, html: str):
+    os.makedirs("reports", exist_ok=True)
+    os.makedirs(os.path.join("docs", "reports"), exist_ok=True)
+    with open(os.path.join("reports", f"{date}_reflection.html"), "w", encoding="utf-8") as f:
+        f.write(html)
+    with open(os.path.join("docs", "reports", f"{date}_reflection.html"), "w", encoding="utf-8") as f:
+        f.write(html)
+
+
 def render_insufficient_data(today: str, reason: str):
     env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
     template = env.get_template("reflection.html.j2")
@@ -77,9 +86,7 @@ def render_insufficient_data(today: str, reason: str):
         update_reason="",
         next_week_watch=[],
     )
-    os.makedirs("reports", exist_ok=True)
-    with open(os.path.join("reports", f"{today}_reflection.html"), "w", encoding="utf-8") as f:
-        f.write(html)
+    _write_report(today, html)
 
 
 def main():
@@ -182,9 +189,7 @@ def main():
         update_reason=update_reason,
         next_week_watch=next_week_watch,
     )
-    os.makedirs("reports", exist_ok=True)
-    with open(os.path.join("reports", f"{today_date}_reflection.html"), "w", encoding="utf-8") as f:
-        f.write(html)
+    _write_report(today_date, html)
 
     print(f"完了: reports/{today_date}_reflection.html を生成し、重みを更新しました")
     for line in reason_lines:
