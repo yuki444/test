@@ -1,0 +1,122 @@
+[
+  {
+    "id": "4cbb0152-ee7c-4c8d-8088-2e48d3a5c034",
+    "code": "6902",
+    "name": "デンソー",
+    "type": "buy",
+    "shares": 254,
+    "price": 1967.5,
+    "date": "2026-08-01",
+    "reason": "スコア210.0pt でTOP10入り、均等配分500,000円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "f91308cc-ccff-47f3-b568-bdd8baee9d0a",
+    "code": "7203",
+    "name": "トヨタ自動車",
+    "type": "buy",
+    "shares": 163,
+    "price": 3067.0,
+    "date": "2026-08-01",
+    "reason": "スコア180.0pt でTOP10入り、均等配分500,000円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "6b44bb3e-b75c-424c-96be-a6c497d56ebf",
+    "code": "9432",
+    "name": "日本電信電話",
+    "type": "buy",
+    "shares": 3280,
+    "price": 152.4,
+    "date": "2026-08-01",
+    "reason": "スコア180.0pt でTOP10入り、均等配分500,000円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "266f969d-85c9-413c-b2bc-d7f56b4965c7",
+    "code": "3382",
+    "name": "セブン&アイ・ホールディングス",
+    "type": "buy",
+    "shares": 237,
+    "price": 2109.0,
+    "date": "2026-08-01",
+    "reason": "スコア176.0pt でTOP10入り、均等配分500,000円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "c9a52df0-ff05-4c08-b0e7-d71d8ac79be8",
+    "code": "5108",
+    "name": "ブリヂストン",
+    "type": "buy",
+    "shares": 126,
+    "price": 3965.0,
+    "date": "2026-08-01",
+    "reason": "スコア170.0pt でTOP10入り、均等配分500,000円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "feb7b219-ba82-4bbd-a52b-df534bc4015e",
+    "code": "8306",
+    "name": "三菱UFJフィナンシャル・グループ",
+    "type": "buy",
+    "shares": 140,
+    "price": 3571.0,
+    "date": "2026-08-01",
+    "reason": "スコア164.0pt でTOP10入り、均等配分500,000円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "3aaada47-9bc0-4471-95bd-bf8ee7bc0d30",
+    "code": "9433",
+    "name": "KDDI",
+    "type": "buy",
+    "shares": 171,
+    "price": 2921.0,
+    "date": "2026-08-01",
+    "reason": "スコア164.0pt でTOP10入り、均等配分500,000円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "b931001e-3e52-4d9e-8ff3-9e0516a168f7",
+    "code": "4901",
+    "name": "富士フイルムホールディングス",
+    "type": "buy",
+    "shares": 132,
+    "price": 3772.0,
+    "date": "2026-08-01",
+    "reason": "スコア162.0pt でTOP10入り、均等配分500,000円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "197441f5-fbe6-4eb5-b021-ece69c0060bd",
+    "code": "8316",
+    "name": "三井住友フィナンシャルグループ",
+    "type": "buy",
+    "shares": 73,
+    "price": 6814.0,
+    "date": "2026-08-01",
+    "reason": "スコア157.0pt でTOP10入り、均等配分500,000円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "6707fa8a-b8d7-4ee7-a7c3-72bfd1411037",
+    "code": "6098",
+    "name": "リクルートホールディングス",
+    "type": "buy",
+    "shares": 39,
+    "price": 12550.0,
+    "date": "2026-08-01",
+    "reason": "スコア155.0pt でTOP10入り、均等配分500,000円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  }
+]
