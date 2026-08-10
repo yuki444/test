@@ -1,8 +1,8 @@
 {
-  "technical": 1.0,
-  "fundamental": 1.0,
-  "momentum": 1.0,
-  "news": 1.0,
-  "last_updated": "初期設定",
-  "update_reason": "初期値（振り返りにより自動調整される）"
+  "technical": 0.95,
+  "fundamental": 0.86,
+  "momentum": 0.98,
+  "news": 1.05,
+  "last_updated": "2026-08-10",
+  "update_reason": "先週TOP10推奨銘柄群の週次リターンとの相関に基づき自動調整。\ntechnical: 相関係数 -0.13 → 重み 1.00 → 0.95（引き下げ, Δ-0.05）\nfundamental: 相関係数 -0.34 → 重み 1.00 → 0.86（引き下げ, Δ-0.14）\nmomentum: 相関係数 -0.04 → 重み 1.00 → 0.98（引き下げ, Δ-0.02）\nnews: 相関係数 0.13 → 重み 1.00 → 1.05（引き上げ, Δ+0.05）"
 }
