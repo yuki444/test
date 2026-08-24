@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1060">
+<title>北海道ゴルフ旅行 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:#0f172a;
+  min-height:100vh;
+  padding:32px 20px;
+  display:flex;
+  justify-content:center;
+}
+
+/* ══════════════════════════════
+   PAMPHLET WRAPPER
+══════════════════════════════ */
+.pf{
+  width:1020px;
+  min-width:1020px;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 32px 100px rgba(0,0,0,0.6);
+}
+
+/* ══════════════════════════════
+   HERO
+══════════════════════════════ */
+.hero{
+  height:196px;
+  background:linear-gradient(125deg,#020c1b 0%,#071e3d 35%,#0b3560 65%,#0e4d75 100%);
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  padding:0 52px;
+}
+
+/* 装飾リング */
+.hero::before{
+  content:'';
+  position:absolute;
+  width:500px;height:500px;
+  border-radius:50%;
+  border:60px solid rgba(255,255,255,0.025);
+  right:-100px;top:-180px;
+  pointer-events:none;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  width:280px;height:280px;
+  border-radius:50%;
+  border:40px solid rgba(56,189,248,0.06);
+  right:120px;top:-100px;
+  pointer-events:none;
+}
+
+.hero-bg-word{
+  position:absolute;
+  right:-8px;bottom:-24px;
+  font-family:'Oswald',sans-serif;
+  font-size:152px;font-weight:700;
+  color:rgba(255,255,255,0.035);
+  letter-spacing:-4px;
+  line-height:1;
+  user-select:none;
+  pointer-events:none;
+  white-space:nowrap;
+}
+
+.hero-left{flex:1;position:relative;}
+
+.hero-kicker{
+  font-size:10px;letter-spacing:4px;font-weight:700;
+  color:#38bdf8;text-transform:uppercase;
+  margin-bottom:10px;
+  display:flex;align-items:center;gap:10px;
+}
+.hero-kicker::before{
+  content:'';display:block;
+  width:28px;height:2px;background:#38bdf8;
+}
+
+.hero-title{
+  font-family:'Oswald',sans-serif;
+  font-size:58px;font-weight:700;
+  color:#fff;
+  line-height:1;
+  letter-spacing:1px;
+  margin-bottom:14px;
+}
+.hero-title .accent{color:#38bdf8;}
+
+.hero-tags{display:flex;gap:8px;flex-wrap:wrap;}
+.htag{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:20px;
+  padding:5px 14px;
+  font-size:11px;color:rgba(255,255,255,0.8);
+  white-space:nowrap;
+}
+
+.hero-right{
+  position:relative;
+  text-align:right;
+  padding-left:40px;
+  flex-shrink:0;
+}
+.hero-date-badge{
+  background:rgba(56,189,248,0.15);
+  border:1px solid rgba(56,189,248,0.35);
+  border-radius:8px;
+  padding:10px 20px;
+  text-align:center;
+}
+.hdb-month{
+  font-size:10px;letter-spacing:3px;
+  color:#38bdf8;font-weight:700;
+  margin-bottom:4px;
+}
+.hdb-dates{
+  font-family:'Oswald',sans-serif;
+  font-size:28px;font-weight:700;color:#fff;
+  line-height:1;
+  margin-bottom:4px;
+}
+.hdb-sub{font-size:10px;color:rgba(255,255,255,0.5);}
+
+/* ══════════════════════════════
+   HIGHLIGHT BAR
+══════════════════════════════ */
+.hlbar{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  background:#0f172a;
+}
+.hlcell{
+  padding:13px 8px;
+  text-align:center;
+  position:relative;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.hlcell+.hlcell::before{
+  content:'';position:absolute;left:0;top:18%;height:64%;
+  width:1px;background:rgba(255,255,255,0.07);
+}
+.hlcell-icon{font-size:22px;line-height:1;}
+.hlcell-text{
+  font-size:9px;color:rgba(255,255,255,0.5);
+  font-weight:700;letter-spacing:.5px;line-height:1.4;
+}
+
+/* ══════════════════════════════
+   DAYS GRID
+══════════════════════════════ */
+.days{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+}
+
+.day-col{
+  padding:22px 20px;
+  border-right:1px solid #e8edf2;
+}
+.day-col:last-child{border-right:none;}
+
+/* Day ヘッダー */
+.dh{
+  border-radius:10px;
+  padding:14px 16px;
+  margin-bottom:16px;
+  position:relative;
+  overflow:hidden;
+}
+.dh::after{
+  content:attr(data-num);
+  position:absolute;
+  right:-6px;bottom:-12px;
+  font-family:'Oswald',sans-serif;
+  font-size:72px;font-weight:700;
+  color:rgba(255,255,255,0.1);
+  line-height:1;
+}
+.day-col:nth-child(1) .dh{background:linear-gradient(135deg,#064e3b,#059669);}
+.day-col:nth-child(2) .dh{background:linear-gradient(135deg,#7f1d1d,#dc2626);}
+.day-col:nth-child(3) .dh{background:linear-gradient(135deg,#1e3a5f,#2563eb);}
+
+.dh-label{
+  font-size:9px;letter-spacing:2px;font-weight:700;
+  color:rgba(255,255,255,0.65);
+  margin-bottom:4px;
+}
+.dh-date{
+  font-size:16px;font-weight:900;color:#fff;
+  line-height:1.2;margin-bottom:3px;
+}
+.dh-theme{
+  font-size:10px;color:rgba(255,255,255,0.7);
+}
+
+/* Activity items */
+.acts{display:flex;flex-direction:column;gap:8px;}
+
+.act{
+  display:flex;gap:9px;
+  border-radius:9px;
+  padding:9px 10px;
+  align-items:flex-start;
+}
+
+/* Day1 colors */
+.day-col:nth-child(1) .act-golf  {background:#f0fdf4;border-left:3px solid #16a34a;}
+.day-col:nth-child(1) .act-curl  {background:#f0f9ff;border-left:3px solid #0284c7;}
+.day-col:nth-child(1) .act-lunch {background:#fef9c3;border-left:3px solid #ca8a04;}
+.day-col:nth-child(1) .act-corn  {background:#fefce8;border-left:3px solid #eab308;}
+.day-col:nth-child(1) .act-beer  {background:#fffbeb;border-left:3px solid #d97706;}
+.day-col:nth-child(1) .act-night {background:#faf5ff;border-left:3px solid #7c3aed;}
+.day-col:nth-child(1) .act-fly   {background:#f8fafc;border-left:3px solid #94a3b8;}
+/* Day2 colors */
+.day-col:nth-child(2) .act-curl      {background:#f0f9ff;border-left:3px solid #0284c7;}
+.day-col:nth-child(2) .act-lake      {background:#e0f2fe;border-left:3px solid #0284c7;}
+.day-col:nth-child(2) .act-lunch     {background:#f0fdf4;border-left:3px solid #16a34a;}
+.day-col:nth-child(2) .act-fireworks {background:#faf5ff;border-left:3px solid #7c3aed;}
+.day-col:nth-child(2) .act-game  {background:#fef2f2;border-left:3px solid #dc2626;}
+.day-col:nth-child(2) .act-night {background:#fffbeb;border-left:3px solid #d97706;}
+/* Day3 colors */
+.day-col:nth-child(3) .act-golf    {background:#eff6ff;border-left:3px solid #2563eb;}
+.day-col:nth-child(3) .act-seafood {background:#fff7ed;border-left:3px solid #ea580c;}
+.day-col:nth-child(3) .act-lake    {background:#e0f2fe;border-left:3px solid #0284c7;}
+.day-col:nth-child(3) .act-fly     {background:#f8fafc;border-left:3px solid #94a3b8;}
+
+.act-icon-wrap{
+  width:32px;height:32px;
+  border-radius:7px;
+  background:rgba(255,255,255,0.85);
+  box-shadow:0 1px 4px rgba(0,0,0,0.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;
+  flex-shrink:0;
+}
+.act-body{flex:1;min-width:0;}
+.act-time{
+  font-size:9px;font-weight:700;
+  color:#94a3b8;margin-bottom:2px;
+  letter-spacing:.3px;
+}
+.act-name{
+  font-size:12px;font-weight:700;
+  color:#1e293b;line-height:1.35;
+}
+.act-desc{
+  font-size:10px;color:#64748b;
+  line-height:1.45;margin-top:2px;
+}
+.act-tags{
+  display:flex;gap:4px;flex-wrap:wrap;
+  margin-top:4px;
+}
+.tg{
+  display:inline-block;
+  border-radius:4px;padding:1px 6px;
+  font-size:9px;font-weight:700;
+  white-space:nowrap;
+}
+.tg-g{background:#d1fae5;color:#065f46;}
+.tg-b{background:#dbeafe;color:#1e40af;}
+.tg-y{background:#fef3c7;color:#92400e;}
+.tg-r{background:#fee2e2;color:#991b1b;}
+.tg-p{background:#ede9fe;color:#4c1d95;}
+
+/* ══════════════════════════════
+   DIVIDER
+══════════════════════════════ */
+.divider{
+  height:1px;background:#e2e8f0;
+  margin:0;
+}
+
+/* ══════════════════════════════
+   BOTTOM SECTION
+══════════════════════════════ */
+.bottom{
+  display:grid;
+  grid-template-columns:1.15fr 1fr;
+  background:#f8fafc;
+}
+.bot-panel{
+  padding:20px 24px;
+}
+.bot-panel:first-child{
+  border-right:1px solid #e2e8f0;
+}
+
+.bot-title{
+  font-size:10px;font-weight:900;letter-spacing:2px;
+  color:#94a3b8;
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:14px;
+}
+.bot-title::after{content:'';flex:1;height:1px;background:#e2e8f0;}
+
+/* 予算 */
+.bdg-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  column-gap:28px;
+}
+.brow{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;
+  border-bottom:1px dashed #e2e8f0;
+  font-size:11px;
+  gap:4px;
+}
+.brow:last-child{border-bottom:none;}
+.blbl{color:#64748b;display:flex;align-items:center;gap:4px;white-space:nowrap;}
+.bamt{font-weight:700;color:#1e293b;white-space:nowrap;font-size:10.5px;}
+
+.bdg-total{
+  margin-top:12px;
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);
+  border-radius:10px;
+  padding:12px 18px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.bdg-total-lbl{font-size:11px;color:rgba(255,255,255,0.55);}
+.bdg-total-val{
+  font-family:'Oswald',sans-serif;
+  font-size:22px;font-weight:700;color:#38bdf8;
+  line-height:1;
+}
+.bdg-total-note{font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px;text-align:right;}
+
+/* チェックリスト */
+.cl{list-style:none;display:flex;flex-direction:column;gap:0;}
+.cli{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:7px 0;
+  border-bottom:1px solid #e8edf2;
+}
+.cli:last-child{border-bottom:none;}
+.cl-box{
+  width:17px;height:17px;
+  border:2px solid #cbd5e1;border-radius:4px;
+  flex-shrink:0;margin-top:1px;
+}
+.cl-body{flex:1;}
+.cl-name{font-size:11.5px;font-weight:700;color:#1e293b;}
+.cl-note{font-size:10px;color:#94a3b8;margin-top:1px;display:flex;align-items:center;gap:5px;}
+.badge{
+  display:inline-block;border-radius:4px;
+  padding:1px 7px;font-size:9px;font-weight:700;
+}
+.b-red{background:#fee2e2;color:#dc2626;}
+.b-ora{background:#ffedd5;color:#c2410c;}
+.b-grn{background:#d1fae5;color:#059669;}
+
+/* ══════════════════════════════
+   HOTEL BAR
+══════════════════════════════ */
+.hotel-bar{
+  background:linear-gradient(90deg,#0f172a 0%,#1e3a5f 60%,#0c4a6e 100%);
+  padding:16px 32px;
+  display:flex;
+  align-items:center;
+  gap:0;
+}
+.hotel-label{
+  font-size:9px;font-weight:900;letter-spacing:3px;
+  color:#38bdf8;text-transform:uppercase;
+  white-space:nowrap;
+  padding-right:20px;
+  border-right:1px solid rgba(255,255,255,0.1);
+  margin-right:20px;
+}
+.hotel-name{
+  font-family:'Oswald',sans-serif;
+  font-size:18px;font-weight:700;color:#fff;
+  margin-right:24px;
+  white-space:nowrap;
+}
+.hotel-chips{
+  display:flex;gap:8px;flex-wrap:wrap;
+  flex:1;
+}
+.hchip{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:6px;
+  padding:4px 10px;
+  font-size:10px;color:rgba(255,255,255,0.75);
+  white-space:nowrap;
+}
+.hchip.good{
+  background:rgba(56,189,248,0.1);
+  border-color:rgba(56,189,248,0.3);
+  color:#7dd3fc;
+}
+
+/* ══════════════════════════════
+   FOOTER
+══════════════════════════════ */
+.footer{
+  background:#0f172a;
+  padding:11px 48px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.footer-l{
+  font-size:10px;color:rgba(255,255,255,0.35);
+  letter-spacing:1px;
+}
+.footer-r{display:flex;gap:8px;}
+.fcourse{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:4px;
+  padding:3px 10px;
+  font-size:9px;color:rgba(255,255,255,0.45);
+  letter-spacing:.5px;
+}
+.bamt.confirmed{color:#16a34a;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="pf">
+
+<!-- ▌HERO -->
+<div class="hero">
+  <div class="hero-bg-word">HOKKAIDO</div>
+  <div class="hero-left">
+    <div class="hero-kicker">Golf &amp; Activity Trip 2026</div>
+    <div class="hero-title"><span class="accent">北海道</span> GOLF 旅行</div>
+    <div class="hero-tags">
+      <div class="htag">✈️ 神戸空港 発着</div>
+      <div class="htag">🚗 カーシェア移動</div>
+      <div class="htag">👨‍👨‍👦 男性3名</div>
+      <div class="htag">💰 約15万円 / 人</div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-date-badge">
+      <div class="hdb-month">JULY 2026</div>
+      <div class="hdb-dates">24 – 26</div>
+      <div class="hdb-sub">金曜日 → 日曜日　2泊3日</div>
+    </div>
+  </div>
+</div>
+
+<!-- ▌HIGHLIGHTS BAR -->
+<div class="hlbar">
+  <div class="hlcell"><div class="hlcell-icon">⛳</div><div class="hlcell-text">名門2コース<br>ゴルフ</div></div>
+  <div class="hlcell"><div class="hlcell-icon">🛶</div><div class="hlcell-text">支笏湖<br>カヌー</div></div>
+  <div class="hlcell"><div class="hlcell-icon">🍺</div><div class="hlcell-text">大通公園<br>ビアガーデン</div></div>
+  <div class="hlcell"><div class="hlcell-icon">🌽</div><div class="hlcell-text">とうきびワゴン<br>大通公園</div></div>
+  <div class="hlcell"><div class="hlcell-icon">⚾</div><div class="hlcell-text">エスコン<br>野球観戦</div></div>
+</div>
+
+<!-- ▌DAYS -->
+<div class="days">
+
+  <!-- DAY 1 -->
+  <div class="day-col">
+    <div class="dh" data-num="01">
+      <div class="dh-label">DAY 1　·　7 / 24（金）</div>
+      <div class="dh-date">ゴルフ &amp; ランチ<br>ビアガーデン</div>
+      <div class="dh-theme">新千歳 → 札幌CC → 大通公園</div>
+    </div>
+    <div class="acts">
+      <div class="act act-fly">
+        <div class="act-icon-wrap">✈️</div>
+        <div class="act-body">
+          <div class="act-time">08:30 → 10:20</div>
+          <div class="act-name">神戸空港 発 → 新千歳 着　SKY173 スカイマーク</div>
+          <div class="act-desc">所要約1時間50分 / 到着後レンタカーPU（〜11:05出発）</div>
+          <div class="act-tags"><span class="tg tg-g" style="background:#d1fae5;">✅ 46,620円/人 予約確定</span></div>
+        </div>
+      </div>
+      <div class="act act-lunch">
+        <div class="act-icon-wrap">🍽️</div>
+        <div class="act-body">
+          <div class="act-time">10:30 〜 11:00</div>
+          <div class="act-name">空港内で昼食（レンタカー手続き前）</div>
+          <div class="act-desc">新千歳から車60分で札幌CC着（約12:05）/ チェックイン30分前ぴったり・急ぎ目で</div>
+          <div class="act-tags"><span class="tg tg-r">⚠️ タイトスケジュール・ゴルフ場着12:05予定</span></div>
+        </div>
+      </div>
+      <div class="act act-golf">
+        <div class="act-icon-wrap">⛳</div>
+        <div class="act-body">
+          <div class="act-time">12:06 着 → 12:36 スタート 〜 約17:30</div>
+          <div class="act-name">ゴルフ ①　札幌カントリークラブ</div>
+          <div class="act-desc">予約確定済み・キャディ付き乗用カート<br>スタート30分前(12:06)現地集合・着替え・練習</div>
+          <div class="act-tags">
+            <span class="tg tg-g" style="background:#d1fae5;">✅ 予約完了</span>
+            <span class="tg tg-b">全レベルOK</span>
+          </div>
+        </div>
+      </div>
+      <div class="act act-corn">
+        <div class="act-icon-wrap">🌽</div>
+        <div class="act-body">
+          <div class="act-time">18:00 〜 18:30</div>
+          <div class="act-name">大通公園 とうきびワゴン</div>
+          <div class="act-desc">札幌の夏の風物詩・道民御用達の移動屋台<br>茹で・焼き（醤油バター）・生の3種 各500円 / ビールのお供に最高</div>
+          <div class="act-tags"><span class="tg tg-y">北海道弁でとうもろこし＝とうきび</span></div>
+        </div>
+      </div>
+      <div class="act act-beer">
+        <div class="act-icon-wrap">🍺</div>
+        <div class="act-body">
+          <div class="act-time">18:30 〜 20:30</div>
+          <div class="act-name">さっぽろ大通ビアガーデン</div>
+          <div class="act-desc">日本最大級・4社ブース<br>大通公園5〜11丁目・ラストオーダー20:30</div>
+          <div class="act-tags"><span class="tg tg-y">7/23〜8/18 開催</span></div>
+        </div>
+      </div>
+      <div class="act act-night">
+        <div class="act-icon-wrap">🦞</div>
+        <div class="act-body">
+          <div class="act-time">20:00〜</div>
+          <div class="act-name">海鮮居酒屋 瑠玖＆魚平（るっく&amp;うおへい）</div>
+          <div class="act-desc">南2条西6丁目（狸小路6丁目西角）/ お通し盛り放題・あら汁飲み放題<br>ビアガーデンから徒歩7分・すすきの至近</div>
+          <div class="act-tags"><span class="tg tg-g" style="background:#d1fae5;">✅ 20:00〜 予約済み</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 2 -->
+  <div class="day-col">
+    <div class="dh" data-num="02">
+      <div class="dh-label">DAY 2　·　7 / 25（土）</div>
+      <div class="dh-date">支笏湖カヌー &amp; エスコン<br>千歳ナイト</div>
+      <div class="dh-theme">支笏湖 → 北広島 → 千歳</div>
+    </div>
+    <div class="acts">
+      <div class="act act-lake">
+        <div class="act-icon-wrap">🛶</div>
+        <div class="act-body">
+          <div class="act-time">09:00 大通出発 → 10:00 支笏湖着 → カヌー 〜 12:00</div>
+          <div class="act-name">支笏湖 カヌー体験</div>
+          <div class="act-desc">日本有数の透明度・国立公園内の湖 / 手ぶらOK・ガイド付き2時間<br>支笏ガイドハウス かのあ 等 / カーシェアで大通→支笏湖約60分</div>
+          <div class="act-tags"><span class="tg tg-b">8,500円/人（2名〜）</span><span class="tg tg-r">要事前予約</span></div>
+        </div>
+      </div>
+      <div class="act act-game">
+        <div class="act-icon-wrap">⚾</div>
+        <div class="act-body">
+          <div class="act-time">12:00 支笏湖発 → 12:30 千歳ホテル（車置く）→ 13:20 着 → 14:00 試合開始 〜 17:00</div>
+          <div class="act-name">エスコンフィールド 日本ハム vs 楽天</div>
+          <div class="act-desc">支笏湖→千歳ホテルで車を置いてチェックイン（30分）/ JR千歳→北広島→シャトル（約40分）<br>車置いてから電車移動なので全員飲める / 帰りも同ルートで千歳ホテルへ</div>
+          <div class="act-tags">
+            <span class="tg tg-r">試合開始14:00</span>
+            <span class="tg tg-b">JR＋シャトルで移動・飲み放題</span>
+          </div>
+        </div>
+      </div>
+      <div class="act act-night">
+        <div class="act-icon-wrap">🦀</div>
+        <div class="act-body">
+          <div class="act-time">18:00〜</div>
+          <div class="act-name">どさんこキッチン ゴリラ 千歳店</div>
+          <div class="act-desc">厚岸直送カキ・活イカ・毛ガニ・ホタテ / 大型水槽から直送の道産海鮮<br>エスコン→JR千歳駅直結エリア / 翌朝07:10出発・早めにホテルへ</div>
+          <div class="act-tags"><span class="tg tg-g" style="background:#d1fae5;">✅ 18:00〜 予約済み</span><span class="tg tg-b">掘りごたつ個室</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 3 -->
+  <div class="day-col">
+    <div class="dh" data-num="03">
+      <div class="dh-label">DAY 3　·　7 / 26（日）</div>
+      <div class="dh-date">ゴルフ &amp; ランチ<br>帰宅</div>
+      <div class="dh-theme">苫小牧 → 新千歳 → 神戸</div>
+    </div>
+    <div class="acts">
+      <div class="act act-fly">
+        <div class="act-icon-wrap">🚗</div>
+        <div class="act-body">
+          <div class="act-time">07:10 ホテル出発</div>
+          <div class="act-name">千歳 → ニドムクラシックコース</div>
+          <div class="act-desc">道央道利用・所要約30分 / 07:40 現地着（スタート30分前）</div>
+        </div>
+      </div>
+      <div class="act act-golf">
+        <div class="act-icon-wrap">⛳</div>
+        <div class="act-body">
+          <div class="act-time">07:40 着 → 08:10 スタート 〜 約13:30</div>
+          <div class="act-name">ゴルフ ②　ニドムクラシックコース</div>
+          <div class="act-desc">予約確定済み・リゾートホテル併設の名門コース<br>スタート30分前(07:40)現地集合・着替え・練習</div>
+          <div class="act-tags">
+            <span class="tg tg-g" style="background:#d1fae5;">✅ 予約完了</span>
+            <span class="tg tg-b">空港から20分</span>
+          </div>
+        </div>
+      </div>
+      <div class="act act-lunch">
+        <div class="act-icon-wrap">🍽️</div>
+        <div class="act-body">
+          <div class="act-time">12:40 〜 13:10</div>
+          <div class="act-name">クラブハウスで軽食</div>
+          <div class="act-desc">ニドム内レストランで速やかに昼食 / 13:15 出発・新千歳まで約20分</div>
+          <div class="act-tags"><span class="tg tg-r">⚠️ 15:00便に間に合うよう迅速に</span></div>
+        </div>
+      </div>
+      <div class="act act-fly">
+        <div class="act-icon-wrap">✈️</div>
+        <div class="act-body">
+          <div class="act-time">13:30 空港着 → 15:00 発 → 16:55 神戸着</div>
+          <div class="act-name">新千歳空港 出発・帰宅　SKY172 スカイマーク</div>
+          <div class="act-desc">レンタカー返却・お土産購入 / 所要約1時間55分 ／ お疲れさまでした！</div>
+          <div class="act-tags"><span class="tg tg-g" style="background:#d1fae5;">✅ 46,620円/人 予約確定</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /days -->
+
+<div class="divider"></div>
+
+<!-- ▌HOTEL BAR -->
+<div class="hotel-bar">
+  <div class="hotel-label">🏨 STAY</div>
+  <div class="hotel-name">
+    <span style="font-size:13px;opacity:.7;font-weight:400;">1泊目</span> アパホテル〈札幌大通駅前南〉 <span style="font-size:12px;color:#38bdf8;margin-left:4px;">¥8,640/人</span>
+    <span style="margin:0 10px;opacity:.4;">｜</span>
+    <span style="font-size:13px;opacity:.7;font-weight:400;">2泊目</span> ホテルグランテラス千歳 <span style="font-size:12px;color:#38bdf8;margin-left:4px;">¥8,910/人</span>
+  </div>
+  <div class="hotel-chips">
+    <div class="hchip good">♨️ 大浴場あり（両ホテル）</div>
+    <div class="hchip good">🛏️ トリプルルーム</div>
+    <div class="hchip">📍 1泊目：大通公園徒歩7分</div>
+    <div class="hchip">📍 2泊目：千歳市・空港8分・無料送迎</div>
+    <div class="hchip">🍽️ 素泊まりプラン</div>
+  </div>
+</div>
+
+<!-- ▌BOTTOM -->
+<div class="bottom">
+
+  <!-- 予算 -->
+  <div class="bot-panel">
+    <div class="bot-title">💰 BUDGET　1人あたり目安</div>
+    <div class="bdg-grid">
+      <div class="brow"><span class="blbl">✈️ 航空券（往復・スカイマーク）</span><span class="bamt confirmed">46,620円 ✓</span></div>
+      <div class="brow"><span class="blbl">🏨 1泊目 アパホテル</span><span class="bamt confirmed">8,640円 ✓</span></div>
+      <div class="brow"><span class="blbl">🏨 2泊目 グランテラス千歳</span><span class="bamt confirmed">8,910円 ✓</span></div>
+      <div class="brow"><span class="blbl">⛳ ゴルフ① 札幌CC</span><span class="bamt confirmed">7,080円 ✓</span></div>
+      <div class="brow"><span class="blbl">⛳ ゴルフ② ニドム</span><span class="bamt confirmed">18,500円 ✓</span></div>
+      <div class="brow"><span class="blbl">🛶 支笏湖カヌー体験</span><span class="bamt">約 8,500円</span></div>
+      <div class="brow"><span class="blbl">⚾ エスコン観戦チケット</span><span class="bamt confirmed">6,200円 ✓</span></div>
+      <div class="brow"><span class="blbl">🚗 カーシェア（3名）+ 高速代別</span><span class="bamt confirmed">9,497円 ✓</span></div>
+      <div class="brow"><span class="blbl">🍺 飲食・飲み代</span><span class="bamt">30,000〜50,000円</span></div>
+    </div>
+    <div class="bdg-total">
+      <span class="bdg-total-lbl">合計目安（1名）</span>
+      <div>
+        <div class="bdg-total-val">150,000 〜 170,000 円</div>
+        <div class="bdg-total-note">※ 高速代・カヌー・飲食除く確定分：105,447円　高速代別途</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- チェックリスト -->
+  <div class="bot-panel">
+    <div class="bot-title">📋 予約チェックリスト</div>
+    <ul class="cl">
+      <li class="cli">
+        <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
+        <div class="cl-body">
+          <div class="cl-name">✈️ 航空券（スカイマーク SKY173/172）</div>
+          <div class="cl-note">神戸08:30発→10:20着 / 新千歳15:00発→16:55神戸着 / 46,620円/人　<span class="badge b-grn">予約完了</span></div>
+        </div>
+      </li>
+      <li class="cli">
+        <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
+        <div class="cl-body">
+          <div class="cl-name">⛳ ゴルフ場 2コース予約</div>
+          <div class="cl-note">札幌CC（12:36）/ ニドム（08:10）　<span class="badge b-grn">予約完了</span></div>
+        </div>
+      </li>
+      <li class="cli">
+        <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
+        <div class="cl-body">
+          <div class="cl-name">⚾ エスコンチケット（7/25 vs 楽天）</div>
+          <div class="cl-note">6,200円/人　<span class="badge b-grn">予約完了</span></div>
+        </div>
+      </li>
+      <li class="cli">
+        <div class="cl-box"></div>
+        <div class="cl-body">
+          <div class="cl-name">🛶 支笏湖カヌー体験（支笏ガイドハウス かのあ 等）</div>
+          <div class="cl-note">アクティビティジャパン・じゃらん等で予約 / 8,500円/人　<span class="badge b-ora">要事前予約</span></div>
+        </div>
+      </li>
+      <li class="cli">
+        <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
+        <div class="cl-body">
+          <div class="cl-name">🏨 1泊目 アパホテル〈札幌大通駅前南〉</div>
+          <div class="cl-note">¥25,920 (3名合計) / 大通駅徒歩7分・天然温泉大浴場　<span class="badge b-grn">予約完了</span></div>
+        </div>
+      </li>
+      <li class="cli">
+        <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
+        <div class="cl-body">
+          <div class="cl-name">🏨 2泊目 ホテルグランテラス千歳</div>
+          <div class="cl-note">¥26,730 (3名合計) / 千歳市本町・大浴場2ヶ所・空港8分　<span class="badge b-grn">予約完了</span></div>
+        </div>
+      </li>
+      <li class="cli">
+        <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
+        <div class="cl-body">
+          <div class="cl-name">🦞 瑠玖＆魚平（1日目夜 20:00〜）</div>
+          <div class="cl-note">南2条西6丁目（狸小路6丁目）/ 海鮮居酒屋・お通し盛り放題　<span class="badge b-grn">予約完了</span></div>
+        </div>
+      </li>
+      <li class="cli">
+        <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
+        <div class="cl-body">
+          <div class="cl-name">🦀 どさんこキッチン ゴリラ 千歳店（2日目夜 18:00〜）</div>
+          <div class="cl-note">千歳市内・道産海鮮居酒屋・掘りごたつ個室　<span class="badge b-grn">予約完了</span></div>
+        </div>
+      </li>
+      <li class="cli">
+        <div class="cl-box" style="background:#d1fae5;border-color:#059669;position:relative;"><span style="position:absolute;top:-2px;left:1px;font-size:13px;color:#059669;">✓</span></div>
+        <div class="cl-body">
+          <div class="cl-name">🚗 カーシェア（2日目利用）</div>
+          <div class="cl-note">¥28,490（3名合計）/ 高速代別途 / 支笏湖・千歳移動　<span class="badge b-grn">予約完了</span></div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ▌FOOTER -->
+<div class="footer">
+  <div class="footer-l">HOKKAIDO GOLF TRIP 2026 · JUL 24–26 · 3 MEMBERS</div>
+  <div class="footer-r">
+    <div class="fcourse">⛳ Day 1 : 札幌カントリークラブ　12:36 ST</div>
+    <div class="fcourse">⛳ Day 3 : ニドムクラシックコース　08:10 ST</div>
+  </div>
+</div>
+
+</div><!-- /pf -->
+</body>
+</html>
