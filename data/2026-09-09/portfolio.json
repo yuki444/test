@@ -1,0 +1,167 @@
+{
+  "cash": 6421.600000000093,
+  "positions": [
+    {
+      "id": "e27c5e84-916b-4dea-b4d5-733b2b4a6d5f",
+      "code": "7267",
+      "name": "本田技研工業",
+      "shares": 298,
+      "buyPrice": 1715.0,
+      "buyDate": "2026-08-31",
+      "currentPrice": 1619.5,
+      "peakPrice": 1742.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "9b4da094-f8c2-4539-bf70-9e977d23d029",
+      "code": "9432",
+      "name": "日本電信電話",
+      "shares": 2987,
+      "buyPrice": 171.2,
+      "buyDate": "2026-08-31",
+      "currentPrice": 172.2,
+      "peakPrice": 174.9,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "ccc129f9-61d4-4181-ac56-1c917af94f64",
+      "code": "8306",
+      "name": "三菱UFJフィナンシャル・グループ",
+      "shares": 139,
+      "buyPrice": 3661.0,
+      "buyDate": "2026-08-31",
+      "currentPrice": 3638.0,
+      "peakPrice": 3785.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "abdd8c58-d5ca-4e72-a6ca-2cafe6ed1e91",
+      "code": "7203",
+      "name": "トヨタ自動車",
+      "shares": 161,
+      "buyPrice": 3175.0,
+      "buyDate": "2026-08-31",
+      "currentPrice": 2977.0,
+      "peakPrice": 3257.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "bf3b7463-1c80-4fe4-84dd-6df1a09e1151",
+      "code": "4502",
+      "name": "武田薬品工業",
+      "shares": 88,
+      "buyPrice": 5768.0,
+      "buyDate": "2026-08-31",
+      "currentPrice": 5673.0,
+      "peakPrice": 5894.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "0a97dbbf-cf6f-468a-a6c7-7f453b3fbf4a",
+      "code": "9433",
+      "name": "KDDI",
+      "shares": 174,
+      "buyPrice": 2925.5,
+      "buyDate": "2026-08-31",
+      "currentPrice": 2968.0,
+      "peakPrice": 3008.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "3a326f6f-1e28-46d7-85c1-0cc8089a71f8",
+      "code": "4661",
+      "name": "オリエンタルランド",
+      "shares": 160,
+      "buyPrice": 3136.0,
+      "buyDate": "2026-09-06",
+      "currentPrice": 3144.0,
+      "peakPrice": 3144.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "cd64bf86-4969-473b-9df0-519f2da7809a",
+      "code": "7974",
+      "name": "任天堂",
+      "shares": 60,
+      "buyPrice": 8466.0,
+      "buyDate": "2026-09-09",
+      "currentPrice": 8466.0,
+      "peakPrice": 8466.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "86bac71b-c5d5-499d-a161-9a0816ff140f",
+      "code": "8766",
+      "name": "東京海上ホールディングス",
+      "shares": 65,
+      "buyPrice": 7776.0,
+      "buyDate": "2026-09-09",
+      "currentPrice": 7776.0,
+      "peakPrice": 7776.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "910865e6-cfa9-431e-8714-a06c91d2be59",
+      "code": "3382",
+      "name": "セブン&アイ・ホールディングス",
+      "shares": 250,
+      "buyPrice": 2031.0,
+      "buyDate": "2026-09-09",
+      "currentPrice": 2031.0,
+      "peakPrice": 2031.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    }
+  ],
+  "date": "2026-09-09",
+  "totalValue": 5028219.0
+}
