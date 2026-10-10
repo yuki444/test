@@ -1,0 +1,167 @@
+{
+  "cash": 6830.799999999814,
+  "positions": [
+    {
+      "id": "5798a48b-bd5d-4c48-90c4-1260b65c6cdd",
+      "code": "8766",
+      "name": "東京海上ホールディングス",
+      "shares": 481,
+      "buyPrice": 527.0,
+      "buyDate": "2026-09-29",
+      "currentPrice": 525.7,
+      "peakPrice": 531.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "61422c35-029e-4cd9-9023-ffdcd76b8f8b",
+      "code": "8316",
+      "name": "三井住友フィナンシャルグループ",
+      "shares": 75,
+      "buyPrice": 3382.0,
+      "buyDate": "2026-09-29",
+      "currentPrice": 3256.0,
+      "peakPrice": 3422.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "4a0e1ab6-3092-409a-bdd8-225e495369c9",
+      "code": "7267",
+      "name": "本田技研工業",
+      "shares": 296,
+      "buyPrice": 1678.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 1726.5,
+      "peakPrice": 1732.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "3c79e3c2-5ad2-41b2-b3d6-15945c8de631",
+      "code": "9432",
+      "name": "日本電信電話",
+      "shares": 2920,
+      "buyPrice": 170.6,
+      "buyDate": "2026-09-30",
+      "currentPrice": 172.9,
+      "peakPrice": 173.1,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "1cc55918-8e37-42de-a270-531defe0b729",
+      "code": "4502",
+      "name": "武田薬品工業",
+      "shares": 86,
+      "buyPrice": 5742.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 5843.0,
+      "peakPrice": 5843.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "219f7800-aa8f-4636-82f2-d37f724bcbe8",
+      "code": "8306",
+      "name": "三菱UFJフィナンシャル・グループ",
+      "shares": 137,
+      "buyPrice": 3635.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 3462.0,
+      "peakPrice": 3661.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "04aa38d2-bbb8-4f5d-add4-9997b30bcc15",
+      "code": "7203",
+      "name": "トヨタ自動車",
+      "shares": 171,
+      "buyPrice": 2898.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 2910.5,
+      "peakPrice": 2919.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "279dfad3-cc16-4c5a-bbaf-9945cf60b379",
+      "code": "9433",
+      "name": "KDDI",
+      "shares": 170,
+      "buyPrice": 2921.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 2893.0,
+      "peakPrice": 2925.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "99918059-dee0-4602-ab9f-896a110102f0",
+      "code": "6098",
+      "name": "リクルートホールディングス",
+      "shares": 28,
+      "buyPrice": 17660.0,
+      "buyDate": "2026-10-09",
+      "currentPrice": 17755.0,
+      "peakPrice": 17755.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "4ddd5965-83b3-4ad4-af5a-e25a24ad83ed",
+      "code": "5108",
+      "name": "ブリヂストン",
+      "shares": 127,
+      "buyPrice": 3908.0,
+      "buyDate": "2026-10-09",
+      "currentPrice": 3913.0,
+      "peakPrice": 3913.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    }
+  ],
+  "date": "2026-10-10",
+  "totalValue": 4480193.0
+}
