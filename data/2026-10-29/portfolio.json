@@ -1,0 +1,167 @@
+{
+  "cash": 391.5999999998021,
+  "positions": [
+    {
+      "id": "4a0e1ab6-3092-409a-bdd8-225e495369c9",
+      "code": "7267",
+      "name": "本田技研工業",
+      "shares": 296,
+      "buyPrice": 1678.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 1775.5,
+      "peakPrice": 1811.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "3c79e3c2-5ad2-41b2-b3d6-15945c8de631",
+      "code": "9432",
+      "name": "日本電信電話",
+      "shares": 2920,
+      "buyPrice": 170.6,
+      "buyDate": "2026-09-30",
+      "currentPrice": 171.0,
+      "peakPrice": 178.3,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "1cc55918-8e37-42de-a270-531defe0b729",
+      "code": "4502",
+      "name": "武田薬品工業",
+      "shares": 86,
+      "buyPrice": 5742.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 6406.0,
+      "peakPrice": 6463.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "04aa38d2-bbb8-4f5d-add4-9997b30bcc15",
+      "code": "7203",
+      "name": "トヨタ自動車",
+      "shares": 171,
+      "buyPrice": 2898.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 3056.0,
+      "peakPrice": 3130.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "279dfad3-cc16-4c5a-bbaf-9945cf60b379",
+      "code": "9433",
+      "name": "KDDI",
+      "shares": 170,
+      "buyPrice": 2921.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 2779.0,
+      "peakPrice": 2962.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "99918059-dee0-4602-ab9f-896a110102f0",
+      "code": "6098",
+      "name": "リクルートホールディングス",
+      "shares": 28,
+      "buyPrice": 17660.0,
+      "buyDate": "2026-10-09",
+      "currentPrice": 18910.0,
+      "peakPrice": 19330.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "4ddd5965-83b3-4ad4-af5a-e25a24ad83ed",
+      "code": "5108",
+      "name": "ブリヂストン",
+      "shares": 127,
+      "buyPrice": 3908.0,
+      "buyDate": "2026-10-09",
+      "currentPrice": 3909.0,
+      "peakPrice": 4057.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "65db045b-5814-449a-8fd6-912a4d749827",
+      "code": "9983",
+      "name": "ファーストリテイリング",
+      "shares": 4,
+      "buyPrice": 77170.0,
+      "buyDate": "2026-10-23",
+      "currentPrice": 73440.0,
+      "peakPrice": 77170.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "e138c1b1-5356-4b73-9e6e-d5564c3cc286",
+      "code": "3382",
+      "name": "セブン&アイ・ホールディングス",
+      "shares": 156,
+      "buyPrice": 2139.0,
+      "buyDate": "2026-10-23",
+      "currentPrice": 2074.0,
+      "peakPrice": 2142.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "3fa06774-6977-458d-bdcc-114a456b3b4c",
+      "code": "8766",
+      "name": "東京海上ホールディングス",
+      "shares": 532,
+      "buyPrice": 565.2,
+      "buyDate": "2026-10-29",
+      "currentPrice": 565.2,
+      "peakPrice": 565.2,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    }
+  ],
+  "date": "2026-10-29",
+  "totalValue": 4515095.0
+}

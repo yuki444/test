@@ -1,0 +1,26 @@
+[
+  {
+    "id": "874c26d0-0d36-4c7b-b19f-27683e37c2ec",
+    "code": "8766",
+    "name": "東京海上ホールディングス",
+    "type": "sell",
+    "shares": 481,
+    "price": 565.2,
+    "date": "2026-10-29",
+    "reason": "保有期間満了: 30日保有（設定 30日）",
+    "pnl": 18374.0,
+    "pnlPct": 7.25
+  },
+  {
+    "id": "4d1e7f3e-bac0-4b1a-8acf-d37dbdbdb232",
+    "code": "8766",
+    "name": "東京海上ホールディングス",
+    "type": "buy",
+    "shares": 532,
+    "price": 565.2,
+    "date": "2026-10-29",
+    "reason": "スコア167.2pt でTOP10入り、均等配分301,078円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  }
+]
