@@ -43,11 +43,11 @@
     "retireExpenseRatio": 1.1
   },
   "income": {
-    "self": 850000,
+    "self": 1250000,
     "spouse": 325000,
     "side": 16200,
     "investment": 25532,
-    "bonusSelf": 1000000,
+    "bonusSelf": 2000000,
     "bonusSpouse": 0
   },
   "expenses": {
