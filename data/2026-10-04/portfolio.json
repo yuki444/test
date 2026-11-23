@@ -1,0 +1,167 @@
+{
+  "cash": 10666.799999999814,
+  "positions": [
+    {
+      "id": "cd64bf86-4969-473b-9df0-519f2da7809a",
+      "code": "7974",
+      "name": "任天堂",
+      "shares": 60,
+      "buyPrice": 8466.0,
+      "buyDate": "2026-09-09",
+      "currentPrice": 7849.0,
+      "peakPrice": 8466.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "910865e6-cfa9-431e-8714-a06c91d2be59",
+      "code": "3382",
+      "name": "セブン&アイ・ホールディングス",
+      "shares": 250,
+      "buyPrice": 2031.0,
+      "buyDate": "2026-09-09",
+      "currentPrice": 1978.0,
+      "peakPrice": 2052.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "5798a48b-bd5d-4c48-90c4-1260b65c6cdd",
+      "code": "8766",
+      "name": "東京海上ホールディングス",
+      "shares": 481,
+      "buyPrice": 527.0,
+      "buyDate": "2026-09-29",
+      "currentPrice": 507.4,
+      "peakPrice": 531.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "61422c35-029e-4cd9-9023-ffdcd76b8f8b",
+      "code": "8316",
+      "name": "三井住友フィナンシャルグループ",
+      "shares": 75,
+      "buyPrice": 3382.0,
+      "buyDate": "2026-09-29",
+      "currentPrice": 3321.0,
+      "peakPrice": 3415.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "4a0e1ab6-3092-409a-bdd8-225e495369c9",
+      "code": "7267",
+      "name": "本田技研工業",
+      "shares": 296,
+      "buyPrice": 1678.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 1664.5,
+      "peakPrice": 1678.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "3c79e3c2-5ad2-41b2-b3d6-15945c8de631",
+      "code": "9432",
+      "name": "日本電信電話",
+      "shares": 2920,
+      "buyPrice": 170.6,
+      "buyDate": "2026-09-30",
+      "currentPrice": 169.9,
+      "peakPrice": 170.7,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "1cc55918-8e37-42de-a270-531defe0b729",
+      "code": "4502",
+      "name": "武田薬品工業",
+      "shares": 86,
+      "buyPrice": 5742.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 5643.0,
+      "peakPrice": 5742.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "219f7800-aa8f-4636-82f2-d37f724bcbe8",
+      "code": "8306",
+      "name": "三菱UFJフィナンシャル・グループ",
+      "shares": 137,
+      "buyPrice": 3635.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 3544.0,
+      "peakPrice": 3635.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "04aa38d2-bbb8-4f5d-add4-9997b30bcc15",
+      "code": "7203",
+      "name": "トヨタ自動車",
+      "shares": 171,
+      "buyPrice": 2898.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 2856.5,
+      "peakPrice": 2910.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "279dfad3-cc16-4c5a-bbaf-9945cf60b379",
+      "code": "9433",
+      "name": "KDDI",
+      "shares": 170,
+      "buyPrice": 2921.0,
+      "buyDate": "2026-09-30",
+      "currentPrice": 2896.5,
+      "peakPrice": 2925.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    }
+  ],
+  "date": "2026-10-04",
+  "totalValue": 4409734.0
+}

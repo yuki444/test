@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アプリ一覧</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f172a;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem}
+h1{font-size:1.5rem;color:#94a3b8;letter-spacing:.05em}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;width:100%;max-width:720px}
+a{display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:2rem 1.5rem;background:#1e293b;border:1px solid #334155;border-radius:1rem;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
+a:hover{border-color:#3b82f6;transform:translateY(-2px)}
+.icon{font-size:2.5rem}
+.name{font-size:1.1rem;font-weight:700;color:#f1f5f9}
+.desc{font-size:.8rem;color:#64748b;text-align:center}
+</style>
+</head>
+<body>
+<h1>🗂 アプリ一覧</h1>
+<div class="grid">
+  <a href="portfolio/">
+    <span class="icon">📊</span>
+    <span class="name">株式ポートフォリオ</span>
+    <span class="desc">保有銘柄・売買履歴・ウォッチリスト管理</span>
+  </a>
+  <a href="financial-planner/">
+    <span class="icon">💰</span>
+    <span class="name">Financial Planner</span>
+    <span class="desc">資産管理・収支シミュレーション</span>
+  </a>
+  <a href="pokapoka-garden/">
+    <span class="icon">🌸</span>
+    <span class="name">ぽかぽかガーデン</span>
+    <span class="desc">子供向けお花育てゲーム</span>
+  </a>
+</div>
+</body>
+</html>

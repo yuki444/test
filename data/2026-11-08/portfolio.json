@@ -1,0 +1,167 @@
+{
+  "cash": 6261.699999999604,
+  "positions": [
+    {
+      "id": "65db045b-5814-449a-8fd6-912a4d749827",
+      "code": "9983",
+      "name": "ファーストリテイリング",
+      "shares": 4,
+      "buyPrice": 77170.0,
+      "buyDate": "2026-10-23",
+      "currentPrice": 77950.0,
+      "peakPrice": 81260.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "e138c1b1-5356-4b73-9e6e-d5564c3cc286",
+      "code": "3382",
+      "name": "セブン&アイ・ホールディングス",
+      "shares": 156,
+      "buyPrice": 2139.0,
+      "buyDate": "2026-10-23",
+      "currentPrice": 2165.0,
+      "peakPrice": 2249.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "3fa06774-6977-458d-bdcc-114a456b3b4c",
+      "code": "8766",
+      "name": "東京海上ホールディングス",
+      "shares": 532,
+      "buyPrice": 565.2,
+      "buyDate": "2026-10-29",
+      "currentPrice": 569.8,
+      "peakPrice": 609.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "bc89935f-85d4-489a-a42e-de1b0bf063b7",
+      "code": "4502",
+      "name": "武田薬品工業",
+      "shares": 78,
+      "buyPrice": 6626.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 6560.0,
+      "peakPrice": 6903.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "2cbc5d13-0e32-43db-acdf-7ec8cb256e47",
+      "code": "7267",
+      "name": "本田技研工業",
+      "shares": 293,
+      "buyPrice": 1773.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 1831.0,
+      "peakPrice": 1904.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "1f18d9df-716e-43b6-a510-ba947a099d52",
+      "code": "9432",
+      "name": "日本電信電話",
+      "shares": 3003,
+      "buyPrice": 173.3,
+      "buyDate": "2026-10-30",
+      "currentPrice": 160.2,
+      "peakPrice": 174.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "07205be3-a6e2-4363-94d1-bc0b5c0adb17",
+      "code": "4661",
+      "name": "オリエンタルランド",
+      "shares": 152,
+      "buyPrice": 3403.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 3529.0,
+      "peakPrice": 3690.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "a97214dd-f63c-4298-9f75-65bf4ab7dca9",
+      "code": "7203",
+      "name": "トヨタ自動車",
+      "shares": 169,
+      "buyPrice": 3064.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 3338.0,
+      "peakPrice": 3338.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "7b8335a9-7dc0-4800-bdd8-6be862f83c28",
+      "code": "5108",
+      "name": "ブリヂストン",
+      "shares": 122,
+      "buyPrice": 4105.0,
+      "buyDate": "2026-11-08",
+      "currentPrice": 4105.0,
+      "peakPrice": 4105.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "463b58b6-55bd-40d1-9bd1-779b9baf0067",
+      "code": "6367",
+      "name": "ダイキン工業",
+      "shares": 23,
+      "buyPrice": 21790.0,
+      "buyDate": "2026-11-08",
+      "currentPrice": 21790.0,
+      "peakPrice": 21790.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    }
+  ],
+  "date": "2026-11-08",
+  "totalValue": 4590689.0
+}

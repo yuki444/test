@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本株推奨ダッシュボード - 2026-10-18</title>
+<style>
+  :root {
+    --bg: #0f1116;
+    --panel: #171a21;
+    --panel-border: #262b36;
+    --text: #e6e8ee;
+    --text-dim: #8b93a7;
+    --accent: #4f8cff;
+    --green: #33c481;
+    --red: #ff5c5c;
+    --amber: #e8b339;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Hiragino Sans", "Yu Gothic", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.6;
+    padding: 24px 16px 64px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 24px; }
+  .header-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .stat-label { color: var(--text-dim); font-size: 0.78rem; margin-bottom: 6px; }
+  .stat-value { font-size: 1.5rem; font-weight: 700; }
+  .positive { color: var(--green); }
+  .negative { color: var(--red); }
+  section { margin-bottom: 40px; }
+  h2 {
+    font-size: 1.05rem;
+    border-left: 4px solid var(--accent);
+    padding-left: 10px;
+    margin-bottom: 14px;
+  }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--panel-border); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; min-width: 640px; background: var(--panel); }
+  th, td { padding: 10px 12px; text-align: left; font-size: 0.85rem; white-space: nowrap; }
+  th { color: var(--text-dim); font-weight: 500; border-bottom: 1px solid var(--panel-border); }
+  tbody tr { border-bottom: 1px solid var(--panel-border); }
+  tbody tr:last-child { border-bottom: none; }
+  .score-bar-track { background: #262b36; border-radius: 4px; width: 100px; height: 8px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  .score-bar-fill { background: linear-gradient(90deg, var(--accent), var(--green)); height: 100%; }
+  .rank { color: var(--text-dim); }
+  .empty { color: var(--text-dim); padding: 20px; text-align: center; }
+  .chart-wrap { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 10px; padding: 16px; }
+  .reports-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .reports-list a {
+    color: var(--accent);
+    text-decoration: none;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+  }
+  .reports-list a:hover { border-color: var(--accent); }
+  footer { color: var(--text-dim); font-size: 0.75rem; text-align: center; margin-top: 40px; }
+  .reason-cell { max-width: 320px; white-space: normal; color: var(--text-dim); font-size: 0.78rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>日本株推奨・自律運用ダッシュボード</h1>
+  <div class="subtitle">最終更新: 2026-10-18（毎日09:00 JST自動更新・仮想売買シミュレーション）</div>
+
+  <div class="header-stats">
+    <div class="stat-card">
+      <div class="stat-label">総資産</div>
+      <div class="stat-value">¥4,626,159</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">損益（実現+含み）</div>
+      <div class="stat-value negative">
+        ¥-373,840
+        (-7.48%)
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">勝率（決済済み売買）</div>
+      <div class="stat-value">33.3% <span style="font-size:0.8rem;color:var(--text-dim);">(8/24)</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">保有銘柄数</div>
+      <div class="stat-value">10 / 10</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>TOP10 推奨銘柄（本日スコア順）</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>コード</th><th>銘柄名</th><th>スコア</th><th>株価</th><th>前日比</th></tr>
+        </thead>
+        <tbody>
+        
+          <tr>
+            <td class="rank">1</td>
+            <td>7267</td>
+            <td>本田技研工業</td>
+            <td>
+              <span class="score-bar-track"><span class="score-bar-fill" style="width: 85.8%;"></span></span>
+              218.7pt
+            </td>
+            <td>¥1,798</td>
+            <td class="positive">+1.21%</td>
+          </tr>
+        
+          <tr>
+            <td class="rank">2</td>
+            <td>4502</td>
+            <td>武田薬品工業</td>
+            <td>
+              <span class="score-bar-track"><span class="score-bar-fill" style="width: 74.1%;"></span></span>
+              189.0pt
+            </td>
+            <td>¥6,223</td>
+            <td class="positive">+0.65%</td>
+          </tr>
+        
+          <tr>
+            <td class="rank">3</td>
+            <td>8766</td>
+            <td>東京海上ホールディングス</td>
+            <td>
+              <span class="score-bar-track"><span class="score-bar-fill" style="width: 71.7%;"></span></span>
+              182.8pt
+            </td>
+            <td>¥558</td>
+            <td class="positive">+2.89%</td>
+          </tr>
+        
+          <tr>
+            <td class="rank">4</td>
+            <td>7203</td>
+            <td>トヨタ自動車</td>
+            <td>
+              <span class="score-bar-track"><span class="score-bar-fill" style="width: 67.1%;"></span></span>
+              171.2pt
+            </td>
+            <td>¥3,094</td>
+            <td class="positive">+2.15%</td>
+          </tr>
+        
+          <tr>
+            <td class="rank">5</td>
+            <td>9432</td>
+            <td>日本電信電話</td>
+            <td>
+              <span class="score-bar-track"><span class="score-bar-fill" style="width: 64.8%;"></span></span>
+              165.2pt
+            </td>
+            <td>¥174</td>
+            <td class="positive">+0.69%</td>
+          </tr>
+        
+          <tr>
+            <td class="rank">6</td>
+            <td>6098</td>
+            <td>リクルートホールディングス</td>
+            <td>
+              <span class="score-bar-track"><span class="score-bar-fill" style="width: 60.9%;"></span></span>
+              155.2pt
+            </td>
+            <td>¥18,420</td>
+            <td class="positive">+0.22%</td>
+          </tr>
+        
+          <tr>
+            <td class="rank">7</td>
+            <td>8035</td>
+            <td>東京エレクトロン</td>
+            <td>
+              <span class="score-bar-track"><span class="score-bar-fill" style="width: 59.7%;"></span></span>
+              152.2pt
+            </td>
+            <td>¥10,630</td>
+            <td class="positive">+2.56%</td>
+          </tr>
+        
+          <tr>
+            <td class="rank">8</td>
+            <td>4661</td>
+            <td>オリエンタルランド</td>
+            <td>
+              <span class="score-bar-track"><span class="score-bar-fill" style="width: 59.0%;"></span></span>
+              150.3pt
+            </td>
+            <td>¥3,167</td>
+            <td class="positive">+1.57%</td>
+          </tr>
+        
+          <tr>
+            <td class="rank">9</td>
+            <td>5108</td>
+            <td>ブリヂストン</td>
+            <td>
+              <span class="score-bar-track"><span class="score-bar-fill" style="width: 57.5%;"></span></span>
+              146.6pt
+            </td>
+            <td>¥4,037</td>
+            <td class="positive">+0.87%</td>
+          </tr>
+        
+          <tr>
+            <td class="rank">10</td>
+            <td>8306</td>
+            <td>三菱UFJフィナンシャル・グループ</td>
+            <td>
+              <span class="score-bar-track"><span class="score-bar-fill" style="width: 52.4%;"></span></span>
+              133.7pt
+            </td>
+            <td>¥3,475</td>
+            <td class="positive">+1.82%</td>
+          </tr>
+        
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>保有ポジション</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>コード</th><th>銘柄名</th><th>株数</th><th>取得単価</th><th>現在価格</th><th>含み損益</th><th>売却ルール</th></tr>
+        </thead>
+        <tbody>
+        
+          <tr>
+            <td>8766</td>
+            <td>東京海上ホールディングス</td>
+            <td>481</td>
+            <td>¥527</td>
+            <td>¥558</td>
+            <td class="positive">+¥15,055 (+5.9%)</td>
+            <td>損切-8% / 利確+25% / 30日</td>
+          </tr>
+        
+          <tr>
+            <td>8316</td>
+            <td>三井住友フィナンシャルグループ</td>
+            <td>75</td>
+            <td>¥3,382</td>
+            <td>¥3,276</td>
+            <td class="negative">¥-7,950 (-3.1%)</td>
+            <td>損切-8% / 利確+25% / 30日</td>
+          </tr>
+        
+          <tr>
+            <td>7267</td>
+            <td>本田技研工業</td>
+            <td>296</td>
+            <td>¥1,678</td>
+            <td>¥1,798</td>
+            <td class="positive">+¥35,372 (+7.1%)</td>
+            <td>損切-8% / 利確+25% / 30日</td>
+          </tr>
+        
+          <tr>
+            <td>9432</td>
+            <td>日本電信電話</td>
+            <td>2920</td>
+            <td>¥171</td>
+            <td>¥174</td>
+            <td class="positive">+¥11,388 (+2.3%)</td>
+            <td>損切-8% / 利確+25% / 30日</td>
+          </tr>
+        
+          <tr>
+            <td>4502</td>
+            <td>武田薬品工業</td>
+            <td>86</td>
+            <td>¥5,742</td>
+            <td>¥6,223</td>
+            <td class="positive">+¥41,366 (+8.4%)</td>
+            <td>損切-8% / 利確+25% / 30日</td>
+          </tr>
+        
+          <tr>
+            <td>8306</td>
+            <td>三菱UFJフィナンシャル・グループ</td>
+            <td>137</td>
+            <td>¥3,635</td>
+            <td>¥3,475</td>
+            <td class="negative">¥-21,920 (-4.4%)</td>
+            <td>損切-8% / 利確+25% / 30日</td>
+          </tr>
+        
+          <tr>
+            <td>7203</td>
+            <td>トヨタ自動車</td>
+            <td>171</td>
+            <td>¥2,898</td>
+            <td>¥3,094</td>
+            <td class="positive">+¥33,516 (+6.8%)</td>
+            <td>損切-8% / 利確+25% / 30日</td>
+          </tr>
+        
+          <tr>
+            <td>9433</td>
+            <td>KDDI</td>
+            <td>170</td>
+            <td>¥2,921</td>
+            <td>¥2,910</td>
+            <td class="negative">¥-1,870 (-0.4%)</td>
+            <td>損切-8% / 利確+25% / 30日</td>
+          </tr>
+        
+          <tr>
+            <td>6098</td>
+            <td>リクルートホールディングス</td>
+            <td>28</td>
+            <td>¥17,660</td>
+            <td>¥18,420</td>
+            <td class="positive">+¥21,280 (+4.3%)</td>
+            <td>損切-8% / 利確+25% / 30日</td>
+          </tr>
+        
+          <tr>
+            <td>5108</td>
+            <td>ブリヂストン</td>
+            <td>127</td>
+            <td>¥3,908</td>
+            <td>¥4,037</td>
+            <td class="positive">+¥16,383 (+3.3%)</td>
+            <td>損切-8% / 利確+25% / 30日</td>
+          </tr>
+        
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>資産推移（直近7日）</h2>
+    <div class="chart-wrap">
+      <svg viewBox="0 0 900 220" width="100%" role="img" aria-label="資産推移チャート">
+  <polygon points="40.0,180 40.0,180.0 176.7,125.0 313.3,131.4 450.0,118.2 586.7,40.0 723.3,56.0 860.0,56.0 860.0,180" fill="#4f8cff" opacity="0.12" />
+  <polyline points="40.0,180.0 176.7,125.0 313.3,131.4 450.0,118.2 586.7,40.0 723.3,56.0 860.0,56.0" fill="none" stroke="#4f8cff" stroke-width="2.5" />
+  <circle cx="40.0" cy="180.0" r="3.5" fill="#4f8cff" /><circle cx="176.7" cy="125.0" r="3.5" fill="#4f8cff" /><circle cx="313.3" cy="131.4" r="3.5" fill="#4f8cff" /><circle cx="450.0" cy="118.2" r="3.5" fill="#4f8cff" /><circle cx="586.7" cy="40.0" r="3.5" fill="#4f8cff" /><circle cx="723.3" cy="56.0" r="3.5" fill="#4f8cff" /><circle cx="860.0" cy="56.0" r="3.5" fill="#4f8cff" />
+  <text x="40.0" y="210" font-size="11" fill="#8b93a7" text-anchor="middle">10-12</text><text x="176.7" y="210" font-size="11" fill="#8b93a7" text-anchor="middle">10-13</text><text x="313.3" y="210" font-size="11" fill="#8b93a7" text-anchor="middle">10-14</text><text x="450.0" y="210" font-size="11" fill="#8b93a7" text-anchor="middle">10-15</text><text x="586.7" y="210" font-size="11" fill="#8b93a7" text-anchor="middle">10-16</text><text x="723.3" y="210" font-size="11" fill="#8b93a7" text-anchor="middle">10-17</text><text x="860.0" y="210" font-size="11" fill="#8b93a7" text-anchor="middle">10-18</text>
+  <text x="40.0" y="170.0" font-size="11" fill="#e6e8ee" text-anchor="middle">4,480,193</text><text x="176.7" y="115.0" font-size="11" fill="#e6e8ee" text-anchor="middle">4,544,901</text><text x="313.3" y="121.4" font-size="11" fill="#e6e8ee" text-anchor="middle">4,537,396</text><text x="450.0" y="108.2" font-size="11" fill="#e6e8ee" text-anchor="middle">4,552,956</text><text x="586.7" y="30.0" font-size="11" fill="#e6e8ee" text-anchor="middle">4,644,981</text><text x="723.3" y="46.0" font-size="11" fill="#e6e8ee" text-anchor="middle">4,626,159</text><text x="860.0" y="46.0" font-size="11" fill="#e6e8ee" text-anchor="middle">4,626,159</text>
+</svg>
+    </div>
+  </section>
+
+  <section>
+    <h2>売買履歴</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>日付</th><th>銘柄</th><th>売買</th><th>株数</th><th>価格</th><th>理由</th><th>損益</th></tr>
+        </thead>
+        <tbody>
+        
+          <tr>
+            <td>2026-10-09</td>
+            <td>7974 任天堂</td>
+            <td class="negative">売</td>
+            <td>60</td>
+            <td>¥8,091</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="negative">¥-22,500</td>
+          </tr>
+        
+          <tr>
+            <td>2026-10-09</td>
+            <td>3382 セブン&アイ・ホールディングス</td>
+            <td class="negative">売</td>
+            <td>250</td>
+            <td>¥2,006</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="negative">¥-6,250</td>
+          </tr>
+        
+          <tr>
+            <td>2026-10-09</td>
+            <td>6098 リクルートホールディングス</td>
+            <td class="positive">買</td>
+            <td>28</td>
+            <td>¥17,660</td>
+            <td class="reason-cell">スコア166.8pt でTOP10入り、均等配分498,813円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-10-09</td>
+            <td>5108 ブリヂストン</td>
+            <td class="positive">買</td>
+            <td>127</td>
+            <td>¥3,908</td>
+            <td class="reason-cell">スコア159.4pt でTOP10入り、均等配分498,813円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>7267 本田技研工業</td>
+            <td class="negative">売</td>
+            <td>298</td>
+            <td>¥1,678</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="negative">¥-11,026</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>9432 日本電信電話</td>
+            <td class="negative">売</td>
+            <td>2987</td>
+            <td>¥171</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="negative">¥-1,792</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>8306 三菱UFJフィナンシャル・グループ</td>
+            <td class="negative">売</td>
+            <td>139</td>
+            <td>¥3,635</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="negative">¥-3,614</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>4502 武田薬品工業</td>
+            <td class="negative">売</td>
+            <td>88</td>
+            <td>¥5,742</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="negative">¥-2,288</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>9433 KDDI</td>
+            <td class="negative">売</td>
+            <td>174</td>
+            <td>¥2,921</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="negative">¥-783</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>4661 オリエンタルランド</td>
+            <td class="negative">売</td>
+            <td>160</td>
+            <td>¥2,878</td>
+            <td class="reason-cell">損切りルール発動: 取得価格比 -8.2%（設定 -8%）</td>
+            <td class="negative">¥-41,360</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>7267 本田技研工業</td>
+            <td class="positive">買</td>
+            <td>296</td>
+            <td>¥1,678</td>
+            <td class="reason-cell">スコア224.1pt でTOP10入り、均等配分498,240円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>9432 日本電信電話</td>
+            <td class="positive">買</td>
+            <td>2920</td>
+            <td>¥171</td>
+            <td class="reason-cell">スコア180.4pt でTOP10入り、均等配分498,240円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>4502 武田薬品工業</td>
+            <td class="positive">買</td>
+            <td>86</td>
+            <td>¥5,742</td>
+            <td class="reason-cell">スコア180.4pt でTOP10入り、均等配分498,240円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>8306 三菱UFJフィナンシャル・グループ</td>
+            <td class="positive">買</td>
+            <td>137</td>
+            <td>¥3,635</td>
+            <td class="reason-cell">スコア171.1pt でTOP10入り、均等配分498,240円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>7203 トヨタ自動車</td>
+            <td class="positive">買</td>
+            <td>171</td>
+            <td>¥2,898</td>
+            <td class="reason-cell">スコア158.8pt でTOP10入り、均等配分498,240円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-30</td>
+            <td>9433 KDDI</td>
+            <td class="positive">買</td>
+            <td>170</td>
+            <td>¥2,921</td>
+            <td class="reason-cell">スコア158.3pt でTOP10入り、均等配分498,240円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-29</td>
+            <td>7203 トヨタ自動車</td>
+            <td class="negative">売</td>
+            <td>161</td>
+            <td>¥2,901</td>
+            <td class="reason-cell">損切りルール発動: 取得価格比 -8.6%（設定 -8%）</td>
+            <td class="negative">¥-44,114</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-29</td>
+            <td>8766 東京海上ホールディングス</td>
+            <td class="negative">売</td>
+            <td>65</td>
+            <td>¥527</td>
+            <td class="reason-cell">損切りルール発動: 取得価格比 -93.2%（設定 -8%）</td>
+            <td class="negative">¥-471,185</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-29</td>
+            <td>8766 東京海上ホールディングス</td>
+            <td class="positive">買</td>
+            <td>481</td>
+            <td>¥527</td>
+            <td class="reason-cell">スコア220.5pt でTOP10入り、均等配分253,869円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-29</td>
+            <td>8316 三井住友フィナンシャルグループ</td>
+            <td class="positive">買</td>
+            <td>75</td>
+            <td>¥3,382</td>
+            <td class="reason-cell">スコア167.5pt でTOP10入り、均等配分253,869円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-09</td>
+            <td>6098 リクルートホールディングス</td>
+            <td class="negative">売</td>
+            <td>39</td>
+            <td>¥15,480</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="negative">¥-25,740</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-09</td>
+            <td>5108 ブリヂストン</td>
+            <td class="negative">売</td>
+            <td>122</td>
+            <td>¥3,767</td>
+            <td class="reason-cell">損切りルール発動: 取得価格比 -9.4%（設定 -8%）</td>
+            <td class="negative">¥-47,824</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-09</td>
+            <td>6758 ソニーグループ</td>
+            <td class="negative">売</td>
+            <td>128</td>
+            <td>¥3,623</td>
+            <td class="reason-cell">損切りルール発動: 取得価格比 -8.9%（設定 -8%）</td>
+            <td class="negative">¥-45,568</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-09</td>
+            <td>7974 任天堂</td>
+            <td class="positive">買</td>
+            <td>60</td>
+            <td>¥8,466</td>
+            <td class="reason-cell">スコア154.0pt でTOP10入り、均等配分509,191円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-09</td>
+            <td>8766 東京海上ホールディングス</td>
+            <td class="positive">買</td>
+            <td>65</td>
+            <td>¥7,776</td>
+            <td class="reason-cell">スコア153.2pt でTOP10入り、均等配分509,191円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-09</td>
+            <td>3382 セブン&アイ・ホールディングス</td>
+            <td class="positive">買</td>
+            <td>250</td>
+            <td>¥2,031</td>
+            <td class="reason-cell">スコア147.5pt でTOP10入り、均等配分509,191円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-06</td>
+            <td>7974 任天堂</td>
+            <td class="negative">売</td>
+            <td>55</td>
+            <td>¥8,839</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="positive">+¥47,025</td>
+          </tr>
+        
+          <tr>
+            <td>2026-09-06</td>
+            <td>4661 オリエンタルランド</td>
+            <td class="positive">買</td>
+            <td>160</td>
+            <td>¥3,136</td>
+            <td class="reason-cell">スコア182.2pt でTOP10入り、均等配分502,294円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>6902 デンソー</td>
+            <td class="negative">売</td>
+            <td>254</td>
+            <td>¥1,926</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="negative">¥-10,541</td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>7203 トヨタ自動車</td>
+            <td class="negative">売</td>
+            <td>163</td>
+            <td>¥3,175</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="positive">+¥17,604</td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>9432 日本電信電話</td>
+            <td class="negative">売</td>
+            <td>3280</td>
+            <td>¥171</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="positive">+¥61,664</td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>3382 セブン&アイ・ホールディングス</td>
+            <td class="negative">売</td>
+            <td>237</td>
+            <td>¥2,006</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="negative">¥-24,292</td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>5108 ブリヂストン</td>
+            <td class="negative">売</td>
+            <td>126</td>
+            <td>¥4,159</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="positive">+¥24,444</td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>8306 三菱UFJフィナンシャル・グループ</td>
+            <td class="negative">売</td>
+            <td>140</td>
+            <td>¥3,661</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="positive">+¥12,600</td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>9433 KDDI</td>
+            <td class="negative">売</td>
+            <td>171</td>
+            <td>¥2,926</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="positive">+¥770</td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>8316 三井住友フィナンシャルグループ</td>
+            <td class="negative">売</td>
+            <td>73</td>
+            <td>¥6,938</td>
+            <td class="reason-cell">保有期間満了: 30日保有（設定 30日）</td>
+            <td class="positive">+¥9,052</td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>7267 本田技研工業</td>
+            <td class="positive">買</td>
+            <td>298</td>
+            <td>¥1,715</td>
+            <td class="reason-cell">スコア209.3pt でTOP10入り、均等配分511,497円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>9432 日本電信電話</td>
+            <td class="positive">買</td>
+            <td>2987</td>
+            <td>¥171</td>
+            <td class="reason-cell">スコア205.6pt でTOP10入り、均等配分511,497円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>8306 三菱UFJフィナンシャル・グループ</td>
+            <td class="positive">買</td>
+            <td>139</td>
+            <td>¥3,661</td>
+            <td class="reason-cell">スコア200.2pt でTOP10入り、均等配分511,497円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>7203 トヨタ自動車</td>
+            <td class="positive">買</td>
+            <td>161</td>
+            <td>¥3,175</td>
+            <td class="reason-cell">スコア199.8pt でTOP10入り、均等配分511,497円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>5108 ブリヂストン</td>
+            <td class="positive">買</td>
+            <td>122</td>
+            <td>¥4,159</td>
+            <td class="reason-cell">スコア184.4pt でTOP10入り、均等配分511,497円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>4502 武田薬品工業</td>
+            <td class="positive">買</td>
+            <td>88</td>
+            <td>¥5,768</td>
+            <td class="reason-cell">スコア177.0pt でTOP10入り、均等配分511,497円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>9433 KDDI</td>
+            <td class="positive">買</td>
+            <td>174</td>
+            <td>¥2,926</td>
+            <td class="reason-cell">スコア176.9pt でTOP10入り、均等配分511,497円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-31</td>
+            <td>6758 ソニーグループ</td>
+            <td class="positive">買</td>
+            <td>128</td>
+            <td>¥3,979</td>
+            <td class="reason-cell">スコア176.0pt でTOP10入り、均等配分511,497円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-10</td>
+            <td>6098 リクルートホールディングス</td>
+            <td class="negative">売</td>
+            <td>39</td>
+            <td>¥16,140</td>
+            <td class="reason-cell">利確ルール発動: 取得価格比 +28.6%（設定 +25%）</td>
+            <td class="positive">+¥140,010</td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-10</td>
+            <td>6098 リクルートホールディングス</td>
+            <td class="positive">買</td>
+            <td>39</td>
+            <td>¥16,140</td>
+            <td class="reason-cell">スコア175.0pt でTOP10入り、均等配分634,324円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-07</td>
+            <td>4901 富士フイルムホールディングス</td>
+            <td class="negative">売</td>
+            <td>132</td>
+            <td>¥3,236</td>
+            <td class="reason-cell">損切りルール発動: 取得価格比 -14.2%（設定 -8%）</td>
+            <td class="negative">¥-70,752</td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-07</td>
+            <td>7974 任天堂</td>
+            <td class="positive">買</td>
+            <td>55</td>
+            <td>¥7,984</td>
+            <td class="reason-cell">スコア163.0pt でTOP10入り、均等配分443,984円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-01</td>
+            <td>6902 デンソー</td>
+            <td class="positive">買</td>
+            <td>254</td>
+            <td>¥1,968</td>
+            <td class="reason-cell">スコア210.0pt でTOP10入り、均等配分500,000円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+          <tr>
+            <td>2026-08-01</td>
+            <td>7203 トヨタ自動車</td>
+            <td class="positive">買</td>
+            <td>163</td>
+            <td>¥3,067</td>
+            <td class="reason-cell">スコア180.0pt でTOP10入り、均等配分500,000円枠で買付</td>
+            <td class="positive"></td>
+          </tr>
+        
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>過去のレポート</h2>
+    <div class="reports-list">
+    
+      <a href="reports/2026-10-17_dashboard.html">2026-10-17</a>
+    
+      <a href="reports/2026-10-16_dashboard.html">2026-10-16</a>
+    
+      <a href="reports/2026-10-15_dashboard.html">2026-10-15</a>
+    
+      <a href="reports/2026-10-14_dashboard.html">2026-10-14</a>
+    
+      <a href="reports/2026-10-13_dashboard.html">2026-10-13</a>
+    
+      <a href="reports/2026-10-12_dashboard.html">2026-10-12</a>
+    
+      <a href="reports/2026-10-11_dashboard.html">2026-10-11</a>
+    
+      <a href="reports/2026-10-10_dashboard.html">2026-10-10</a>
+    
+      <a href="reports/2026-10-09_dashboard.html">2026-10-09</a>
+    
+      <a href="reports/2026-10-08_dashboard.html">2026-10-08</a>
+    
+      <a href="reports/2026-10-07_dashboard.html">2026-10-07</a>
+    
+      <a href="reports/2026-10-06_dashboard.html">2026-10-06</a>
+    
+      <a href="reports/2026-10-05_dashboard.html">2026-10-05</a>
+    
+      <a href="reports/2026-10-04_dashboard.html">2026-10-04</a>
+    
+      <a href="reports/2026-10-03_dashboard.html">2026-10-03</a>
+    
+      <a href="reports/2026-10-02_dashboard.html">2026-10-02</a>
+    
+      <a href="reports/2026-10-01_dashboard.html">2026-10-01</a>
+    
+      <a href="reports/2026-09-30_dashboard.html">2026-09-30</a>
+    
+      <a href="reports/2026-09-29_dashboard.html">2026-09-29</a>
+    
+      <a href="reports/2026-09-28_dashboard.html">2026-09-28</a>
+    
+      <a href="reports/2026-09-27_dashboard.html">2026-09-27</a>
+    
+      <a href="reports/2026-09-26_dashboard.html">2026-09-26</a>
+    
+      <a href="reports/2026-09-25_dashboard.html">2026-09-25</a>
+    
+      <a href="reports/2026-09-24_dashboard.html">2026-09-24</a>
+    
+      <a href="reports/2026-09-23_dashboard.html">2026-09-23</a>
+    
+      <a href="reports/2026-09-22_dashboard.html">2026-09-22</a>
+    
+      <a href="reports/2026-09-21_dashboard.html">2026-09-21</a>
+    
+      <a href="reports/2026-09-20_dashboard.html">2026-09-20</a>
+    
+      <a href="reports/2026-09-19_dashboard.html">2026-09-19</a>
+    
+      <a href="reports/2026-09-18_dashboard.html">2026-09-18</a>
+    
+      <a href="reports/2026-09-17_dashboard.html">2026-09-17</a>
+    
+      <a href="reports/2026-09-16_dashboard.html">2026-09-16</a>
+    
+      <a href="reports/2026-09-15_dashboard.html">2026-09-15</a>
+    
+      <a href="reports/2026-09-14_dashboard.html">2026-09-14</a>
+    
+      <a href="reports/2026-09-13_dashboard.html">2026-09-13</a>
+    
+      <a href="reports/2026-09-12_dashboard.html">2026-09-12</a>
+    
+      <a href="reports/2026-09-11_dashboard.html">2026-09-11</a>
+    
+      <a href="reports/2026-09-10_dashboard.html">2026-09-10</a>
+    
+      <a href="reports/2026-09-09_dashboard.html">2026-09-09</a>
+    
+      <a href="reports/2026-09-08_dashboard.html">2026-09-08</a>
+    
+      <a href="reports/2026-09-07_dashboard.html">2026-09-07</a>
+    
+      <a href="reports/2026-09-06_dashboard.html">2026-09-06</a>
+    
+      <a href="reports/2026-09-05_dashboard.html">2026-09-05</a>
+    
+      <a href="reports/2026-09-04_dashboard.html">2026-09-04</a>
+    
+      <a href="reports/2026-09-03_dashboard.html">2026-09-03</a>
+    
+      <a href="reports/2026-09-02_dashboard.html">2026-09-02</a>
+    
+      <a href="reports/2026-09-01_dashboard.html">2026-09-01</a>
+    
+      <a href="reports/2026-08-31_dashboard.html">2026-08-31</a>
+    
+      <a href="reports/2026-08-30_dashboard.html">2026-08-30</a>
+    
+      <a href="reports/2026-08-29_dashboard.html">2026-08-29</a>
+    
+      <a href="reports/2026-08-28_dashboard.html">2026-08-28</a>
+    
+      <a href="reports/2026-08-27_dashboard.html">2026-08-27</a>
+    
+      <a href="reports/2026-08-26_dashboard.html">2026-08-26</a>
+    
+      <a href="reports/2026-08-25_dashboard.html">2026-08-25</a>
+    
+      <a href="reports/2026-08-24_dashboard.html">2026-08-24</a>
+    
+      <a href="reports/2026-08-23_dashboard.html">2026-08-23</a>
+    
+      <a href="reports/2026-08-22_dashboard.html">2026-08-22</a>
+    
+      <a href="reports/2026-08-21_dashboard.html">2026-08-21</a>
+    
+      <a href="reports/2026-08-20_dashboard.html">2026-08-20</a>
+    
+      <a href="reports/2026-08-19_dashboard.html">2026-08-19</a>
+    
+      <a href="reports/2026-08-18_dashboard.html">2026-08-18</a>
+    
+      <a href="reports/2026-08-17_dashboard.html">2026-08-17</a>
+    
+      <a href="reports/2026-08-16_dashboard.html">2026-08-16</a>
+    
+      <a href="reports/2026-08-15_dashboard.html">2026-08-15</a>
+    
+      <a href="reports/2026-08-14_dashboard.html">2026-08-14</a>
+    
+      <a href="reports/2026-08-13_dashboard.html">2026-08-13</a>
+    
+      <a href="reports/2026-08-12_dashboard.html">2026-08-12</a>
+    
+      <a href="reports/2026-08-11_dashboard.html">2026-08-11</a>
+    
+      <a href="reports/2026-08-10_dashboard.html">2026-08-10</a>
+    
+      <a href="reports/2026-08-09_dashboard.html">2026-08-09</a>
+    
+      <a href="reports/2026-08-08_dashboard.html">2026-08-08</a>
+    
+      <a href="reports/2026-08-07_dashboard.html">2026-08-07</a>
+    
+      <a href="reports/2026-08-06_dashboard.html">2026-08-06</a>
+    
+      <a href="reports/2026-08-05_dashboard.html">2026-08-05</a>
+    
+      <a href="reports/2026-08-04_dashboard.html">2026-08-04</a>
+    
+      <a href="reports/2026-08-03_dashboard.html">2026-08-03</a>
+    
+      <a href="reports/2026-08-02_dashboard.html">2026-08-02</a>
+    
+      <a href="reports/2026-08-01_dashboard.html">2026-08-01</a>
+    
+    </div>
+  </section>
+
+  <footer>Suno AI Lyrics リポジトリ内で稼働する日本株スコアリング・仮想運用パイプライン（実資金の売買は行いません）</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "ぽかぽかガーデン",
+  "short_name": "ガーデン",
+  "description": "5さいのためのおはなそだてゲーム",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffe0f0",
+  "theme_color": "#ffb74d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

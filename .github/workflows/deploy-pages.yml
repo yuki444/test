@@ -1,10 +1,13 @@
-name: Deploy Financial Planner to GitHub Pages
+name: Deploy Apps to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
+      - 'static/**'
       - 'financial-planner/**'
+      - 'pokapoka-garden/**'
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
@@ -26,13 +29,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare deploy directory
+        run: |
+          mkdir _deploy
+          cp static/index.html _deploy/index.html
+          cp -r financial-planner _deploy/financial-planner
+          cp -r pokapoka-garden _deploy/pokapoka-garden
+          if [ -d docs ]; then cp -r docs _deploy/stock-sim; fi
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: financial-planner/
+          path: _deploy/
 
       - name: Deploy to GitHub Pages
         id: deployment

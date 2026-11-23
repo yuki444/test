@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>週次振り返りレポート - 2026-08-10</title>
+<style>
+  :root {
+    --bg: #0f1116; --panel: #171a21; --panel-border: #262b36;
+    --text: #e6e8ee; --text-dim: #8b93a7;
+    --accent: #4f8cff; --green: #33c481; --red: #ff5c5c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Hiragino Sans", "Yu Gothic", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.6; padding: 24px 16px 64px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 24px; }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 1.05rem; border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 14px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--panel-border); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; min-width: 520px; background: var(--panel); }
+  th, td { padding: 10px 12px; text-align: left; font-size: 0.85rem; white-space: nowrap; }
+  th { color: var(--text-dim); font-weight: 500; border-bottom: 1px solid var(--panel-border); }
+  tbody tr { border-bottom: 1px solid var(--panel-border); }
+  tbody tr:last-child { border-bottom: none; }
+  .positive { color: var(--green); }
+  .negative { color: var(--red); }
+  .empty { color: var(--text-dim); padding: 20px; text-align: center; }
+  .axis-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .axis-name { width: 120px; color: var(--text-dim); font-size: 0.85rem; }
+  .axis-bar-track { flex: 1; background: #262b36; border-radius: 4px; height: 10px; position: relative; overflow: hidden; }
+  .axis-bar-fill { position: absolute; top: 0; bottom: 0; }
+  .axis-value { width: 60px; text-align: right; font-size: 0.85rem; }
+  .weight-compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .weight-card { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 10px; padding: 14px; }
+  .weight-card .axis-name { width: auto; margin-bottom: 6px; }
+  .weight-change { font-size: 1.1rem; font-weight: 700; }
+  pre.reason { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 10px; padding: 14px; white-space: pre-wrap; font-family: inherit; font-size: 0.85rem; color: var(--text-dim); }
+  footer { color: var(--text-dim); font-size: 0.75rem; text-align: center; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>週次振り返りレポート</h1>
+  <div class="subtitle">2026-08-10 時点（先週推奨銘柄の実績を評価し、スコア重みを自動調整）</div>
+
+  
+    <section>
+      <h2>予測精度（2026-08-03のTOP10 → 2026-08-10時点の実績）</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>コード</th><th>銘柄名</th><th>予想スコア</th><th>実績リターン</th><th>判定</th></tr></thead>
+          <tbody>
+          
+            <tr>
+              <td>6902</td>
+              <td>デンソー</td>
+              <td>180.0pt</td>
+              <td class="negative">-1.59%</td>
+              <td>下落 ✗</td>
+            </tr>
+          
+            <tr>
+              <td>9433</td>
+              <td>KDDI</td>
+              <td>179.0pt</td>
+              <td class="negative">-2.65%</td>
+              <td>下落 ✗</td>
+            </tr>
+          
+            <tr>
+              <td>7203</td>
+              <td>トヨタ自動車</td>
+              <td>175.0pt</td>
+              <td class="positive">+1.08%</td>
+              <td>上昇 ✓</td>
+            </tr>
+          
+            <tr>
+              <td>8306</td>
+              <td>三菱UFJフィナンシャル・グループ</td>
+              <td>164.0pt</td>
+              <td class="positive">+0.40%</td>
+              <td>上昇 ✓</td>
+            </tr>
+          
+            <tr>
+              <td>9432</td>
+              <td>日本電信電話</td>
+              <td>157.0pt</td>
+              <td class="positive">+4.49%</td>
+              <td>上昇 ✓</td>
+            </tr>
+          
+            <tr>
+              <td>3382</td>
+              <td>セブン&アイ・ホールディングス</td>
+              <td>151.0pt</td>
+              <td class="positive">+1.53%</td>
+              <td>上昇 ✓</td>
+            </tr>
+          
+            <tr>
+              <td>6758</td>
+              <td>ソニーグループ</td>
+              <td>147.0pt</td>
+              <td class="positive">+4.37%</td>
+              <td>上昇 ✓</td>
+            </tr>
+          
+            <tr>
+              <td>7974</td>
+              <td>任天堂</td>
+              <td>146.0pt</td>
+              <td class="positive">+8.91%</td>
+              <td>上昇 ✓</td>
+            </tr>
+          
+            <tr>
+              <td>4901</td>
+              <td>富士フイルムホールディングス</td>
+              <td>144.0pt</td>
+              <td class="negative">-13.71%</td>
+              <td>下落 ✗</td>
+            </tr>
+          
+            <tr>
+              <td>6098</td>
+              <td>リクルートホールディングス</td>
+              <td>140.0pt</td>
+              <td class="positive">+32.68%</td>
+              <td>上昇 ✓</td>
+            </tr>
+          
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>軸別精度（スコアと実績リターンの相関係数）</h2>
+      
+        <div class="axis-bar-row">
+          <div class="axis-name">technical</div>
+          <div class="axis-bar-track">
+            <div class="axis-bar-fill" style="
+              right: 50%; width: 6.3%; background: var(--red);"></div>
+          </div>
+          <div class="axis-value">-0.13</div>
+        </div>
+      
+        <div class="axis-bar-row">
+          <div class="axis-name">fundamental</div>
+          <div class="axis-bar-track">
+            <div class="axis-bar-fill" style="
+              right: 50%; width: 17.0%; background: var(--red);"></div>
+          </div>
+          <div class="axis-value">-0.34</div>
+        </div>
+      
+        <div class="axis-bar-row">
+          <div class="axis-name">momentum</div>
+          <div class="axis-bar-track">
+            <div class="axis-bar-fill" style="
+              right: 50%; width: 2.1%; background: var(--red);"></div>
+          </div>
+          <div class="axis-value">-0.04</div>
+        </div>
+      
+        <div class="axis-bar-row">
+          <div class="axis-name">news</div>
+          <div class="axis-bar-track">
+            <div class="axis-bar-fill" style="
+              left: 50%; width: 6.5%; background: var(--green);
+              "></div>
+          </div>
+          <div class="axis-value">0.13</div>
+        </div>
+      
+    </section>
+
+    <section>
+      <h2>重み変更（前後比較）</h2>
+      <div class="weight-compare">
+        
+          <div class="weight-card">
+            <div class="axis-name">technical</div>
+            <div class="weight-change">1.00 → 0.95</div>
+          </div>
+        
+          <div class="weight-card">
+            <div class="axis-name">fundamental</div>
+            <div class="weight-change">1.00 → 0.86</div>
+          </div>
+        
+          <div class="weight-card">
+            <div class="axis-name">momentum</div>
+            <div class="weight-change">1.00 → 0.98</div>
+          </div>
+        
+          <div class="weight-card">
+            <div class="axis-name">news</div>
+            <div class="weight-change">1.00 → 1.05</div>
+          </div>
+        
+      </div>
+      <pre class="reason">先週TOP10推奨銘柄群の週次リターンとの相関に基づき自動調整。
+technical: 相関係数 -0.13 → 重み 1.00 → 0.95（引き下げ, Δ-0.05）
+fundamental: 相関係数 -0.34 → 重み 1.00 → 0.86（引き下げ, Δ-0.14）
+momentum: 相関係数 -0.04 → 重み 1.00 → 0.98（引き下げ, Δ-0.02）
+news: 相関係数 0.13 → 重み 1.00 → 1.05（引き上げ, Δ+0.05）</pre>
+    </section>
+
+    <section>
+      <h2>来週の注目銘柄</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>コード</th><th>銘柄名</th><th>最新スコア</th><th>株価</th></tr></thead>
+          <tbody>
+          
+            <tr>
+              <td>1</td>
+              <td>6098</td>
+              <td>リクルートホールディングス</td>
+              <td>175.0pt</td>
+              <td>¥16,140</td>
+            </tr>
+          
+            <tr>
+              <td>2</td>
+              <td>7203</td>
+              <td>トヨタ自動車</td>
+              <td>172.0pt</td>
+              <td>¥2,954</td>
+            </tr>
+          
+            <tr>
+              <td>3</td>
+              <td>9432</td>
+              <td>日本電信電話</td>
+              <td>172.0pt</td>
+              <td>¥158</td>
+            </tr>
+          
+            <tr>
+              <td>4</td>
+              <td>7974</td>
+              <td>任天堂</td>
+              <td>163.0pt</td>
+              <td>¥8,127</td>
+            </tr>
+          
+            <tr>
+              <td>5</td>
+              <td>5108</td>
+              <td>ブリヂストン</td>
+              <td>161.0pt</td>
+              <td>¥4,363</td>
+            </tr>
+          
+            <tr>
+              <td>6</td>
+              <td>7267</td>
+              <td>本田技研工業</td>
+              <td>160.0pt</td>
+              <td>¥1,661</td>
+            </tr>
+          
+            <tr>
+              <td>7</td>
+              <td>6902</td>
+              <td>デンソー</td>
+              <td>155.0pt</td>
+              <td>¥1,915</td>
+            </tr>
+          
+            <tr>
+              <td>8</td>
+              <td>9433</td>
+              <td>KDDI</td>
+              <td>154.0pt</td>
+              <td>¥2,808</td>
+            </tr>
+          
+            <tr>
+              <td>9</td>
+              <td>6758</td>
+              <td>ソニーグループ</td>
+              <td>147.0pt</td>
+              <td>¥3,727</td>
+            </tr>
+          
+            <tr>
+              <td>10</td>
+              <td>8306</td>
+              <td>三菱UFJフィナンシャル・グループ</td>
+              <td>144.0pt</td>
+              <td>¥3,481</td>
+            </tr>
+          
+          </tbody>
+        </table>
+      </div>
+    </section>
+  
+
+  <footer>日本株推奨・自律運用システム 週次振り返り（<a href="../index.html" style="color:var(--accent);">ダッシュボードへ戻る</a>）</footer>
+</div>
+</body>
+</html>

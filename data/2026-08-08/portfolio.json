@@ -1,0 +1,167 @@
+{
+  "cash": 4864.0,
+  "positions": [
+    {
+      "id": "6f1436d6-6541-444b-8508-b30ca2e51af7",
+      "code": "6902",
+      "name": "デンソー",
+      "shares": 254,
+      "buyPrice": 1967.5,
+      "buyDate": "2026-08-01",
+      "currentPrice": 1929.5,
+      "peakPrice": 1967.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "08c0d4b0-065c-436e-8b86-a6d9f5733598",
+      "code": "7203",
+      "name": "トヨタ自動車",
+      "shares": 163,
+      "buyPrice": 3067.0,
+      "buyDate": "2026-08-01",
+      "currentPrice": 2980.0,
+      "peakPrice": 3067.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "2fe27ff8-4a93-4098-bdc6-f622cbb98bf9",
+      "code": "9432",
+      "name": "日本電信電話",
+      "shares": 3280,
+      "buyPrice": 152.4,
+      "buyDate": "2026-08-01",
+      "currentPrice": 158.5,
+      "peakPrice": 158.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "fe8cd769-37e8-43e9-a5cd-336fa837f8fd",
+      "code": "3382",
+      "name": "セブン&アイ・ホールディングス",
+      "shares": 237,
+      "buyPrice": 2109.0,
+      "buyDate": "2026-08-01",
+      "currentPrice": 2097.5,
+      "peakPrice": 2109.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "a609b9c7-03e8-420a-8391-12e1f24800ab",
+      "code": "5108",
+      "name": "ブリヂストン",
+      "shares": 126,
+      "buyPrice": 3965.0,
+      "buyDate": "2026-08-01",
+      "currentPrice": 4199.0,
+      "peakPrice": 4199.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "aa14a813-c583-4f6b-a753-ff910ffa6c48",
+      "code": "8306",
+      "name": "三菱UFJフィナンシャル・グループ",
+      "shares": 140,
+      "buyPrice": 3571.0,
+      "buyDate": "2026-08-01",
+      "currentPrice": 3564.0,
+      "peakPrice": 3586.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "039f412e-b08a-4175-8762-388662c5260e",
+      "code": "9433",
+      "name": "KDDI",
+      "shares": 171,
+      "buyPrice": 2921.0,
+      "buyDate": "2026-08-01",
+      "currentPrice": 2981.0,
+      "peakPrice": 2981.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "f2aa03d7-07dc-428a-b82c-a01aac67ca6f",
+      "code": "8316",
+      "name": "三井住友フィナンシャルグループ",
+      "shares": 73,
+      "buyPrice": 6814.0,
+      "buyDate": "2026-08-01",
+      "currentPrice": 6782.0,
+      "peakPrice": 6819.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "2b4b72d6-9656-4cb9-a8f6-d36a5d4e55ab",
+      "code": "6098",
+      "name": "リクルートホールディングス",
+      "shares": 39,
+      "buyPrice": 12550.0,
+      "buyDate": "2026-08-01",
+      "currentPrice": 13165.0,
+      "peakPrice": 13165.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "c5eee0b9-fb11-4c49-a988-d8540aa4ba3d",
+      "code": "7974",
+      "name": "任天堂",
+      "shares": 55,
+      "buyPrice": 7984.0,
+      "buyDate": "2026-08-07",
+      "currentPrice": 8043.0,
+      "peakPrice": 8043.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    }
+  ],
+  "date": "2026-08-08",
+  "totalValue": 4986356.0
+}

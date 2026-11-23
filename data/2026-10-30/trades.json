@@ -1,0 +1,122 @@
+[
+  {
+    "id": "c85f3636-d21c-4151-a755-fc95b43d97eb",
+    "code": "7267",
+    "name": "本田技研工業",
+    "type": "sell",
+    "shares": 296,
+    "price": 1773.0,
+    "date": "2026-10-30",
+    "reason": "保有期間満了: 30日保有（設定 30日）",
+    "pnl": 28120.0,
+    "pnlPct": 5.66
+  },
+  {
+    "id": "d61b3fba-c25f-4487-9dff-e475b26b4f1c",
+    "code": "9432",
+    "name": "日本電信電話",
+    "type": "sell",
+    "shares": 2920,
+    "price": 173.3,
+    "date": "2026-10-30",
+    "reason": "保有期間満了: 30日保有（設定 30日）",
+    "pnl": 7884.0,
+    "pnlPct": 1.58
+  },
+  {
+    "id": "ceec3b81-dab9-4d27-93fc-f30e46a3b948",
+    "code": "4502",
+    "name": "武田薬品工業",
+    "type": "sell",
+    "shares": 86,
+    "price": 6626.0,
+    "date": "2026-10-30",
+    "reason": "保有期間満了: 30日保有（設定 30日）",
+    "pnl": 76024.0,
+    "pnlPct": 15.4
+  },
+  {
+    "id": "4d40096b-de63-464f-ace5-153e08f616c2",
+    "code": "7203",
+    "name": "トヨタ自動車",
+    "type": "sell",
+    "shares": 171,
+    "price": 3064.0,
+    "date": "2026-10-30",
+    "reason": "保有期間満了: 30日保有（設定 30日）",
+    "pnl": 28386.0,
+    "pnlPct": 5.73
+  },
+  {
+    "id": "58cc599f-9c58-454c-ac91-2aef7bbd0ab3",
+    "code": "9433",
+    "name": "KDDI",
+    "type": "sell",
+    "shares": 170,
+    "price": 2810.0,
+    "date": "2026-10-30",
+    "reason": "保有期間満了: 30日保有（設定 30日）",
+    "pnl": -18870.0,
+    "pnlPct": -3.8
+  },
+  {
+    "id": "8de6a1fd-cef0-4d49-a90a-0a730a9238fe",
+    "code": "4502",
+    "name": "武田薬品工業",
+    "type": "buy",
+    "shares": 78,
+    "price": 6626.0,
+    "date": "2026-10-30",
+    "reason": "スコア217.3pt でTOP10入り、均等配分520,543円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "233962f5-08c1-45ad-a8c4-7c2d2469d53d",
+    "code": "7267",
+    "name": "本田技研工業",
+    "type": "buy",
+    "shares": 293,
+    "price": 1773.0,
+    "date": "2026-10-30",
+    "reason": "スコア199.1pt でTOP10入り、均等配分520,543円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "0fe5b2ed-6005-4954-b2b1-954e00e046b9",
+    "code": "9432",
+    "name": "日本電信電話",
+    "type": "buy",
+    "shares": 3003,
+    "price": 173.3,
+    "date": "2026-10-30",
+    "reason": "スコア184.9pt でTOP10入り、均等配分520,543円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "995f9fc4-dbc8-4b1b-9b2f-da8a0b273912",
+    "code": "4661",
+    "name": "オリエンタルランド",
+    "type": "buy",
+    "shares": 152,
+    "price": 3403.0,
+    "date": "2026-10-30",
+    "reason": "スコア168.8pt でTOP10入り、均等配分520,543円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  },
+  {
+    "id": "a7355e31-309c-46cc-885c-ee69c8defdcd",
+    "code": "7203",
+    "name": "トヨタ自動車",
+    "type": "buy",
+    "shares": 169,
+    "price": 3064.0,
+    "date": "2026-10-30",
+    "reason": "スコア168.6pt でTOP10入り、均等配分520,543円枠で買付",
+    "pnl": null,
+    "pnlPct": null
+  }
+]

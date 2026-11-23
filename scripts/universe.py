@@ -1,0 +1,36 @@
+"""Top 30 major Japanese stocks (mirrors stock-app/src/data/universe.ts)."""
+
+STOCK_UNIVERSE = [
+    {"code": "7203", "name": "トヨタ自動車", "sector": "輸送用機器"},
+    {"code": "6758", "name": "ソニーグループ", "sector": "電気機器"},
+    {"code": "6861", "name": "キーエンス", "sector": "電気機器"},
+    {"code": "9984", "name": "ソフトバンクグループ", "sector": "情報・通信業"},
+    {"code": "8306", "name": "三菱UFJフィナンシャル・グループ", "sector": "銀行業"},
+    {"code": "7974", "name": "任天堂", "sector": "その他製品"},
+    {"code": "6367", "name": "ダイキン工業", "sector": "機械"},
+    {"code": "9433", "name": "KDDI", "sector": "情報・通信業"},
+    {"code": "8035", "name": "東京エレクトロン", "sector": "電気機器"},
+    {"code": "9983", "name": "ファーストリテイリング", "sector": "小売業"},
+    {"code": "6098", "name": "リクルートホールディングス", "sector": "サービス業"},
+    {"code": "4568", "name": "第一三共", "sector": "医薬品"},
+    {"code": "6981", "name": "村田製作所", "sector": "電気機器"},
+    {"code": "4063", "name": "信越化学工業", "sector": "化学"},
+    {"code": "9432", "name": "日本電信電話", "sector": "情報・通信業"},
+    {"code": "7267", "name": "本田技研工業", "sector": "輸送用機器"},
+    {"code": "7741", "name": "HOYA", "sector": "精密機器"},
+    {"code": "6902", "name": "デンソー", "sector": "輸送用機器"},
+    {"code": "4519", "name": "中外製薬", "sector": "医薬品"},
+    {"code": "4661", "name": "オリエンタルランド", "sector": "サービス業"},
+    {"code": "8316", "name": "三井住友フィナンシャルグループ", "sector": "銀行業"},
+    {"code": "8766", "name": "東京海上ホールディングス", "sector": "保険業"},
+    {"code": "6954", "name": "ファナック", "sector": "電気機器"},
+    {"code": "4543", "name": "テルモ", "sector": "精密機器"},
+    {"code": "6503", "name": "三菱電機", "sector": "電気機器"},
+    {"code": "5108", "name": "ブリヂストン", "sector": "ゴム製品"},
+    {"code": "2802", "name": "味の素", "sector": "食料品"},
+    {"code": "3382", "name": "セブン&アイ・ホールディングス", "sector": "小売業"},
+    {"code": "4901", "name": "富士フイルムホールディングス", "sector": "化学"},
+    {"code": "4502", "name": "武田薬品工業", "sector": "医薬品"},
+]
+
+STOCK_NAMES = {s["code"]: s["name"] for s in STOCK_UNIVERSE}

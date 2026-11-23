@@ -1,0 +1,167 @@
+{
+  "cash": 10906.699999999604,
+  "positions": [
+    {
+      "id": "99918059-dee0-4602-ab9f-896a110102f0",
+      "code": "6098",
+      "name": "リクルートホールディングス",
+      "shares": 28,
+      "buyPrice": 17660.0,
+      "buyDate": "2026-10-09",
+      "currentPrice": 18990.0,
+      "peakPrice": 19330.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "4ddd5965-83b3-4ad4-af5a-e25a24ad83ed",
+      "code": "5108",
+      "name": "ブリヂストン",
+      "shares": 127,
+      "buyPrice": 3908.0,
+      "buyDate": "2026-10-09",
+      "currentPrice": 3983.0,
+      "peakPrice": 4057.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "65db045b-5814-449a-8fd6-912a4d749827",
+      "code": "9983",
+      "name": "ファーストリテイリング",
+      "shares": 4,
+      "buyPrice": 77170.0,
+      "buyDate": "2026-10-23",
+      "currentPrice": 75050.0,
+      "peakPrice": 77170.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "e138c1b1-5356-4b73-9e6e-d5564c3cc286",
+      "code": "3382",
+      "name": "セブン&アイ・ホールディングス",
+      "shares": 156,
+      "buyPrice": 2139.0,
+      "buyDate": "2026-10-23",
+      "currentPrice": 2115.0,
+      "peakPrice": 2142.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "3fa06774-6977-458d-bdcc-114a456b3b4c",
+      "code": "8766",
+      "name": "東京海上ホールディングス",
+      "shares": 532,
+      "buyPrice": 565.2,
+      "buyDate": "2026-10-29",
+      "currentPrice": 579.2,
+      "peakPrice": 579.2,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "bc89935f-85d4-489a-a42e-de1b0bf063b7",
+      "code": "4502",
+      "name": "武田薬品工業",
+      "shares": 78,
+      "buyPrice": 6626.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 6626.0,
+      "peakPrice": 6626.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "2cbc5d13-0e32-43db-acdf-7ec8cb256e47",
+      "code": "7267",
+      "name": "本田技研工業",
+      "shares": 293,
+      "buyPrice": 1773.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 1773.0,
+      "peakPrice": 1773.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "1f18d9df-716e-43b6-a510-ba947a099d52",
+      "code": "9432",
+      "name": "日本電信電話",
+      "shares": 3003,
+      "buyPrice": 173.3,
+      "buyDate": "2026-10-30",
+      "currentPrice": 173.3,
+      "peakPrice": 173.3,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "07205be3-a6e2-4363-94d1-bc0b5c0adb17",
+      "code": "4661",
+      "name": "オリエンタルランド",
+      "shares": 152,
+      "buyPrice": 3403.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 3403.0,
+      "peakPrice": 3403.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "a97214dd-f63c-4298-9f75-65bf4ab7dca9",
+      "code": "7203",
+      "name": "トヨタ自動車",
+      "shares": 169,
+      "buyPrice": 3064.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 3064.0,
+      "peakPrice": 3064.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    }
+  ],
+  "date": "2026-10-30",
+  "totalValue": 4578551.0
+}
