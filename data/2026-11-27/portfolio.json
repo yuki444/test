@@ -1,0 +1,167 @@
+{
+  "cash": 3699.699999999604,
+  "positions": [
+    {
+      "id": "3fa06774-6977-458d-bdcc-114a456b3b4c",
+      "code": "8766",
+      "name": "東京海上ホールディングス",
+      "shares": 532,
+      "buyPrice": 565.2,
+      "buyDate": "2026-10-29",
+      "currentPrice": 594.4,
+      "peakPrice": 609.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "bc89935f-85d4-489a-a42e-de1b0bf063b7",
+      "code": "4502",
+      "name": "武田薬品工業",
+      "shares": 78,
+      "buyPrice": 6626.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 7357.0,
+      "peakPrice": 7423.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "2cbc5d13-0e32-43db-acdf-7ec8cb256e47",
+      "code": "7267",
+      "name": "本田技研工業",
+      "shares": 293,
+      "buyPrice": 1773.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 1774.0,
+      "peakPrice": 1904.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "1f18d9df-716e-43b6-a510-ba947a099d52",
+      "code": "9432",
+      "name": "日本電信電話",
+      "shares": 3003,
+      "buyPrice": 173.3,
+      "buyDate": "2026-10-30",
+      "currentPrice": 169.0,
+      "peakPrice": 174.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "07205be3-a6e2-4363-94d1-bc0b5c0adb17",
+      "code": "4661",
+      "name": "オリエンタルランド",
+      "shares": 152,
+      "buyPrice": 3403.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 3836.0,
+      "peakPrice": 3962.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "a97214dd-f63c-4298-9f75-65bf4ab7dca9",
+      "code": "7203",
+      "name": "トヨタ自動車",
+      "shares": 169,
+      "buyPrice": 3064.0,
+      "buyDate": "2026-10-30",
+      "currentPrice": 3392.0,
+      "peakPrice": 3470.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "7b8335a9-7dc0-4800-bdd8-6be862f83c28",
+      "code": "5108",
+      "name": "ブリヂストン",
+      "shares": 122,
+      "buyPrice": 4105.0,
+      "buyDate": "2026-11-08",
+      "currentPrice": 4325.0,
+      "peakPrice": 4451.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "463b58b6-55bd-40d1-9bd1-779b9baf0067",
+      "code": "6367",
+      "name": "ダイキン工業",
+      "shares": 23,
+      "buyPrice": 21790.0,
+      "buyDate": "2026-11-08",
+      "currentPrice": 23715.0,
+      "peakPrice": 24545.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "f9707151-33bb-4ee0-b973-228df4e36f42",
+      "code": "6902",
+      "name": "デンソー",
+      "shares": 176,
+      "buyPrice": 1900.0,
+      "buyDate": "2026-11-22",
+      "currentPrice": 1944.0,
+      "peakPrice": 1957.5,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    },
+    {
+      "id": "88aa6fac-845a-4482-91f8-db5d906af546",
+      "code": "4901",
+      "name": "富士フイルムホールディングス",
+      "shares": 90,
+      "buyPrice": 3699.0,
+      "buyDate": "2026-11-22",
+      "currentPrice": 3838.0,
+      "peakPrice": 3838.0,
+      "sellRules": {
+        "stopLoss": 8,
+        "takeProfit": 25,
+        "trailingStop": null,
+        "daysToHold": 30
+      }
+    }
+  ],
+  "date": "2026-11-27",
+  "totalValue": 4838034.0
+}
